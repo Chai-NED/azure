@@ -1,0 +1,1 @@
+﻿New-AzureRmKeyVault -VaultName '' -ResourceGroupName '' -Location 'East US'
