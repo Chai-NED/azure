@@ -1,5 +1,5 @@
 ﻿# ##############################
-# Purpose: Delete selected resources in a resource group
+# Purpose: Delete selected resources in a resource group based on name prefix. Note... if you leave the prefix empty, be prepared for total destruction in your RG :) You have been warned!
 #
 # Author: Patrick El-Azem
 # ##############################
