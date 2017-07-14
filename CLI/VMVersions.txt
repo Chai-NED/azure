@@ -1,1 +1,0 @@
-az vm image list -p MicrosoftSQLServer -l eastus -f SQL2016SP1-WS2016 -s Enterprise --all
