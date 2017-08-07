@@ -1,4 +1,4 @@
-Azure-relevant Powershell scripts. All scripts are ARM (Azure Resource Manager).
+Azure artifacts: CLI, Powershell, etc.
 
 ---
 
