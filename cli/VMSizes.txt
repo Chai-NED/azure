@@ -1,2 +1,2 @@
-az vm list-sizes -l "East US" --query "[*)].[name,numberOfCores,memoryInMb]" --output table
+az vm list-sizes -l "East US" --query "[*].[name,numberOfCores,memoryInMb]" --output table
 az vm list-sizes -l "East US" --query "[?contains(name,'v3')].[name,numberOfCores,memoryInMb]" --output table
