@@ -1,8 +1,0 @@
-Application ID (aka Client ID) from Azure AD app
-<get your own>
-
-App key (aka Client Secret) from Azure AD app
-<get your own>
-
-Tenant ID (i.e. Directory ID)
-<get your own>

@@ -1,16 +1,17 @@
 library(httr)
 
-# Security info
-token <- readLines("adls-r/1a-AuthToken.txt")
-auth <- paste("Bearer", token, " ")
+source("security.R")
 
-# Variables
-adlsAccountName <- "<get your own>"
+### User specified
 adlsFolderName <- "Samples"
-op <- "LISTSTATUS"
+
+# Security info
+auth <- paste("Bearer", security_get_token(), " ")
 
 #Exec
-adlsUri <- paste("https://", adlsAccountName, ".azuredatalakestore.net/webhdfs/v1", sep="")
+op <- "LISTSTATUS"
+
+adlsUri <- paste("https://", security_adls_account_name, ".azuredatalakestore.net/webhdfs/v1", sep="")
 
 uri = paste(adlsUri, adlsFolderName, paste("?op=", op, sep=""), sep="/")
 

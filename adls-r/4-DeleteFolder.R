@@ -1,17 +1,18 @@
 library(httr)
 
-# Security info
-token <- readLines("adls-r/1a-AuthToken.txt")
-auth <- paste("Bearer", token, " ")
+source("security.R")
 
-# Variables
-adlsAccountName <- "<get your own>"
-adlsFolderName <- "Samples/testDir1/"
-op <- "DELETE"
+### User specified
+adlsFolderName <- "Samples/testFolder/"
 recursive <- "true"
 
+# Security info
+auth <- paste("Bearer", security_get_token(), " ")
+
 #Exec
-adlsUri <- paste("https://", adlsAccountName, ".azuredatalakestore.net/webhdfs/v1/", adlsFolderName, sep="")
+op <- "DELETE"
+
+adlsUri <- paste("https://", security_adls_account_name, ".azuredatalakestore.net/webhdfs/v1/", adlsFolderName, sep="")
 
 uri = paste(adlsUri, "?op=", op, "&recursive=", recursive, sep="")
 
