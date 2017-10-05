@@ -9,41 +9,45 @@ param
 (
 	[string]$SubscriptionId = '',
     [string]$Location = 'East US',
-	[string]$ResourceGroupName = '',
+	[string]$ResourceGroupNameDiagnostics = '',
 	[string]$StorageAccountNameDiagnostics = '',
     [string]$StorageAccountSkuNameDiagnostics = 'Standard_LRS',
+	[string]$ResourceGroupNameVM = '',
 	[string]$VMName = '',
-	[string]$DiagnosticsXMLFilePath = ((Get-Location).Path + '\VM-Diagnostics.xml')
+	[string]$DiagnosticsXMLFilePath = ((Get-Location).Path + '\VM-Diagnostics.xml'),
+    [string]$AppInsightsInstrumentationKey = ''
 )
 
 $diagnosticsXMLFilePathSource = $DiagnosticsXMLFilePath
 $diagnosticsXMLFilePathForVM = ((Get-Location).Path + '\VM-Diagnostics-' + $VMName + '.xml')
 
 $tokenSubscriptionId = '###SUBSCRIPTIONID###'
-$tokenResourceGroupName = '###RGNAME###'
+$tokenResourceGroupNameVM = '###RGNAME###'
 $tokenVMName = '###VMNAME###'
+$tokenAppInsightsKey = '###APPIKEY###'
 
 $configXml = [string](Get-Content -Path $diagnosticsXMLFilePathSource)
 $configXml = $configXml.Replace($tokenSubscriptionId, $SubscriptionId)
-$configXMl = $configXml.Replace($tokenResourceGroupName, $ResourceGroupName)
+$configXMl = $configXml.Replace($tokenResourceGroupNameVM, $ResourceGroupNameVM)
 $configXMl = $configXml.Replace($tokenVMName, $VMName)
+$configXMl = $configXml.Replace($tokenAppInsightsKey, $AppInsightsInstrumentationKey)
 
 New-Item -Path $diagnosticsXMLFilePathForVM -Value $configXMl -ItemType File -Force
 
 # Ensure diagnostics storage account exists
-$sa = .\StorageAccount-CreateGet.ps1 -ResourceGroupName $ResourceGroupName -Location $Location -StorageAccountName $StorageAccountNameDiagnostics -StorageAccountSkuName $StorageAccountSkuNameDiagnostics
+$sa = .\StorageAccount-CreateGet.ps1 -ResourceGroupName $ResourceGroupNameDiagnostics -Location $Location -StorageAccountName $StorageAccountNameDiagnostics -StorageAccountSkuName $StorageAccountSkuNameDiagnostics
 
 # Set boot diagnostics
-$vm = Get-AzureRmVm -ResourceGroupName $ResourceGroupName -Name $VMName
+$vm = Get-AzureRmVm -ResourceGroupName $ResourceGroupNameVM -Name $VMName
 
 if ($null -ne $vm)
 {
-    Set-AzureRmVMBootDiagnostics -Enable -ResourceGroupName $ResourceGroupName -VM $vm -StorageAccountName $StorageAccountNameDiagnostics | Out-Null
+    Set-AzureRmVMBootDiagnostics -Enable -ResourceGroupName $ResourceGroupNameDiagnostics -VM $vm -StorageAccountName $StorageAccountNameDiagnostics | Out-Null
 }
 
 # Set guest OS diagnostics
 Set-AzureRmVMDiagnosticsExtension `
-	-ResourceGroupName $ResourceGroupName `
+	-ResourceGroupName $ResourceGroupNameVM `
 	-VMName $VMName `
 	-StorageAccountName $StorageAccountNameDiagnostics `
 	-DiagnosticsConfigurationPath $diagnosticsXMLFilePathForVM `
