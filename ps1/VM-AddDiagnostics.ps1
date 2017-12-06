@@ -13,21 +13,25 @@ param
 	[string]$ResourceGroupNameStorageAccountDiagnostics = '',
 	[string]$StorageAccountNameDiagnostics = '',
     [string]$StorageAccountSkuNameDiagnostics = 'Standard_LRS',
+	[string]$ResourceGroupNameVM = '',
 	[string]$VMName = '',
-	[string]$DiagnosticsXMLFilePath = ((Get-Location).Path + '\VM-Diagnostics.xml')
+	[string]$DiagnosticsXMLFilePath = ((Get-Location).Path + '\VM-Diagnostics.xml'),
+    [string]$AppInsightsInstrumentationKey = ''
 )
 
 $diagnosticsXMLFilePathSource = $DiagnosticsXMLFilePath
 $diagnosticsXMLFilePathForVM = ((Get-Location).Path + '\VM-Diagnostics-' + $VMName + '.xml')
 
 $tokenSubscriptionId = '###SUBSCRIPTIONID###'
-$tokenResourceGroupName = '###RGNAME###'
+$tokenResourceGroupNameVM = '###RGNAME###'
 $tokenVMName = '###VMNAME###'
+$tokenAppInsightsKey = '###APPIKEY###'
 
 $configXml = [string](Get-Content -Path $diagnosticsXMLFilePathSource)
 $configXml = $configXml.Replace($tokenSubscriptionId, $SubscriptionId)
-$configXMl = $configXml.Replace($tokenResourceGroupName, $ResourceGroupNameVM)
+$configXMl = $configXml.Replace($tokenResourceGroupNameVM, $ResourceGroupNameVM)
 $configXMl = $configXml.Replace($tokenVMName, $VMName)
+$configXMl = $configXml.Replace($tokenAppInsightsKey, $AppInsightsInstrumentationKey)
 
 New-Item -Path $diagnosticsXMLFilePathForVM -Value $configXMl -ItemType File -Force
 

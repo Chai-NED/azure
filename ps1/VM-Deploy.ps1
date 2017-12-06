@@ -1,125 +1,106 @@
 ﻿# ##############################
-# Purpose: Deploy RM VM
+# Purpose: Deploy RM VM - Managed Disks
 #
 # Author: Patrick El-Azem
 #
-# Reference:
-# https://docs.microsoft.com/azure/virtual-machines/windows/quick-create-powershell
+# Notes: this script assumes you have created RGs, VNets, subnets, NSGs. It does create the availability set you designate, if it doesn't exist yet.
 # ##############################
 
 # Arguments with defaults
 param
 (
     [string]$SubscriptionId = '',
-    [string]$ResourceGroupName = '',
-    [string]$Location = 'East US',
+    [string]$Location = '',
 
-    [string]$StorageAccountName = '',
-    [string]$StorageAccountSkuName = 'Premium_LRS',
-    [string]$VHDContainerName = 'vhds',
-    [string]$DiskFileNameExtension = '.vhd',
+    [string]$ResourceGroupNameVNet = '',
+    [string]$VNetName = '',
 
-    [string]$StorageAccountNameDiagnostics = '',
+    [string]$SubnetName = '',
 
-    [string]$OsDiskFileNameTail = 'OsDisk',
-    [int]$OSDiskSizeInGB = 128,
+    [string]$NSGName = '',
 
-    [string]$DataDiskFileNameTail = 'DataDisk',
-    [int]$DataDiskSizeInGB = 256,
-    [int]$NumberOfDataDisks = 0,
+    [string]$ResourceGroupNameVM = '',
 
     [string]$AvailabilitySetName = '',
     [int]$FaultDomainCount = 3,
     [int]$UpdateDomainCount = 5,
-    [bool]$AvailabilitySetIsManaged = $false,
+    [bool]$AvailabilitySetIsManaged = $true,
 
     [string]$VMName = '',
-    [string]$VMSize = 'Standard_DS2_v2',
+    [string]$VMSize = '',
 
-    [string]$VNetName = '',
-    [string]$VNetPrefix = '172.16.0.0/16',
+    [string]$OsDiskSkuName = 'PremiumLRS',
+    [string]$OsTypeName = 'Windows',
+    [string]$OsDiskFileNameTail = '_os',
+    [int]$OSDiskSizeInGB = 128,
 
-    [string]$SubnetName = '',
-    [string]$SubnetPrefix = '172.16.1.0/24',
+    [string]$DataDiskSkuName = 'PremiumLRS',
+    [string]$DataDiskFileNameTail = '_data_',
+    [int]$DataDiskSizeInGB = 256,
+    [int]$NumberOfDataDisks = 0,
 
-    [string]$NSGName = '',
-
-    [string]$PIPName1 = $VMName + 'pip1',
-    [string]$NICName1 = $VMName + 'nic1',
+    [bool]$UsePublicIP = $true,
+    [string]$PIPName1 = $VMName + '_pip_1',
+    [string]$NICName1 = $VMName + '_nic_1',
 
     [string]$VMPublisherName = 'MicrosoftWindowsServer',
     [string]$VMOffer = 'WindowsServer',
     [string]$VMSku = '2016-Datacenter',
-    [string]$VMVersion = 'latest'
+    [string]$VMVersion = 'latest',
+
+    [string]$ResourceGroupNameDiagnostics = '',
+    [string]$StorageAccountNameDiagnostics = '',
+    [string]$AppInsightsInstrumentationKey = ''
 )
 
 $credPromptText = 'Type the name and password of the VM local administrator account.'
 
-# Ensure resource group exists
-$rg = .\ResourceGroup-CreateGet.ps1 -ResourceGroupName $ResourceGroupName -Location $Location
-
-# Get storage account
-$storageAccount = .\StorageAccount-CreateGet.ps1 -ResourceGroupName $ResourceGroupName -Location $Location -StorageAccountName $StorageAccountName -StorageAccountSkuName $StorageAccountSkuName
-
-# Set current storage account
-Set-AzureRmCurrentStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
-
 # Ensure diagnostics storage account exists
-$diagsa = .\StorageAccount-CreateGet.ps1 -ResourceGroupName $ResourceGroupName -Location $Location -StorageAccountName $StorageAccountNameDiagnostics -StorageAccountSkuName 'Standard_LRS'
+$diagsa = .\StorageAccount-CreateGet.ps1 -ResourceGroupName $ResourceGroupNameDiagnostics -Location $Location -StorageAccountName $StorageAccountNameDiagnostics -StorageAccountSkuName 'Standard_LRS'
 
-
-# Get NSG - rules in case NSG does not exist yet (will not be applied to already-existing NSG)
-$nsgRule1 = New-AzureRmNetworkSecurityRuleConfig `
-    -Name 'Allow-RDP' `
-    -Description 'Allow RDP' `
-    -Access Allow `
-    -Protocol Tcp `
-    -Direction Inbound `
-    -Priority 100 `
-    -SourceAddressPrefix Internet `
-    -SourcePortRange * `
-    -DestinationAddressPrefix * `
-    -DestinationPortRange 3389
-
-$nsgRule2 = New-AzureRmNetworkSecurityRuleConfig `
-    -Name 'Allow-SQL' `
-    -Description 'Allow SQL' `
-    -Access Allow `
-    -Protocol Tcp `
-    -Direction Inbound `
-    -Priority 101 `
-    -SourceAddressPrefix Internet `
-    -SourcePortRange * `
-    -DestinationAddressPrefix * `
-    -DestinationPortRange 1433
-
-$nsg = .\NSG-CreateGet.ps1 -ResourceGroupName $ResourceGroupName -Location $Location -NSGName $NSGName -Rules $nsgRule1, $nsgRule2
-
-
-
-# Get VNet and subnet
-$vnet = .\VNet-CreateGet.ps1 -ResourceGroupName $ResourceGroupName -Location $Location -VNetName $VNetName -VNetPrefix $VNetPrefix
+# Get VNet
+$vnet = Get-AzureRmVirtualNetwork -Name $VNetName -ResourceGroupName $ResourceGroupNameVNet
 
 # Get subnet
-$subnet = .\VNetSubnet-CreateGet.ps1 -ResourceGroupName $ResourceGroupName -Location $Location -VNetName $VNetName -VNetPrefix $VNetPrefix -SubnetName $SubnetName -SubnetPrefix $SubnetPrefix -NSGResourceId $nsg.Id
+$subnet = Get-AzureRmVirtualNetworkSubnetConfig -VirtualNetwork $vnet -Name $SubnetName
 
 
-# Get public IP
-$pip1 = New-AzureRmPublicIpAddress -Name $PIPName1 -ResourceGroupName $ResourceGroupName -Location $Location -AllocationMethod Dynamic
+if ($UsePublicIP -eq $true)
+{
+    # Get public IP
+    $pip1 = New-AzureRmPublicIpAddress -Name $PIPName1 -ResourceGroupName $ResourceGroupNameVM -Location $Location -AllocationMethod Dynamic
 
-# Get NIC
-$nic1 = New-AzureRmNetworkInterface -Name $NICName1 -ResourceGroupName $ResourceGroupName -Location $Location -SubnetId $subnet.Id -PublicIpAddressId $pip1.Id
+    # Get NIC
+    $nic1 = New-AzureRmNetworkInterface -Name $NICName1 -ResourceGroupName $ResourceGroupNameVM -Location $Location -SubnetId $subnet.Id -PublicIpAddressId $pip1.Id
+}
+else
+{
+    # Get NIC without public IP - private IP only
+    $nic1 = New-AzureRmNetworkInterface -Name $NICName1 -ResourceGroupName $ResourceGroupNameVM -Location $Location -SubnetId $subnet.Id
+}
+
+# Set the private IP to static rather than dynamic
+$nic1.IpConfigurations[0].PrivateIpAllocationMethod = 'Static'
+Set-AzureRmNetworkInterface -NetworkInterface $nic1
+
 
 # Get credential
 $cred = Get-Credential -Message $credPromptText
 
 
-# Get availability set - create if not exists
-$avset = .\AvailabilitySet-CreateGet.ps1 -ResourceGroupName $ResourceGroupName -Location $Location -AvailabilitySetName $AvailabilitySetName -FaultDomains $FaultDomainCount -UpdateDomains $UpdateDomainCount -Managed $AvailabilitySetIsManaged
+if ($AvailabilitySetName)
+{
+    # Get availability set - create if not exists
+    $avset = .\AvailabilitySet-CreateGet.ps1 -ResourceGroupName $ResourceGroupNameVM -Location $Location -AvailabilitySetName $AvailabilitySetName -FaultDomains $FaultDomainCount -UpdateDomains $UpdateDomainCount -Managed $AvailabilitySetIsManaged
 
-$vm = New-AzureRmVMConfig -VMName $VMName -VMSize $VMSize -AvailabilitySetId $avset.Id
+    $vm = New-AzureRmVMConfig -VMName $VMName -VMSize $VMSize -AvailabilitySetId $avset.Id
+}
+else
+{
+    $vm = New-AzureRmVMConfig -VMName $VMName -VMSize $VMSize
+}
 
-$vm = Set-AzureRmVMOperatingSystem -VM $vm -ComputerName $VMName -Credential $cred -Windows -ProvisionVMAgent -EnableAutoUpdate
+$vm = Set-AzureRmVMOperatingSystem -VM $vm -Windows -ComputerName $VMName -Credential $cred -ProvisionVMAgent -EnableAutoUpdate
 
 $vm = Set-AzureRmVMSourceImage -VM $vm -PublisherName $VMPublisherName -Offer $VMOffer -Skus $VMSku -Version $VMVersion
 
@@ -127,23 +108,23 @@ $vm = Set-AzureRmVMSourceImage -VM $vm -PublisherName $VMPublisherName -Offer $V
 $vm = Add-AzureRmVMNetworkInterface -VM $vm -Id $nic1.Id -Primary
 
 # Add OS disk
-$osDiskUri = $storageAccount.PrimaryEndpoints.Blob.ToString() + $VHDContainerName + '/' + $VMName + $OsDiskFileNameTail + $DiskFileNameExtension
-$vm = Set-AzureRmVMOSDisk -VM $vm -Name ($VMName + $OsDiskFileNameTail) -VhdUri $osDiskUri -CreateOption FromImage -DiskSizeInGB $OSDiskSizeInGB -Windows
+$diskNameOS = ($VMName + $OsDiskFileNameTail)
+$vm = Set-AzureRmVMOSDisk -Windows -VM $vm -CreateOption FromImage -Name $diskNameOS -DiskSizeInGB $OSDiskSizeInGB -StorageAccountType $OsDiskSkuName
 
 # Add data disks
 for ($ddi = 1; $ddi -le $NumberOfDataDisks; $ddi++)
 {
-    $dataDiskName = ($VMName + $DataDiskFileNameTail + $ddi)
-    $dataDiskUri = $storageAccount.PrimaryEndpoints.Blob.ToString() + $VHDContainerName + '/' + $dataDiskName + $DiskFileNameExtension
-    $vm = Add-AzureRmVMDataDisk -VM $vm -Lun $ddi -Name $dataDiskName -VhdUri $dataDiskUri -CreateOption Empty -DiskSizeInGB $DataDiskSizeInGB
+    $diskNameData = ($VMName + $DataDiskFileNameTail + $ddi)
+    $vm = Add-AzureRmVMDataDisk -VM $vm -Lun $ddi -CreateOption Empty -DiskSizeInGB $DataDiskSizeInGB -Name $diskNameData -StorageAccountType $DataDiskSkuName
 }
 
+# Create the VM with its disks
 New-AzureRmVM `
-    -ResourceGroupName $ResourceGroupName `
+    -ResourceGroupName $ResourceGroupNameVM `
     -Location $Location `
     -VM $vm | Out-Null
 
 # Add diagnostics
-.\VM-AddDiagnostics.ps1 -SubscriptionId $SubscriptionId -ResourceGroupName $ResourceGroupName -Location $Location -VMName $VMName -StorageAccountNameDiagnostics $StorageAccountNameDiagnostics
+.\VM-AddDiagnostics.ps1 -SubscriptionId $SubscriptionId -Location $Location -ResourceGroupNameDiagnostics $ResourceGroupNameDiagnostics -StorageAccountNameDiagnostics $StorageAccountNameDiagnostics -ResourceGroupNameVM $ResourceGroupNameVM -VMName $VMName -AppInsightsInstrumentationKey $AppInsightsInstrumentationKey
 
 return $vm
