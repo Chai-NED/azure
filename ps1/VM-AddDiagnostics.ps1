@@ -9,7 +9,8 @@ param
 (
 	[string]$SubscriptionId = '',
     [string]$Location = 'East US',
-	[string]$ResourceGroupName = '',
+	[string]$ResourceGroupNameVM = '',
+	[string]$ResourceGroupNameStorageAccountDiagnostics = '',
 	[string]$StorageAccountNameDiagnostics = '',
     [string]$StorageAccountSkuNameDiagnostics = 'Standard_LRS',
 	[string]$VMName = '',
@@ -25,25 +26,25 @@ $tokenVMName = '###VMNAME###'
 
 $configXml = [string](Get-Content -Path $diagnosticsXMLFilePathSource)
 $configXml = $configXml.Replace($tokenSubscriptionId, $SubscriptionId)
-$configXMl = $configXml.Replace($tokenResourceGroupName, $ResourceGroupName)
+$configXMl = $configXml.Replace($tokenResourceGroupName, $ResourceGroupNameVM)
 $configXMl = $configXml.Replace($tokenVMName, $VMName)
 
 New-Item -Path $diagnosticsXMLFilePathForVM -Value $configXMl -ItemType File -Force
 
 # Ensure diagnostics storage account exists
-$sa = .\StorageAccount-CreateGet.ps1 -ResourceGroupName $ResourceGroupName -Location $Location -StorageAccountName $StorageAccountNameDiagnostics -StorageAccountSkuName $StorageAccountSkuNameDiagnostics
+$sa = .\StorageAccount-CreateGet.ps1 -ResourceGroupName $ResourceGroupNameStorageAccountDiagnostics -Location $Location -StorageAccountName $StorageAccountNameDiagnostics -StorageAccountSkuName $StorageAccountSkuNameDiagnostics
 
 # Set boot diagnostics
-$vm = Get-AzureRmVm -ResourceGroupName $ResourceGroupName -Name $VMName
+$vm = Get-AzureRmVm -ResourceGroupName $ResourceGroupNameVM -Name $VMName
 
 if ($null -ne $vm)
 {
-    Set-AzureRmVMBootDiagnostics -Enable -ResourceGroupName $ResourceGroupName -VM $vm -StorageAccountName $StorageAccountNameDiagnostics | Out-Null
+    Set-AzureRmVMBootDiagnostics -Enable -ResourceGroupName $ResourceGroupNameVM -VM $vm -StorageAccountName $StorageAccountNameDiagnostics | Out-Null
 }
 
 # Set guest OS diagnostics
 Set-AzureRmVMDiagnosticsExtension `
-	-ResourceGroupName $ResourceGroupName `
+	-ResourceGroupName $ResourceGroupNameVM `
 	-VMName $VMName `
 	-StorageAccountName $StorageAccountNameDiagnostics `
 	-DiagnosticsConfigurationPath $diagnosticsXMLFilePathForVM `
