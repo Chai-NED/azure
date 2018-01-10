@@ -10,14 +10,12 @@
 param
 (
     [string]$SubscriptionId = '',
-    [string]$Location = '',
+    [string]$Location = 'East US',
 
     [string]$ResourceGroupNameVNet = '',
     [string]$VNetName = '',
 
     [string]$SubnetName = '',
-
-    [string]$NSGName = '',
 
     [string]$ResourceGroupNameVM = '',
 
@@ -27,7 +25,7 @@ param
     [bool]$AvailabilitySetIsManaged = $true,
 
     [string]$VMName = '',
-    [string]$VMSize = '',
+    [string]$VMSize = 'Standard_DS3_v2',
 
     [string]$OsDiskSkuName = 'PremiumLRS',
     [string]$OsTypeName = 'Windows',
@@ -37,7 +35,7 @@ param
     [string]$DataDiskSkuName = 'PremiumLRS',
     [string]$DataDiskFileNameTail = '_data_',
     [int]$DataDiskSizeInGB = 256,
-    [int]$NumberOfDataDisks = 0,
+    [int]$NumberOfDataDisks = 1,
 
     [bool]$UsePublicIP = $true,
     [string]$PIPName1 = $VMName + '_pip_1',
@@ -49,8 +47,7 @@ param
     [string]$VMVersion = 'latest',
 
     [string]$ResourceGroupNameDiagnostics = '',
-    [string]$StorageAccountNameDiagnostics = '',
-    [string]$AppInsightsInstrumentationKey = ''
+    [string]$StorageAccountNameDiagnostics = ''
 )
 
 $credPromptText = 'Type the name and password of the VM local administrator account.'
@@ -125,6 +122,6 @@ New-AzureRmVM `
     -VM $vm | Out-Null
 
 # Add diagnostics
-.\VM-AddDiagnostics.ps1 -SubscriptionId $SubscriptionId -Location $Location -ResourceGroupNameDiagnostics $ResourceGroupNameDiagnostics -StorageAccountNameDiagnostics $StorageAccountNameDiagnostics -ResourceGroupNameVM $ResourceGroupNameVM -VMName $VMName -AppInsightsInstrumentationKey $AppInsightsInstrumentationKey
+.\VM-AddDiagnostics.ps1 -SubscriptionId $SubscriptionId -Location $Location -ResourceGroupNameVM $ResourceGroupNameVM -ResourceGroupNameStorageAccountDiagnostics $ResourceGroupNameDiagnostics -StorageAccountNameDiagnostics $StorageAccountNameDiagnostics -VMName $VMName
 
 return $vm

@@ -13,7 +13,6 @@ param
 	[string]$ResourceGroupNameStorageAccountDiagnostics = '',
 	[string]$StorageAccountNameDiagnostics = '',
     [string]$StorageAccountSkuNameDiagnostics = 'Standard_LRS',
-	[string]$ResourceGroupNameVM = '',
 	[string]$VMName = '',
 	[string]$DiagnosticsXMLFilePath = ((Get-Location).Path + '\VM-Diagnostics.xml'),
     [string]$AppInsightsInstrumentationKey = ''
@@ -43,7 +42,7 @@ $vm = Get-AzureRmVm -ResourceGroupName $ResourceGroupNameVM -Name $VMName
 
 if ($null -ne $vm)
 {
-    Set-AzureRmVMBootDiagnostics -Enable -ResourceGroupName $ResourceGroupNameVM -VM $vm -StorageAccountName $StorageAccountNameDiagnostics | Out-Null
+    Set-AzureRmVMBootDiagnostics -Enable -ResourceGroupName $ResourceGroupNameStorageAccountDiagnostics -VM $vm -StorageAccountName $StorageAccountNameDiagnostics | Out-Null
 }
 
 # Set guest OS diagnostics
