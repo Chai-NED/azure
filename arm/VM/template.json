@@ -3,82 +3,154 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "subscriptionId": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "location": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
 
         "availabilitySetName": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "resourceGroupNameVM": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "virtualMachineName": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "virtualMachineSize": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "adminUsername": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "adminPassword": {
-            "type": "securestring"
+            "type": "securestring",
+			"metadata": {
+				"description": ""
+			}
         },
 
         "osDiskStorageType": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "osDiskName": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
 
         "dataDiskStorageType": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "dataDiskCount": {
-            "type": "int"
+            "type": "int",
+			"metadata": {
+				"description": ""
+			}
         },
         "dataDiskSizeInGB": {
-            "type": "int"
+            "type": "int",
+			"metadata": {
+				"description": ""
+			}
         },
         "dataDiskNamePrefix": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         
         "networkInterfaceName": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "publicIpAddressName": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "publicIpAddressType": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "publicIpAddressSku": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
 
         "resourceGroupNameNetwork": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "virtualNetworkName": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "subnetName": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "networkSecurityGroupName": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
 
         "resourceGroupNameDiagnostics": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         },
         "diagnosticsStorageAccountName": {
-            "type": "string"
+            "type": "string",
+			"metadata": {
+				"description": ""
+			}
         }
     },
     "variables": {
