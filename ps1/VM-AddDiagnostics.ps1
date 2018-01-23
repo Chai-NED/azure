@@ -40,10 +40,9 @@ $sa = .\StorageAccount-CreateGet.ps1 -ResourceGroupName $ResourceGroupNameStorag
 # Set boot diagnostics
 $vm = Get-AzureRmVm -ResourceGroupName $ResourceGroupNameVM -Name $VMName
 
-if ($null -ne $vm)
-{
-    Set-AzureRmVMBootDiagnostics -Enable -ResourceGroupName $ResourceGroupNameStorageAccountDiagnostics -VM $vm -StorageAccountName $StorageAccountNameDiagnostics | Out-Null
-}
+Set-AzureRmVMBootDiagnostics -Enable -ResourceGroupName $ResourceGroupNameStorageAccountDiagnostics -VM $vm -StorageAccountName $StorageAccountNameDiagnostics | Out-Null
+
+Update-AzureRmVM -ResourceGroupName $ResourceGroupNameVM -VM $vm
 
 # Set guest OS diagnostics
 Set-AzureRmVMDiagnosticsExtension `

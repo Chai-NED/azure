@@ -1,0 +1,84 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subscriptionId": {
+            "value": ""
+        },
+        "location": {
+            "value": ""
+        },
+
+        "availabilitySetName": {
+            "value": ""
+        },
+        "resourceGroupNameVM": {
+            "value": ""
+        },
+        "virtualMachineName": {
+            "value": ""
+        },
+        "virtualMachineSize": {
+            "value": "Standard_D2s_v3"
+        },
+        "adminUsername": {
+            "value": ""
+        },
+        "adminPassword": {
+            "value": ""
+        },
+
+        "osDiskStorageType": {
+            "value": "Premium_LRS"
+        },
+        "osDiskName": {
+            "value": ""
+        },
+
+        "dataDiskStorageType": {
+            "value": "Premium_LRS"
+        },
+        "dataDiskCount": {
+            "value": 0
+        },
+        "dataDiskSizeInGB": {
+            "value": 256
+        },
+        "dataDiskNamePrefix": {
+            "value": ""
+        },
+
+        "networkInterfaceName": {
+            "value": ""
+        },
+        "publicIpAddressName": {
+            "value": ""
+        },
+        "publicIpAddressType": {
+            "value": "Dynamic"
+        },
+        "publicIpAddressSku": {
+            "value": "Basic"
+        },
+
+        "resourceGroupNameNetwork": {
+            "value": ""
+        },
+        "virtualNetworkName": {
+            "value": ""
+        },
+        "subnetName": {
+            "value": ""
+        },
+        "networkSecurityGroupName": {
+            "value": ""
+        },
+
+        "resourceGroupNameDiagnostics": {
+            "value": ""
+        },
+        "diagnosticsStorageAccountName": {
+            "value": ""
+        }
+    }
+}
