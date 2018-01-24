@@ -19,7 +19,7 @@
             "value": ""
         },
         "virtualMachineSize": {
-            "value": "Standard_D2s_v3"
+            "value": "Standard_DS1_v2"
         },
         "adminUsername": {
             "value": ""
@@ -31,29 +31,20 @@
         "osDiskStorageType": {
             "value": "Premium_LRS"
         },
-        "osDiskName": {
-            "value": ""
+        "osDiskSizeInGB": {
+            "value": 129
         },
 
         "dataDiskStorageType": {
             "value": "Premium_LRS"
         },
         "dataDiskCount": {
-            "value": 0
+            "value": 1
         },
         "dataDiskSizeInGB": {
-            "value": 256
-        },
-        "dataDiskNamePrefix": {
-            "value": ""
+            "value": 257
         },
 
-        "networkInterfaceName": {
-            "value": ""
-        },
-        "publicIpAddressName": {
-            "value": ""
-        },
         "publicIpAddressType": {
             "value": "Dynamic"
         },
@@ -79,6 +70,22 @@
         },
         "diagnosticsStorageAccountName": {
             "value": ""
+        },
+
+        "_artifactsLocation": {
+            "value": "https://pz17sa.blob.core.windows.net/public/dsc"
+        },
+        "dscFolder": {
+            "value": "WebServerConfiguration"
+        },
+        "dscFileName" : {
+            "value": "WebServerConfiguration.zip"
+        },
+        "dscModule" : {
+            "value": "WebServerConfiguration.ps1"
+        },
+        "dscFunction" : {
+            "value": "WebServerConfiguration"
         }
     }
 }

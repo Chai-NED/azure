@@ -56,8 +56,8 @@
 				"description": ""
 			}
 		},
-		"osDiskName": {
-			"type": "string",
+		"osDiskSizeInGB": {
+			"type": "int",
 			"metadata": {
 				"description": ""
 			}
@@ -76,24 +76,6 @@
 		},
 		"dataDiskSizeInGB": {
 			"type": "int",
-			"metadata": {
-				"description": ""
-			}
-		},
-		"dataDiskNamePrefix": {
-			"type": "string",
-			"metadata": {
-				"description": ""
-			}
-		},
-		"networkInterfaceName": {
-			"type": "string",
-			"metadata": {
-				"description": ""
-			}
-		},
-		"publicIpAddressName": {
-			"type": "string",
 			"metadata": {
 				"description": ""
 			}
@@ -145,13 +127,47 @@
 			"metadata": {
 				"description": ""
 			}
+		},
+		"_artifactsLocation": {
+			"type": "string",
+			"metadata": {
+				"description": ""
+			}
+		},
+		"dscFolder": {
+			"type": "string",
+			"metadata": {
+				"description": ""
+			}
+		},
+		"dscFileName": {
+			"type": "string",
+			"metadata": {
+				"description": ""
+			}
+		},
+		"dscModule": {
+			"type": "string",
+			"metadata": {
+				"description": ""
+			}
+		},
+		"dscFunction": {
+			"type": "string",
+			"metadata": {
+				"description": ""
+			}
 		}
 	},
 	"variables": {
 		"vnetId": "[resourceId(parameters('resourceGroupNameNetwork'), 'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
 		"subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
 		"diagnosticsStorageAccountId": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupNameDiagnostics'), '/providers/Microsoft.Storage/storageAccounts/', parameters('diagnosticsStorageAccountName'))]",
-		"diagnosticsExtensionName": "IaaSDiagnostics"
+		"diagnosticsExtensionName": "IaaSDiagnostics",
+		"osDiskName": "[concat(parameters('virtualMachineName'), '_os')]",
+		"dataDiskNamePrefix": "[concat(parameters('virtualMachineName'), '_data_')]",
+		"networkInterfaceName": "[concat(parameters('virtualMachineName'), '_nic_1')]",
+		"publicIpAddressName": "[concat(parameters('virtualMachineName'), '_pip_1')]"
 	},
 	"resources": [
 		{
@@ -176,7 +192,7 @@
 			"apiVersion": "2017-03-30",
 			"location": "[parameters('location')]",
 			"dependsOn": [
-				"[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
+				"[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
 			],
 			"properties": {
 				"availabilitySet": {
@@ -202,7 +218,8 @@
 					},
 					"osDisk": {
 						"createOption": "FromImage",
-						"name": "[parameters('osDiskName')]",
+						"name": "[variables('osDiskName')]",
+						"diskSizeGB": "[parameters('osDiskSizeInGB')]",
 						"managedDisk": {
 							"storageAccountType": "[parameters('osDiskStorageType')]"
 						}
@@ -214,7 +231,7 @@
 							"input": {
 								"lun": "[copyIndex('dataDisks')]",
 								"createOption": "Empty",
-								"name": "[concat(parameters('dataDiskNamePrefix'), copyIndex('dataDisks'))]",
+								"name": "[concat(variables('dataDiskNamePrefix'), copyIndex('dataDisks'))]",
 								"diskSizeGB": "[parameters('dataDiskSizeInGB')]",
 								"managedDisk": {
 									"storageAccountType": "[parameters('dataDiskStorageType')]"
@@ -226,7 +243,7 @@
 				"networkProfile": {
 					"networkInterfaces": [
 						{
-							"id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
+							"id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
 						}
 					]
 				},
@@ -239,35 +256,23 @@
 			},
 			"resources": [
 				{
-					"name": "microsoft.antimalware-windows-20180123110721",
-					"apiVersion": "2017-03-30",
-					"type": "Microsoft.Resources/extensions",
+					"name": "[concat(parameters('virtualMachineName'),'/IaaSAntimalware')]",
+					"type": "Microsoft.Compute/virtualMachines/extensions",
+					"location": "[parameters('location')]",
+					"apiVersion": "2015-06-15",
 					"properties": {
-						"mode": "Incremental",
-						"templateLink": {
-							"uri": "https://gallery.azure.com/artifact/20161101/microsoft.antimalware-windows-arm.1.0.0/Artifacts/MainTemplate.json"
-						},
-						"parameters": {
-							"vmName": {
-								"value": "[parameters('virtualMachineName')]"
-							},
-							"location": {
-								"value": "[parameters('location')]"
-							},
-							"RealtimeProtectionEnabled": {
-								"value": "true"
-							},
-							"ScheduledScanSettingsIsEnabled": {
-								"value": "true"
-							},
-							"ScheduledScanSettingsScanType": {
-								"value": "Quick"
-							},
-							"ScheduledScanSettingsDay": {
-								"value": "7"
-							},
-							"ScheduledScanSettingsTime": {
-								"value": "120"
+						"publisher": "Microsoft.Azure.Security",
+						"type": "IaaSAntimalware",
+						"typeHandlerVersion": "1.3",
+						"autoUpgradeMinorVersion": true,
+						"settings": {
+							"AntimalwareEnabled": true,
+							"RealtimeProtectionEnabled": "true",
+							"ScheduledScanSettings": {
+								"isEnabled": "true",
+								"day": "7",
+								"time": "120",
+								"scanType": "Quick"
 							}
 						}
 					},
@@ -279,30 +284,24 @@
 					"name": "Microsoft.Powershell.DSC",
 					"type": "extensions",
 					"location": "[resourceGroup().location]",
-					"apiVersion": "2016-03-30",
+					"apiVersion": "2017-03-30",
 					"dependsOn": [
 						"[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]"
 					],
 					"tags": {
-						"displayName": "dscExt"
+						"displayName": "WebServerConfiguration"
 					},
 					"properties": {
 						"publisher": "Microsoft.Powershell",
 						"type": "DSC",
-						"typeHandlerVersion": "2.9",
+						"typeHandlerVersion": "2.26",
 						"autoUpgradeMinorVersion": true,
 						"settings": {
 							"configuration": {
-								"url": "[concat(parameters('_artifactsLocation'), '/', variables('dscExtArchiveFolder'), '/', variables('dscExtArchiveFileName'))]",
-								"script": "dscExt.ps1",
-								"function": "Main"
-							},
-							"configurationArguments": {
-								"nodeName": "[parameters('virtualMachineName')]"
+								"url": "[concat(parameters('_artifactsLocation'), '/', parameters('dscFolder'), '/', parameters('dscFileName'))]",
+								"script": "[parameters('dscModule')]",
+								"function": "[parameters('dscFunction')]"
 							}
-						},
-						"protectedSettings": {
-							"configurationUrlSasToken": "[parameters('_artifactsLocationSasToken')]"
 						}
 					}
 				}
@@ -554,89 +553,12 @@
 			}
 		},
 		{
-			"name": "microsoft.antimalware-windows-20171206140853",
-			"apiVersion": "2015-01-01",
-			"type": "Microsoft.Resources/deployments",
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "https://gallery.azure.com/artifact/20161101/microsoft.antimalware-windows-arm.1.0.0/Artifacts/MainTemplate.json"
-				},
-				"parameters": {
-					"vmName": {
-						"value": "[parameters('virtualMachineName')]"
-					},
-					"location": {
-						"value": "[parameters('location')]"
-					},
-					"RealtimeProtectionEnabled": {
-						"value": "true"
-					},
-					"ScheduledScanSettingsIsEnabled": {
-						"value": "false"
-					},
-					"ScheduledScanSettingsScanType": {
-						"value": "Quick"
-					},
-					"ScheduledScanSettingsDay": {
-						"value": "7"
-					},
-					"ScheduledScanSettingsTime": {
-						"value": "120"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat('Microsoft.Compute/virtualMachines/',parameters('virtualMachineName'),'/extensions/', variables('diagnosticsExtensionName'))]"
-			]
-		},
-        {
-            "name": "Microsoft.DSC-20180123142721",
-            "apiVersion": "2015-01-01",
-            "type": "Microsoft.Resources/deployments",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "https://gallery.azure.com/artifact/20161101/Microsoft.DSC-arm.2.0.8/Artifacts/MainTemplate.json"
-                },
-                "parameters": {
-                    "vmName": {
-                        "value": "[parameters('virtualMachineName')]"
-                    },
-                    "location": {
-                        "value": "[parameters('location')]"
-                    },
-                    "modulesUrl": {
-                        "value": "https://iaasv2tempstoreeastus.blob.core.windows.net/vmextensionstemporary-1003000094aeac07-20180123160951737/WebServerConfiguration.zip?sv=2015-04-05&sr=c&sig=96fMGl1yyR5zxsicgv2yxY264J2qIgu30AX5TBmfmyE%3D&se=2018-01-24T16%3A09%3A51Z&sp=rw"
-                    },
-                    "configurationFunction": {
-                        "value": "WebServerConfiguration\\WebServerConfiguration"
-                    },
-                    "wmfVersion": {
-                        "value": "latest"
-                    },
-                    "privacy": {
-                        "value": "Enable"
-                    },
-                    "version": {
-                        "value": "2.9"
-                    },
-                    "autoUpdate": {
-                        "value": true
-                    }
-                }
-            },
-            "dependsOn": [
-                "OctopusDeploy.OctopusDeployWindowsTentacle-20180123110836"
-            ]
-        },
-		{
-			"name": "[parameters('networkInterfaceName')]",
+			"name": "[variables('networkInterfaceName')]",
 			"type": "Microsoft.Network/networkInterfaces",
 			"apiVersion": "2016-09-01",
 			"location": "[parameters('location')]",
 			"dependsOn": [
-				"[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]"
+				"[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
 			],
 			"properties": {
 				"ipConfigurations": [
@@ -648,18 +570,15 @@
 							},
 							"privateIPAllocationMethod": "Dynamic",
 							"publicIpAddress": {
-								"id": "[resourceId(parameters('resourceGroupNameVM'), 'Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
+								"id": "[resourceId(parameters('resourceGroupNameVM'), 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
 							}
 						}
 					}
-				],
-				"networkSecurityGroup": {
-					"id": "[resourceId(parameters('resourceGroupNameNetwork'), 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
-				}
+				]
 			}
 		},
 		{
-			"name": "[parameters('publicIpAddressName')]",
+			"name": "[variables('publicIpAddressName')]",
 			"type": "Microsoft.Network/publicIpAddresses",
 			"apiVersion": "2017-08-01",
 			"location": "[parameters('location')]",

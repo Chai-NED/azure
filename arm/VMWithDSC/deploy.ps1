@@ -25,26 +25,23 @@
 #>
 
 param(
- [Parameter(Mandatory=$True)]
  [string]
- $subscriptionId,
-
- [Parameter(Mandatory=$True)]
- [string]
- $resourceGroupName,
+ $subscriptionId = '',
 
  [string]
- $resourceGroupLocation,
-
- [Parameter(Mandatory=$True)]
- [string]
- $deploymentName,
+ $resourceGroupName = '',
 
  [string]
- $templateFilePath = "azuredeploy.json",
+ $resourceGroupLocation = '',
 
  [string]
- $parametersFilePath = "azuredeploy.parameters.json"
+ $deploymentName = '',
+
+ [string]
+ $templateFilePath = 'azuredeploy.json',
+
+ [string]
+ $parametersFilePath = 'azuredeploy.parameters.json'
 )
 
 <#
@@ -96,6 +93,14 @@ if(!$resourceGroup)
 }
 else{
     Write-Host "Using existing resource group '$resourceGroupName'";
+}
+
+# Test the deployment
+Write-Host "Testing deployment...";
+if(Test-Path $parametersFilePath) {
+    Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath;
+} else {
+    Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath;
 }
 
 # Start the deployment
