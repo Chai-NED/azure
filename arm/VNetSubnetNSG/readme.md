@@ -14,6 +14,6 @@ __Deployment modalities:__
 1. Powershell: use the deploy.ps1 in this folder, which deploys from both azuredeploy.json and azuredeploy.parameters.json. Provide values for the parameters in azuredeploy.parameters.json and run it from a Powershell prompt. For more info, see https://docs.microsoft.com/azure/azure-resource-manager/resource-group-template-deploy
 2. From Azure portal: use the "Deploy to Azure" button below.
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fplzm%2Fazure%2Fmaster%2Farm%2FVM%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fplzm%2Fazure%2Fmaster%2Farm%2FVNetSubnetNSG%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
