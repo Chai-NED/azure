@@ -12,8 +12,8 @@ __ARM template preparation:__
 
 __Deployment modalities:__
 1. Powershell: use the deploy.ps1 in this folder, which deploys from both azuredeploy.json and azuredeploy.parameters.json. Provide values for the parameters in azuredeploy.parameters.json and run it from a Powershell prompt. For more info, see https://docs.microsoft.com/azure/azure-resource-manager/resource-group-template-deploy
-2. From Azure portal: use the "Deploy to Azure" button below.
+2. From Azure portal: use the "Deploy to Azure" button below. Note that this does not use the azuredeploy.parameters.json file; you will need to enter all parameter values in the Azure portal.
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fplzm%2Fazure%2Fmaster%2Farm%2FVNetSubnetNSG%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fplzm%2Fazure%2Fmaster%2Farm%2FVNetSubnetNSG%2Fazuredeploy.json" target="_blank" rel="noopener">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>

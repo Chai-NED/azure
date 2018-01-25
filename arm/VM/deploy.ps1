@@ -26,16 +26,16 @@
 
 param(
  [string]
- $subscriptionId = 'e61e4c75-268b-4c94-ad48-237aa3231481',
+ $subscriptionId = '',
 
  [string]
- $resourceGroupName = 'pz17octo',
+ $resourceGroupName = '',
 
  [string]
- $resourceGroupLocation = 'East US',
+ $resourceGroupLocation = '',
 
  [string]
- $deploymentName = 'FooDep',
+ $deploymentName = 'My Deployment',
 
  [string]
  $templateFilePath = 'azuredeploy.json',
