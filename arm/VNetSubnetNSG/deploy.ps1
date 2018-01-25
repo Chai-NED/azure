@@ -14,6 +14,9 @@
  .PARAMETER resourceGroupLocation
     Optional, a resource group location. If specified, will try to create a new resource group in this location. If not specified, assumes resource group is existing.
 
+ .PARAMETER deploymentName
+    The deployment name.
+
  .PARAMETER templateFilePath
     Optional, path to the template file. Defaults to template.json.
 
@@ -22,22 +25,23 @@
 #>
 
 param(
- [Parameter(Mandatory=$True)]
  [string]
- $subscriptionId,
-
- [Parameter(Mandatory=$True)]
- [string]
- $resourceGroupName,
+ $subscriptionId = '',
 
  [string]
- $resourceGroupLocation,
+ $resourceGroupName = '',
 
  [string]
- $templateFilePath = "azuredeploy.json",
+ $resourceGroupLocation = '',
 
  [string]
- $parametersFilePath = "azuredeploy.parameters.json"
+ $deploymentName = 'My Deployment',
+
+ [string]
+ $templateFilePath = 'azuredeploy.json',
+
+ [string]
+ $parametersFilePath = 'azuredeploy.parameters.json'
 )
 
 <#
@@ -61,15 +65,14 @@ $ErrorActionPreference = "Stop"
 
 # sign in
 Write-Host "Logging in...";
-$execLogin = ($PSScriptRoot + "\" + "login.ps1 -SubscriptionId '" + $subscriptionId + "'")
-Invoke-Expression $execLogin
+Login-AzureRmAccount;
 
 # select subscription
 Write-Host "Selecting subscription '$subscriptionId'";
 Select-AzureRmSubscription -SubscriptionID $subscriptionId;
 
 # Register RPs
-$resourceProviders = @("microsoft.resources");
+$resourceProviders = @("microsoft.compute","microsoft.resources","microsoft.network");
 if($resourceProviders.length) {
     Write-Host "Registering resource providers"
     foreach($resourceProvider in $resourceProviders) {
@@ -92,10 +95,18 @@ else{
     Write-Host "Using existing resource group '$resourceGroupName'";
 }
 
+# Test the deployment
+Write-Host "Testing deployment...";
+if(Test-Path $parametersFilePath) {
+    Test-AzureRmResourceGroupDeployment -ResourceGroupNameFromTemplate $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose
+} else {
+    Test-AzureRmResourceGroupDeployment -ResourceGroupNameFromTemplate $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -Verbose
+}
+
 # Start the deployment
 Write-Host "Starting deployment...";
 if(Test-Path $parametersFilePath) {
-    New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath;
+    New-AzureRmResourceGroupDeployment -ResourceGroupNameFromTemplate $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -DeploymentDebugLogLevel All
 } else {
-    New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath;
+    New-AzureRmResourceGroupDeployment -ResourceGroupNameFromTemplate $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -DeploymentDebugLogLevel All
 }

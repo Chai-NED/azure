@@ -27,7 +27,7 @@ $secretvalue = ConvertTo-SecureString $SecretText -AsPlainText -Force
 $secret = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $SecretName -SecretValue $secretvalue
 
 # Do Azure AD stuff here
-# https://docs.microsoft.com/en-us/azure/key-vault/key-vault-get-started#a-idregisteraregister-an-application-with-azure-active-directory
+# https://docs.microsoft.com/azure/key-vault/key-vault-get-started#a-idregisteraregister-an-application-with-azure-active-directory
 
 Set-AzureRmKeyVaultAccessPolicy -VaultName $KeyVaultName -ServicePrincipalName $AppClientID -PermissionsToCertificates $PermissionsToCertificates -PermissionsToKeys $PermissionsToKeys -PermissionsToSecrets $PermissionsToSecrets
 

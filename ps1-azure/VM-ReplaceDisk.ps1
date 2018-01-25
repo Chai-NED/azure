@@ -12,7 +12,7 @@
     [string]$DiskFileNameExtension = '.vhd',
 
     [string]$DataDiskFileNameTail = 'DataDisk',
-    [int]$DataDiskSizeInGB = 256
+    [int]$DataDiskSizeInGB = 257
 )
 
 $ddi = 3

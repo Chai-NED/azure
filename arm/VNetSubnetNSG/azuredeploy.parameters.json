@@ -1,0 +1,36 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": ""
+        },
+        "resourceGroupName": {
+            "value": ""
+        },
+        "virtualNetworkName": {
+            "value": ""
+        },
+        "virtualNetworkAddressSpace": {
+            "value": ""
+        },
+        "subnetName": {
+            "value": ""
+        },
+        "subnetAddressSpace": {
+            "value": ""
+        },
+        "networkSecurityGroupName": {
+            "value": ""
+        },
+        "networkSecurityGroupRule_Name": {
+            "value": ""
+        },
+        "networkSecurityGroupRule_Source": {
+            "value": ""
+        },
+        "networkSecurityGroupRule_Priority": {
+            "value": 100
+        }
+    }
+}

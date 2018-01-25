@@ -1,4 +1,12 @@
-﻿# Reference: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/resize-vm
+﻿# ##############################
+# Purpose: Deploy RM VM - Managed Disks
+#
+# Author: Patrick El-Azem
+#
+# Reference: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/resize-vm
+#
+# Notes: this script assumes you have created RGs, VNets, subnets, NSGs. It does create the availability set you designate, if it doesn't exist yet.
+# ##############################
 
 # ##################################################
 # Variables

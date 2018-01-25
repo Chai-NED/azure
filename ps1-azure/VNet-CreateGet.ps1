@@ -1,5 +1,5 @@
 ﻿# ##############################
-# Purpose: Create RM VNet
+# Purpose: Create VNet
 #
 # Author: Patrick El-Azem
 # ##############################

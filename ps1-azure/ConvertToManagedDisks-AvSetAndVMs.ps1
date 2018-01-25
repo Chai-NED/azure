@@ -12,8 +12,8 @@
 # Arguments with defaults
 param
 (
-    [string]$ResourceGroupName = 'pz17-emoney',
-    [string]$AvailabilitySetName = 'pz17-emoney-avset1'
+    [string]$ResourceGroupName = '',
+    [string]$AvailabilitySetName = ''
 )
 
 # Get the availability set

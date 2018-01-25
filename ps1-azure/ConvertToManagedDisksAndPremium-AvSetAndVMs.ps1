@@ -22,7 +22,7 @@ param
     [string]$ResourceGroupName = '',
     [string]$AvailabilitySetNameCurrent = '',
     [string]$AvailabilitySetNameNew = '',
-    [string]$VMSizeForNewVMs = 'Standard_DS2_v2',
+    [string]$VMSizeForNewVMs = '',
     [int]$FaultDomainCount = 3,
     [int]$UpdateDomainCount = 5
 )

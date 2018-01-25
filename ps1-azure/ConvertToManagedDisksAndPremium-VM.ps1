@@ -17,7 +17,7 @@ param
 (
     [string]$ResourceGroupName = '',
     [string]$VMName = '',
-    [string]$VMSizeNew = 'Standard_DS2_v2',
+    [string]$VMSizeNew = '',
     [bool]$Restart = $false
 )
 

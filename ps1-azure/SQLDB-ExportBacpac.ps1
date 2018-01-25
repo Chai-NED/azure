@@ -23,7 +23,7 @@ param
     [string]$BacpacBlobName = '',
     [string]$SQLServerName = '',
     [string]$DatabaseName = '',
-    [string]$DatabaseTier = 'S1',
+    [string]$DatabaseTier = '',
     [string]$UserName = '',
     [string]$Password = ''
 )
