@@ -1,5 +1,5 @@
 ﻿# ##############################
-# Purpose: Deploy RM VM - Managed Disks
+# Purpose: Deploy ARM VM with availability set and using Managed Disks
 #
 # Author: Patrick El-Azem
 #

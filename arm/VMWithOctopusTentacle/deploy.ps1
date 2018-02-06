@@ -35,7 +35,7 @@ param(
  $resourceGroupLocation = '',
 
  [string]
- $deploymentName = 'VM with DSC',
+ $deploymentName = 'VM with Octopus',
 
  [string]
  $templateFilePath = 'azuredeploy.json',

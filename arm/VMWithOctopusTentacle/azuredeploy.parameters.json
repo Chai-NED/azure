@@ -18,7 +18,7 @@
             "value": ""
         },
         "virtualMachineSize": {
-            "value": "Standard_D2s_v3"
+            "value": ""
         },
         "adminUsername": {
             "value": ""
@@ -54,6 +54,30 @@
             "value": ""
         },
         "subnetName": {
+            "value": ""
+        },
+        "octopusServerUrl": {
+            "value": ""
+        },
+        "octopusApiKey": {
+            "value": ""
+        },
+        "octopusEnvironments": {
+            "value": ""
+        },
+        "octopusRoles": {
+            "value": ""
+        },
+        "octopusCommunicationMode": {
+            "value": "Listen"
+        },
+        "octopusListenOnPort": {
+            "value": 10933
+        },
+        "octopusPublicHostNameConfiguration": {
+            "value": "ComputerName"
+        },
+        "octopusCustomPublicHostName": {
             "value": ""
         },
         "resourceGroupNameDiagnostics": {

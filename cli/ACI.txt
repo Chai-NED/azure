@@ -1,4 +1,5 @@
-az container create --name ctn1 --image microsoft/aci-helloworld --resource-group containerfun --ip-address public
+az container create --name ctn1 --image microsoft/aci-helloworld --resource-group containerfun --ip-address public --environment-variables EULA=TRUE
+
 az container show --name ctn1 --resource-group containerfun
 
 az container logs --name ctn1 --resource-group containerfun

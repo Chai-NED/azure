@@ -27,25 +27,25 @@
             "value": ""
         },
         "osDiskStorageType": {
-            "value": "Premium_LRS"
+            "value": ""
         },
         "osDiskSizeInGB": {
-            "value": 129
+            "value": 0
         },
         "dataDiskStorageType": {
-            "value": "Premium_LRS"
+            "value": ""
         },
         "dataDiskCount": {
-            "value": 1
+            "value": 0
         },
         "dataDiskSizeInGB": {
-            "value": 257
+            "value": 0
         },
         "publicIpAddressType": {
-            "value": "Dynamic"
+            "value": ""
         },
         "publicIpAddressSku": {
-            "value": "Basic"
+            "value": ""
         },
         "resourceGroupNameNetwork": {
             "value": ""
@@ -54,9 +54,6 @@
             "value": ""
         },
         "subnetName": {
-            "value": ""
-        },
-        "networkSecurityGroupName": {
             "value": ""
         },
         "resourceGroupNameDiagnostics": {

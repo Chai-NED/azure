@@ -72,6 +72,9 @@
 		},
 		"osDiskSizeInGB": {
 			"type": "int",
+			"defaultValue": 129,
+			"minValue": 32,
+			"maxValue": 1023,
 			"metadata": {
 				"displayName": "OS disk size",
 				"description": "OS disk size in GB"
@@ -91,6 +94,7 @@
 		},
 		"dataDiskCount": {
 			"type": "int",
+			"defaultValue": 1,
 			"metadata": {
 				"displayName": "Number of data disks",
 				"description": "Number of data disks to attach to the VM. At this writing, ARM template language requires an integer 1-800; less then or equal to 0 (zero) is not allowed."
@@ -98,6 +102,9 @@
 		},
 		"dataDiskSizeInGB": {
 			"type": "int",
+			"defaultValue": 257,
+			"minValue": 32,
+			"maxValue": 1023,
 			"metadata": {
 				"displayName": "Data disk size",
 				"description": "Data disk size in DB. Each data disk will be created at this size"
@@ -146,13 +153,6 @@
 			"metadata": {
 				"displayName": "Subnet",
 				"description": "Subnet into which to deploy the VM"
-			}
-		},
-		"networkSecurityGroupName": {
-			"type": "string",
-			"metadata": {
-				"displayName": "Network Security Group (NSG)",
-				"description": "Network security group with which to associate the VM's NIC. Note that this is optional; if the subnet has an NSG associated with it, then that NSG will protect the VM since the VM is in the subnet."
 			}
 		},
 		"resourceGroupNameDiagnostics": {
@@ -302,31 +302,6 @@
 			},
 			"resources": [
 				{
-					"name": "[concat(parameters('virtualMachineName'),'/IaaSAntimalware')]",
-					"type": "Microsoft.Compute/virtualMachines/extensions",
-					"location": "[parameters('location')]",
-					"apiVersion": "2015-06-15",
-					"properties": {
-						"publisher": "Microsoft.Azure.Security",
-						"type": "IaaSAntimalware",
-						"typeHandlerVersion": "1.3",
-						"autoUpgradeMinorVersion": true,
-						"settings": {
-							"AntimalwareEnabled": true,
-							"RealtimeProtectionEnabled": "true",
-							"ScheduledScanSettings": {
-								"isEnabled": "true",
-								"day": "7",
-								"time": "120",
-								"scanType": "Quick"
-							}
-						}
-					},
-					"dependsOn": [
-						"[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
-					]
-				},
-				{
 					"name": "IISDotNetWebServer",
 					"type": "extensions",
 					"location": "[resourceGroup().location]",
@@ -351,6 +326,43 @@
 						}
 					}
 				}
+			]
+		},
+		{
+			"name": "[concat(parameters('virtualMachineName'),'IaaSAntimalware')]",
+			"apiVersion": "2015-01-01",
+			"type": "Microsoft.Resources/deployments",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "https://gallery.azure.com/artifact/20161101/microsoft.antimalware-windows-arm.1.0.0/Artifacts/MainTemplate.json"
+				},
+				"parameters": {
+					"vmName": {
+						"value": "[parameters('virtualMachineName')]"
+					},
+					"location": {
+						"value": "[parameters('location')]"
+					},
+					"RealtimeProtectionEnabled": {
+						"value": "true"
+					},
+					"ScheduledScanSettingsIsEnabled": {
+						"value": "true"
+					},
+					"ScheduledScanSettingsScanType": {
+						"value": "Quick"
+					},
+					"ScheduledScanSettingsDay": {
+						"value": "7"
+					},
+					"ScheduledScanSettingsTime": {
+						"value": "120"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
 			]
 		},
 		{

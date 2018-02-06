@@ -155,6 +155,75 @@
 				"description": "Subnet into which to deploy the VM"
 			}
 		},
+		"octopusServerUrl": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Octopus Server URL",
+				"description": "Octopus Server URL"
+			}
+		},
+		"octopusApiKey": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Octopus API Key",
+				"description": "Octopus API Key"
+			}
+		},
+		"octopusEnvironments": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Octopus Environments",
+				"description": "Octopus Environments (comma-delimited)"
+			}
+		},
+		"octopusRoles": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Octopus Roles",
+				"description": "Octopus Roles (comma-delimited)"
+			}
+		},
+		"octopusCommunicationMode": {
+			"type": "string",
+			"allowedValues": [
+				"Listen",
+				"Poll"
+			],
+			"metadata": {
+				"displayName": "Octopus Communication Mode",
+				"description": "Octopus Communication Mode"
+			}
+		},
+		"octopusListenOnPort": {
+			"type": "int",
+			"defaultValue": 10933,
+			"minValue": 0,
+			"maxValue": 65535,
+			"metadata": {
+				"displayName": "Octopus Port",
+				"description": "Octopus Port to listen on"
+			}
+		},
+		"octopusPublicHostNameConfiguration": {
+			"type": "string",
+			"allowedValues": [
+				"PublicIP",
+				"FQDN",
+				"ComputerName",
+				"Custom"
+			],
+			"metadata": {
+				"displayName": "Octopus Public Hostname Configuration",
+				"description": "Octopus Public Hostname Configuration"
+			}
+		},
+		"octopusCustomPublicHostName": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Octopus Custom Public Hostname",
+				"description": "Octopus Custom Public Hostname when Public Hostname Configuration of Custom is selected"
+			}
+		},
 		"resourceGroupNameDiagnostics": {
 			"type": "string",
 			"metadata": {
@@ -302,6 +371,52 @@
 			},
 			"dependsOn": [
 				"[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+			]
+		},
+		{
+			"name": "[concat(parameters('virtualMachineName'),'OctopusDeploy.OctopusDeployWindowsTentacle')]",
+			"apiVersion": "2015-01-01",
+			"type": "Microsoft.Resources/deployments",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "https://gallery.azure.com/artifact/20161101/OctopusDeploy.OctopusDeployWindowsTentacle-arm.1.0.0/Artifacts/MainTemplate.json"
+				},
+				"parameters": {
+					"octopusServerUrl": {
+						"value": "[parameters('octopusServerUrl')]"
+					},
+					"apiKey": {
+						"value": "[parameters('octopusApiKey')]"
+					},
+					"environments": {
+						"value": "[parameters('octopusEnvironments')]"
+					},
+					"roles": {
+						"value": "[parameters('octopusRoles')]"
+					},
+					"communicationMode": {
+						"value": "[parameters('octopusCommunicationMode')]"
+					},
+					"port": {
+						"value": "[parameters('octopusListenOnPort')]"
+					},
+					"publicHostNameConfiguration": {
+						"value": "[parameters('octopusPublicHostNameConfiguration')]"
+					},
+					"customPublicHostName": {
+						"value": "[parameters('octopusCustomPublicHostName')]"
+					},
+					"vmName": {
+						"value": "[parameters('virtualMachineName')]"
+					},
+					"location": {
+						"value": "[parameters('location')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(parameters('virtualMachineName'),'IaaSAntimalware')]"
 			]
 		},
 		{

@@ -35,7 +35,7 @@ param(
  $resourceGroupLocation = '',
 
  [string]
- $deploymentName = 'My Deployment',
+ $deploymentName = 'VM',
 
  [string]
  $templateFilePath = 'azuredeploy.json',
