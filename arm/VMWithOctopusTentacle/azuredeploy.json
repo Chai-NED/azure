@@ -44,6 +44,43 @@
 				"description": "The VM size. See https://docs.microsoft.com/azure/virtual-machines/windows/sizes or use Azure CLI command 'az vm list-sizes'."
 			}
 		},
+		"publisher": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Publisher",
+				"description": "CLI: az vm image list-publishers -l [Azure region]. For Windows 10, use MicrosoftWindowsDesktop"
+			}
+		},
+		"offer": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Offer",
+				"description": "CLI: az vm image list-offers -l [Azure region] --publisher [Publisher]. For Windows 10, use Windows-10"
+			}
+		},
+		"sku": {
+			"type": "string",
+			"metadata": {
+				"displayName": "SKU",
+				"description": "CLI: az vm image list-skus -l [Azure region] --publisher [Publisher] --offer [Offer]. For Windows 10 1709, use RS3-Pro"
+			}
+		},
+		"version": {
+			"type": "string",
+			"defaultValue": "latest",
+			"metadata": {
+				"displayName": "Version",
+				"description": "Image version. Typically use latest."
+			}
+		},
+		"licenseType": {
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"displayName": "License Type",
+				"description": "For Windows 10, use Windows_Client"
+			}
+		},
 		"adminUsername": {
 			"type": "string",
 			"metadata": {
@@ -237,6 +274,51 @@
 				"displayName": "Storage Account for VM diagnostics",
 				"description": "The standard storage account to which VM diagnostics data will be written."
 			}
+		},
+		"vmTimeZone": {
+			"type": "string",
+			"defaultValue": "UTC",
+			"minLength": 2,
+			"metadata": {
+				"description": "Time zone of the VMs. Type '[TimeZoneInfo]::GetSystemTimeZones().Id' in PowerShell to get the list. Note that 'UTC' works but 'UTC+xx' does NOT work."
+			}
+		},
+		"vmAutoShutdownTime": {
+			"type": "string",
+			"defaultValue": "9999",
+			"minLength": 4,
+			"maxLength": 4,
+			"metadata": {
+				"description": "The time at which VMs will be automatically shutdown (24h HHmm format). Set value to '9999' to NOT configure the auto shutdown."
+			}
+		},
+		"enableAutoShutdownNotification": {
+			"type": "string",
+			"defaultValue": "Enabled",
+			"allowedValues": [
+				"Enabled",
+				"Disabled"
+			],
+			"metadata": {
+				"displayName": "Enable Auto-shutdown Notification?",
+				"description": "Specify whether a notification should be sent before VM auto-shutdown."
+			}
+		},
+		"autoShutdownNotificationWebhookURL": {
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"displayName": "Auto-shutdown Notification Webhook URL",
+				"description": "Auto-shutdown Notification Webhook URL"
+			}
+		},
+		"autoShutdownNotificationMinutesBefore": {
+			"type": "int",
+			"defaultValue": 15,
+			"metadata": {
+				"displayName": "Auto-shutdown Notification minutes in advance",
+				"description": "Auto-shutdown Notification minutes in advance"
+			}
 		}
 	},
 	"variables": {
@@ -283,7 +365,8 @@
 					"adminUsername": "[parameters('adminUsername')]",
 					"adminPassword": "[parameters('adminPassword')]",
 					"windowsConfiguration": {
-						"provisionVmAgent": "true"
+						"provisionVmAgent": "true",
+						"timeZone": "[parameters('vmTimeZone')]"
 					}
 				},
 				"hardwareProfile": {
@@ -291,10 +374,10 @@
 				},
 				"storageProfile": {
 					"imageReference": {
-						"publisher": "MicrosoftWindowsServer",
-						"offer": "WindowsServer",
-						"sku": "2016-Datacenter",
-						"version": "latest"
+						"publisher": "[parameters('publisher')]",
+						"offer": "[parameters('offer')]",
+						"sku": "[parameters('sku')]",
+						"version": "[parameters('version')]"
 					},
 					"osDisk": {
 						"createOption": "FromImage",
@@ -327,6 +410,7 @@
 						}
 					]
 				},
+				"licenseType": "[parameters('licenseType')]",
 				"diagnosticsProfile": {
 					"bootDiagnostics": {
 						"enabled": true,
@@ -372,6 +456,30 @@
 			"dependsOn": [
 				"[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
 			]
+		},
+		{
+			"condition": "[not(equals(parameters('vmAutoShutdownTime'), '9999'))]",
+			"type": "Microsoft.DevTestLab/schedules",
+			"name": "[concat('shutdown-computevm-', parameters('virtualMachineName'))]",
+			"apiVersion": "[providers('Microsoft.DevTestLab','labs').apiVersions[0]]",
+			"location": "[parameters('location')]",
+			"dependsOn": [
+				"[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+			],
+			"properties": {
+				"status": "Enabled",
+				"taskType": "ComputeVmShutdownTask",
+				"dailyRecurrence": {
+					"time": "[parameters('vmAutoShutdownTime')]"
+				},
+				"timeZoneId": "[parameters('vmTimeZone')]",
+				"notificationSettings": {
+					"status": "[parameters('enableAutoShutdownNotification')]",
+					"timeInMinutes": "[parameters('autoShutdownNotificationMinutesBefore')]",
+					"webhookUrl": "[parameters('autoShutdownNotificationWebhookURL')]"
+				},
+				"targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]"
+			}
 		},
 		{
 			"name": "[concat(parameters('virtualMachineName'),'OctopusDeploy.OctopusDeployWindowsTentacle')]",

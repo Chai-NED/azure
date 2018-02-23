@@ -20,6 +20,21 @@
         "virtualMachineSize": {
             "value": ""
         },
+        "publisher": {
+            "value": ""
+        },
+        "offer": {
+            "value": ""
+        },
+        "sku": {
+            "value": ""
+        },
+        "version": {
+            "value": "latest"
+        },
+        "licenseType": {
+            "value": ""
+        },
         "adminUsername": {
             "value": ""
         },
@@ -85,6 +100,21 @@
         },
         "diagnosticsStorageAccountName": {
             "value": ""
+        },
+        "vmTimeZone": {
+            "value": ""
+        },
+        "vmAutoShutdownTime": {
+            "value": "9999"
+        },
+        "enableAutoShutdownNotification": {
+            "value": "Disabled"
+        },
+        "autoShutdownNotificationWebhookURL": {
+            "value": ""
+        },
+        "autoShutdownNotificationMinutesBefore": {
+            "value": 15
         }
     }
 }

@@ -18,7 +18,22 @@
             "value": ""
         },
         "virtualMachineSize": {
-            "value": "Standard_D2s_v3"
+            "value": "Standard_D4s_v3"
+        },
+        "publisher": {
+            "value": "MicrosoftWindowsDesktop"
+        },
+        "offer": {
+            "value": "Windows-10"
+        },
+        "sku": {
+            "value": "RS3-Pro"
+        },
+        "version": {
+            "value": "latest"
+        },
+        "licenseType": {
+            "value": "Windows_Client"
         },
         "adminUsername": {
             "value": ""
@@ -61,6 +76,21 @@
         },
         "diagnosticsStorageAccountName": {
             "value": ""
+        },
+        "vmTimeZone": {
+            "value": "Eastern Standard Time"
+        },
+        "vmAutoShutdownTime": {
+            "value": "9999"
+        },
+        "enableAutoShutdownNotification": {
+            "value": "Disabled"
+        },
+        "autoShutdownNotificationWebhookURL": {
+            "value": ""
+        },
+        "autoShutdownNotificationMinutesBefore": {
+            "value": 15
         }
     }
 }
