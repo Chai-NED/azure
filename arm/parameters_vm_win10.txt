@@ -1,0 +1,15 @@
+        "publisher": {
+            "value": "MicrosoftWindowsDesktop"
+        },
+        "offer": {
+            "value": "Windows-10"
+        },
+        "sku": {
+            "value": "RS3-Pro"
+        },
+        "version": {
+            "value": "latest"
+        },
+        "licenseType": {
+            "value": "Windows_Client"
+        },

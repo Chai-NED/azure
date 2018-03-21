@@ -1,0 +1,15 @@
+        "publisher": {
+            "value": "MicrosoftWindowsServer"
+        },
+        "offer": {
+            "value": "WindowsServer"
+        },
+        "sku": {
+            "value": "2016-Datacenter"
+        },
+        "version": {
+            "value": "latest"
+        },
+        "licenseType": {
+            "value": ""
+        },

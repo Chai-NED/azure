@@ -257,7 +257,6 @@
             "apiVersion": "2017-06-01",
             "scale": null,
             "properties": {
-                "provisioningState": "Succeeded",
                 "addressPrefix": "[parameters('subnetAddressSpace')]",
                 "networkSecurityGroup": {
                     "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"

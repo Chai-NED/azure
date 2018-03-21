@@ -1,0 +1,138 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": ""
+        },
+        "vmssName": {
+            "value": ""
+        },
+        "vmssFqdnLabel": {
+            "value": ""
+        },
+        "vmssAutoScaleSettingName": {
+            "value": ""
+        },
+        "vmssAutoScaleProfileName": {
+            "value": ""
+        },
+        "vmssAutoScaleMinimum": {
+            "value": 1
+        },
+        "vmssAutoScaleMaximum": {
+            "value": 10
+        },
+        "vmssAutoScaleDefault": {
+            "value": 1
+        },
+        "vmssAutoScaleTriggerCpuPctGreaterThan": {
+            "value": 75
+        },
+        "vmssAutoScaleTriggerCpuPctLessThan": {
+            "value": 25
+        },
+        "vmssAutoScaleChangeCountIncrease": {
+            "value": 1
+        },
+        "vmssAutoScaleChangeCountDecrease": {
+            "value": 1
+        },
+        "vmssUpgradePolicy": {
+            "value": "Automatic"
+        },
+        "vmssOverprovision": {
+            "value": true
+        },
+        "vmPublisher": {
+            "value": "MicrosoftWindowsServer"
+        },
+        "vmOffer": {
+            "value": "WindowsServer"
+        },
+        "vmSku": {
+            "value": "2016-Datacenter"
+        },
+        "vmVersion": {
+            "value": "latest"
+        },
+        "vmSize": {
+            "value": "Standard_DS1_v2"
+        },
+        "vmInstanceCount": {
+            "value": 1
+        },
+        "vmNamePrefix": {
+            "value": ""
+        },
+        "vmAdminUserName": {
+            "value": ""
+        },
+        "vmAdminPassword": {
+            "value": ""
+        },
+        "vmProvisionVMAgent": {
+            "value": true
+        },
+        "vmEnableAutomaticUpdates": {
+            "value": true
+        },
+        "vmEnableAcceleratedNetworking": {
+            "value": true
+        },
+        "vmOsDiskStorageType": {
+            "value": "Premium_LRS"
+        },
+        "vmOsDiskCaching": {
+            "value": "ReadWrite"
+        },
+        "vmOsDiskSizeInGB": {
+            "value": 129
+        },
+        "vNetName": {
+            "value": ""
+        },
+        "vNetAddressSpace": {
+            "value": "10.0.0.0/16"
+        },
+        "subnetName": {
+            "value": ""
+        },
+        "subnetAddressSpace": {
+            "value": "10.0.1.0/24"
+        },
+        "vnetEnableDdosProtection": {
+            "value": false
+        },
+        "vnetEnableVmProtection": {
+            "value": false
+        },
+        "loadBalancerName": {
+            "value": ""
+        },
+        "loadBalancerSkuName": {
+            "value": "Basic"
+        },
+        "loadBalancerPublicIPAddressSkuName": {
+            "value": "Basic"
+        },
+        "loadBalancerPublicIPAddressAllocationMethod": {
+            "value": "Dynamic"
+        },
+        "loadBalancerRule_Protocol": {
+            "value": "Tcp"
+        },
+        "inboundNatPool_PortRangeFrontEnd_Start": {
+            "value": 50000
+        },
+        "inboundNatPool_PortRangeFrontEnd_End": {
+            "value": 50119
+        },
+        "inboundNatPool_PortBackEnd": {
+            "value": 3389
+        },
+        "inboundNatPool_Protocol": {
+            "value": "Tcp"
+        }
+    }
+}
