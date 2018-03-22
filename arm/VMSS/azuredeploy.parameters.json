@@ -98,6 +98,15 @@
         "vnetEnableVmProtection": {
             "value": false
         },
+        "nsgName": {
+            "value": "vmss_nsg"
+        },
+        "nsgRule_Name_AdminAccess": {
+            "value": "AdminAccess"
+        },
+        "nsgRule_Source_AdminAccess": {
+            "value": ""
+        },
         "loadBalancerName": {
             "value": "vmss_lb"
         },

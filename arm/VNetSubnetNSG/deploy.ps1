@@ -35,7 +35,7 @@ param(
  $resourceGroupLocation = '',
 
  [string]
- $deploymentName = 'My Deployment',
+ $deploymentName = 'VNet-Subnet-NSG Deployment',
 
  [string]
  $templateFilePath = 'azuredeploy.json',

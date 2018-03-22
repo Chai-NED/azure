@@ -9,13 +9,6 @@
                 "description": "The Azure region within which to deploy. Examples: 'East US', 'West US', and so on. See https://azure.microsoft.com/regions/."
             }
         },
-        "resourceGroupName": {
-            "type": "string",
-            "metadata": {
-                "displayName": "Resource Group",
-                "description": "The resource group name that should contain the deployed resources"
-            }
-        },
         "virtualNetworkName": {
             "type": "string",
             "metadata": {
@@ -227,43 +220,6 @@
                 "virtualNetworkPeerings": []
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
-            ]
-        },
-        {
-            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
-            "name": "[concat(parameters('networkSecurityGroupName'), '/', parameters('networkSecurityGroupRule_Name'))]",
-            "apiVersion": "2017-06-01",
-            "scale": null,
-            "properties": {
-                "protocol": "*",
-                "sourcePortRange": "*",
-                "destinationPortRange": "*",
-                "sourceAddressPrefix": "[parameters('networkSecurityGroupRule_Source')]",
-                "destinationAddressPrefix": "*",
-                "access": "Allow",
-                "priority": "[parameters('networkSecurityGroupRule_Priority')]",
-                "direction": "Inbound",
-                "sourceAddressPrefixes": [],
-                "destinationAddressPrefixes": []
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
-            ]
-        },
-        {
-            "type": "Microsoft.Network/virtualNetworks/subnets",
-            "name": "[concat(parameters('virtualNetworkName'), '/', parameters('subnetName'))]",
-            "apiVersion": "2017-06-01",
-            "scale": null,
-            "properties": {
-                "addressPrefix": "[parameters('subnetAddressSpace')]",
-                "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
-                }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
             ]
         }
