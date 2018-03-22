@@ -6,8 +6,8 @@
             "type": "string",
             "defaultValue": "",
             "metadata": {
-                "displayName": "",
-                "description": ""
+                "displayName": "Azure region",
+                "description": "Azure region. Do NOT use human-readable form; use short form. For example, use 'eastus' NOT 'East US'. This is so LB public IP DNS FQDN succeeds, since Azure PIP DNS FQDNs include regionalization subdomain."
             }
         },
         "vmssName": {
@@ -19,22 +19,6 @@
             }
         },
         "vmssFqdnLabel": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "displayName": "",
-                "description": ""
-            }
-        },
-        "vmssAutoScaleSettingName": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "displayName": "",
-                "description": ""
-            }
-        },
-        "vmssAutoScaleProfileName": {
             "type": "string",
             "defaultValue": "",
             "metadata": {
@@ -157,14 +141,6 @@
         "vmInstanceCount": {
             "type": "int",
             "defaultValue": 1,
-            "metadata": {
-                "displayName": "",
-                "description": ""
-            }
-        },
-        "vmNamePrefix": {
-            "type": "string",
-            "defaultValue": "",
             "metadata": {
                 "displayName": "",
                 "description": ""
@@ -395,11 +371,14 @@
         }
     },
     "variables": {
-        "loadBalancerPublicIPAddressName": "[concat(parameters('loadBalancerName'), 'Pip')]",
-        "loadBalancerFrontEndName": "[concat(parameters('loadBalancerName'), 'FrontEnd')]",
-        "loadBalancerBackEndName": "[concat(parameters('loadBalancerName'), 'BackEnd')]",
-        "loadBalancerProbeName": "[concat(parameters('loadBalancerName'), 'HttpProbe')]",
-        "loadBalancerNatPoolName": "[concat(parameters('loadBalancerName'), 'NatPool')]"
+        "vmssAutoScaleSettingName": "[concat(parameters('vmssName'), 'AutoScaleSetting')]",
+        "vmssAutoScaleProfileName": "[concat(parameters('vmssName'), 'AutoScaleProfile')]",
+        "loadBalancerPublicIPAddressName": "[concat(parameters('loadBalancerName'), '_Pip')]",
+        "loadBalancerFrontEndName": "[concat(parameters('loadBalancerName'), '_FrontEnd')]",
+        "loadBalancerBackEndName": "[concat(parameters('loadBalancerName'), '_BackEnd')]",
+        "loadBalancerProbeName": "[concat(parameters('loadBalancerName'), '_HttpProbe')]",
+        "loadBalancerNatPoolName": "[concat(parameters('loadBalancerName'), '_NatPool')]",
+        "vmNamePrefix": "[substring(uniqueString(parameters('vmssName')), 0, 4)]"
     },
     "resources": [
         {
@@ -419,7 +398,7 @@
                 },
                 "virtualMachineProfile": {
                     "osProfile": {
-                        "computerNamePrefix": "[parameters('vmNamePrefix')]",
+                        "computerNamePrefix": "[variables('vmNamePrefix')]",
                         "adminUsername": "[parameters('vmAdminUserName')]",
                         "adminPassword": "[parameters('vmAdminPassword')]",
                         "windowsConfiguration": {
@@ -447,7 +426,7 @@
                     "networkProfile": {
                         "networkInterfaceConfigurations": [
                             {
-                                "name": "[concat(parameters('vmssName'),'Nic')]",
+                                "name": "[concat(parameters('vmssName'),'_Nic')]",
                                 "properties": {
                                     "primary": true,
                                     "enableAcceleratedNetworking": "[parameters('vmEnableAcceleratedNetworking')]",
@@ -456,7 +435,7 @@
                                     },
                                     "ipConfigurations": [
                                         {
-                                            "name": "[concat(parameters('vmssName'),'IpConfig')]",
+                                            "name": "[concat(parameters('vmssName'),'_IpConfig')]",
                                             "properties": {
                                                 "subnet": {
                                                     "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
@@ -489,14 +468,14 @@
         },
         {
             "type": "microsoft.insights/autoscalesettings",
-            "name": "[parameters('vmssAutoScaleSettingName')]",
+            "name": "[variables('vmssAutoScaleSettingName')]",
             "apiVersion": "2015-04-01",
             "location": "[parameters('location')]",
             "tags": {},
             "properties": {
                 "profiles": [
                     {
-                        "name": "[parameters('vmssAutoScaleProfileName')]",
+                        "name": "[variables('vmssAutoScaleProfileName')]",
                         "capacity": {
                             "minimum": "[parameters('vmssAutoScaleMinimum')]",
                             "maximum": "[parameters('vmssAutoScaleMaximum')]",
@@ -545,7 +524,7 @@
                     }
                 ],
                 "enabled": true,
-                "name": "[parameters('vmssAutoScaleSettingName')]",
+                "name": "[variables('vmssAutoScaleSettingName')]",
                 "targetResourceUri": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('vmssName'))]"
             },
             "dependsOn": [
@@ -582,7 +561,7 @@
                 ],
                 "loadBalancingRules": [
                     {
-                        "name": "[concat(parameters('loadBalancerName'), 'Port80')]",
+                        "name": "[concat(parameters('loadBalancerName'), '_port80')]",
                         "properties": {
                             "frontendIPConfiguration": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIPConfigurations/', variables('loadBalancerFrontEndName'))]"
@@ -594,14 +573,14 @@
                             "frontendPort": 80,
                             "backendPort": 80,
                             "enableFloatingIP": false,
-                            "idleTimeoutInMinutes": 5,
+                            "idleTimeoutInMinutes": 4,
                             "probe": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/', variables('loadBalancerProbeName'))]"
                             }
                         }
                     },
                     {
-                        "name": "[concat(parameters('loadBalancerName'), 'Port443')]",
+                        "name": "[concat(parameters('loadBalancerName'), '_port443')]",
                         "properties": {
                             "frontendIPConfiguration": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIPConfigurations/', variables('loadBalancerFrontEndName'))]"
@@ -613,7 +592,7 @@
                             "frontendPort": 443,
                             "backendPort": 443,
                             "enableFloatingIP": false,
-                            "idleTimeoutInMinutes": 5,
+                            "idleTimeoutInMinutes": 4,
                             "probe": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/', variables('loadBalancerProbeName'))]"
                             }
@@ -661,7 +640,7 @@
                 "idleTimeoutInMinutes": 4,
                 "dnsSettings": {
                     "domainNameLabel": "[toLower(parameters('vmssFqdnLabel'))]",
-                    "fqdn": "concat([toLower(parameters('vmssFqdnLabel'))], [parameters('location')], '.cloudapp.azure.com')"
+                    "fqdn": "concat([toLower(parameters('vmssFqdnLabel'))], '.', [parameters('location')], '.cloudapp.azure.com')"
                 }
             },
             "dependsOn": []

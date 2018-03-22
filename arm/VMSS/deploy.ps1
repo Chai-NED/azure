@@ -29,10 +29,10 @@ param(
  $subscriptionId = '',
 
  [string]
- $resourceGroupName = '',
+ $resourceGroupName = 'pzvmss',
 
  [string]
- $resourceGroupLocation = '',
+ $resourceGroupLocation = 'eastus',
 
  [string]
  $deploymentName = 'VM Scale Set',

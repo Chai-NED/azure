@@ -3,28 +3,22 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": ""
+            "value": "eastus"
         },
         "vmssName": {
-            "value": ""
+            "value": "vmss"
         },
         "vmssFqdnLabel": {
-            "value": ""
-        },
-        "vmssAutoScaleSettingName": {
-            "value": ""
-        },
-        "vmssAutoScaleProfileName": {
-            "value": ""
+            "value": "pzvmss"
         },
         "vmssAutoScaleMinimum": {
-            "value": 1
+            "value": 2
         },
         "vmssAutoScaleMaximum": {
             "value": 10
         },
         "vmssAutoScaleDefault": {
-            "value": 1
+            "value": 2
         },
         "vmssAutoScaleTriggerCpuPctGreaterThan": {
             "value": 75
@@ -57,16 +51,13 @@
             "value": "latest"
         },
         "vmSize": {
-            "value": "Standard_DS1_v2"
+            "value": "Standard_DS3_v2"
         },
         "vmInstanceCount": {
-            "value": 1
-        },
-        "vmNamePrefix": {
-            "value": ""
+            "value": 4
         },
         "vmAdminUserName": {
-            "value": ""
+            "value": "vmAdmin"
         },
         "vmAdminPassword": {
             "value": ""
@@ -90,13 +81,13 @@
             "value": 129
         },
         "vNetName": {
-            "value": ""
+            "value": "vmss_vnet"
         },
         "vNetAddressSpace": {
             "value": "10.0.0.0/16"
         },
         "subnetName": {
-            "value": ""
+            "value": "subnet1"
         },
         "subnetAddressSpace": {
             "value": "10.0.1.0/24"
@@ -108,7 +99,7 @@
             "value": false
         },
         "loadBalancerName": {
-            "value": ""
+            "value": "vmss_lb"
         },
         "loadBalancerSkuName": {
             "value": "Basic"
