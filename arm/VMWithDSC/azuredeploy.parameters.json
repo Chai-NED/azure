@@ -93,19 +93,19 @@
             "value": 0
         },
         "_artifactsLocation": {
-            "value": ""
+            "value": "https://pz17sa.blob.core.windows.net/public/dsc/"
         },
         "dscFolder": {
-            "value": ""
+            "value": "IIS_ASPNet46_Net35/"
         },
         "dscFileName" : {
-            "value": ""
+            "value": "IIS_ASPNet46_Net35.zip"
         },
         "dscModule" : {
-            "value": ""
+            "value": "IIS_ASPNet46_Net35.ps1"
         },
         "dscFunction" : {
-            "value": ""
+            "value": "IIS_ASPNet46_Net35"
         }
     }
 }

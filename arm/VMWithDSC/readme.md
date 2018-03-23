@@ -16,7 +16,7 @@ __DSC resource preparation:__
 - "dscFileName" is the .zip file that contains your DSC .ps1 file(s).
 - "dscModule" is the .ps1 filename within the .zip file.
 - "dscFunction" is the name of the actual DSC function to call within the .ps1 filename.
-- To better understand all this, check out azuredeploy.parameters.json and an example DSC zip file and its contents: https://pz17sa.blob.core.windows.net/public/dsc/IISDotNetWebServer/IISDotNetWebServer.zip (this file installs IIS, ASP.NET 4.6, and .NET 3.5/2.0)
+- To better understand all this, check out azuredeploy.parameters.json and an example DSC zip file and its contents: https://pz17sa.blob.core.windows.net/public/dsc/IIS_ASPNet46_Net35/IIS_ASPNet46_Net35.zip (this file installs IIS, ASP.NET 4.6, and .NET 3.5/2.0)
 
 __ARM template preparation:__
 - Edit the azuredeploy.parameters.json file and provide appropriate values.

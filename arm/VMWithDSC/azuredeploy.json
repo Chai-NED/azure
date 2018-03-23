@@ -386,7 +386,7 @@
 			},
 			"resources": [
 				{
-					"name": "IISDotNetWebServer",
+					"name": "IIS_ASPNet46_Net35",
 					"type": "extensions",
 					"location": "[resourceGroup().location]",
 					"apiVersion": "2017-03-30",
@@ -394,12 +394,12 @@
 						"[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]"
 					],
 					"tags": {
-						"displayName": "IISDotNetWebServer"
+						"displayName": "IIS_ASPNet46_Net35"
 					},
 					"properties": {
 						"publisher": "Microsoft.Powershell",
 						"type": "DSC",
-						"typeHandlerVersion": "2.26",
+						"typeHandlerVersion": "2.9",
 						"autoUpgradeMinorVersion": true,
 						"settings": {
 							"configuration": {

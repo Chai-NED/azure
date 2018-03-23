@@ -1,4 +1,4 @@
-configuration IISDotNetWebServer
+configuration IIS_ASPNet46_Net35
 {
     node "localhost"
     {
