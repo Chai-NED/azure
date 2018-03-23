@@ -133,6 +133,12 @@
         },
         "inboundNatPool_Protocol": {
             "value": "Tcp"
+        },
+        "diagnosticsStorageAccountName": {
+            "value": ""
+        },
+        "diagnosticsStorageAccountResourceGroup": {
+            "value": ""
         }
     }
 }

@@ -392,17 +392,62 @@
                 "displayName": "Inbound NAT Pool Protocol",
                 "description": "Inbound NAT Pool Protocol"
             }
+        },
+        "diagnosticsStorageAccountName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "displayName": "Diagnostics storage account name",
+                "description": "Diagnostics storage account name"
+            }
+        },
+        "diagnosticsStorageAccountResourceGroup": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "displayName": "Diagnostics storage account resource group",
+                "description": "Diagnostics storage account resource group"
+            }
         }
     },
     "variables": {
-        "vmssAutoScaleSettingName": "[concat(parameters('vmssName'), '_AutoScaleSetting')]",
-        "vmssAutoScaleProfileName": "[concat(parameters('vmssName'), '_AutoScaleProfile')]",
-        "loadBalancerPublicIPAddressName": "[concat(parameters('loadBalancerName'), '_Pip')]",
-        "loadBalancerFrontEndName": "[concat(parameters('loadBalancerName'), '_FrontEnd')]",
-        "loadBalancerBackEndName": "[concat(parameters('loadBalancerName'), '_BackEnd')]",
-        "loadBalancerProbeName": "[concat(parameters('loadBalancerName'), '_HttpProbe')]",
-        "loadBalancerNatPoolName": "[concat(parameters('loadBalancerName'), '_NatPool')]",
-        "vmNamePrefix": "[substring(uniqueString(parameters('vmssName')), 0, 4)]"
+        "vmNameInfix": "[toLower(substring(concat(parameters('vmssName'), uniqueString(resourceGroup().id)), 0, 9))]",
+        "vmssAutoScaleSettingName": "[concat(parameters('vmssName'), '_autoScaleSetting')]",
+        "vmssAutoScaleProfileName": "[concat(parameters('vmssName'), '_autoScaleProfile')]",
+        "vmssNicName": "[concat(parameters('vmssName'),'_nic')]",
+        "vmssIpConfigName": "[concat(parameters('vmssName'),'_ipConfig')]",
+        "lbPublicIPAddressName": "[concat(parameters('loadBalancerName'), '_pip')]",
+        "lbFrontEndName": "[concat(parameters('loadBalancerName'), '_frontEnd')]",
+        "lbBackEndName": "[concat(parameters('loadBalancerName'), '_backEnd')]",
+        "lbProbeName": "[concat(parameters('loadBalancerName'), '_httpProbe')]",
+        "lbNatPoolName": "[concat(parameters('loadBalancerName'), '_natPool')]",
+        "lbRuleName_port80": "[concat(parameters('loadBalancerName'), '_port80')]",
+        "lbRuleName_port443": "[concat(parameters('loadBalancerName'), '_port443')]",
+        "diagnosticsStorageAccountId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('diagnosticsStorageAccountResourceGroup'), '/providers/', 'Microsoft.Storage/storageAccounts/', parameters('diagnosticsStorageAccountName'))]",
+        "diagnosticsMetricsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/', 'Microsoft.Compute/virtualMachineScaleSets/', variables('vmNameInfix'))]",
+        "diagnosticsBlock01": "<WadCfg><DiagnosticMonitorConfiguration overallQuotaInMB=\"16384\" xmlns=\"http://schemas.microsoft.com/ServiceHosting/2010/10/DiagnosticsConfiguration\">",
+        "diagnosticsBlock02": "<Directories scheduledTransferPeriod=\"PT1M\"><IISLogs containerName=\"iislogs\" /><FailedRequestLogs containerName=\"iisfailed\" /></Directories>",
+        "diagnosticsBlock03": "<WindowsEventLog scheduledTransferPeriod=\"PT1M\"><DataSource name=\"Application!*[System[(Level = 1 or Level = 2 or Level = 3)]]\" /><DataSource name=\"Security!*[System[(Level = 1 or Level = 2 or Level = 3)]]\" /><DataSource name=\"System!*[System[(Level = 1 or Level = 2 or Level = 3)]]\" /><DataSource name=\"System!*[System[Provider[@Name='Microsoft Antimalware']]]\" /></WindowsEventLog>",
+        "diagnosticsBlock04": "[concat('<Metrics resourceId=\"', variables('diagnosticsMetricsResourceId'), '\">', '<MetricAggregation scheduledTransferPeriod=\"PT1M\"/><MetricAggregation scheduledTransferPeriod=\"PT1H\"/></Metrics>')]",
+        "diagnosticsBlock05": "<DiagnosticInfrastructureLogs scheduledTransferPeriod=\"PT1M\" scheduledTransferLogLevelFilter=\"Warning\" />",
+        "diagnosticsBlock06": "<PerformanceCounters scheduledTransferPeriod=\"PT1M\"><PerformanceCounterConfiguration counterSpecifier=\"\\Processor(_Total)\\% Processor Time\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU percentage guest OS\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor(_Total)\\% Interrupt Time\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU interrupt time\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor(_Total)\\% Privileged Time\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU privileged time\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor Information(_Total)\\Parking Status\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"CPU parking status\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor(_Total)\\% User Time\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU user time\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor Information(_Total)\\% Processor Performance\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Processor percent perf.\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor Information(_Total)\\Processor Frequency\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Processor frequency\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\System\\Threads\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Threads\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\System\\Processes\" sampleRate=\"PT15S\" unit=\"Count\">",
+        "diagnosticsBlock07": "<annotation displayName=\"Processes\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Thread(_Total)\\Context Switches/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Context switches\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\Committed Bytes\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Memory committed\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\Available Bytes\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Memory available\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\% Committed Bytes In Use\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"Memory percentage\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\Cache Faults/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Cache faults\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\Page Faults/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Page faults\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\Page Reads/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Page reads\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\Pages/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Memory pages\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\Transition Faults/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\">",
+        "diagnosticsBlock08": "<annotation displayName=\"Transition faults\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\Pool Paged Bytes\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Paged pool\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\Pool Nonpaged Bytes\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Non-paged pool\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Process(_Total)\\% Processor Time\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"Process total time\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Process(_Total)\\Page Faults/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Process page faults\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Process(_Total)\\Thread Count\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Process total threads\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Process(_Total)\\Handle Count\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Process total handles\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Process(_Total)\\Private Bytes\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Process function bytes\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Process(_Total)\\Working Set\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Process working set\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Process(_Total)\\Working Set - Private\" sampleRate=\"PT15S\" unit=\"Bytes\">",
+        "diagnosticsBlock09": "<annotation displayName=\"Process function working set\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk(_Total)\\Disk Read Bytes/sec\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"Disk read guest OS\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk(_Total)\\Disk Write Bytes/sec\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"Disk write guest OS\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Web Service(_Total)\\Bytes Total/Sec\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"Web service bytes\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Web Service(_Total)\\ISAPI Extension Requests/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"ISAPI extension requests\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Web Service(_Total)\\Connection Attempts/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Web connection attempts\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Web Service(_Total)\\Current Connections\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Web current connections\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Web Service(_Total)\\Get Requests/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Web get requests\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Web Service(_Total)\\Post Requests/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\">",
+        "diagnosticsBlock10": "<annotation displayName=\"Web post requests\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\TCPv4\\Connections Established\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"TCP connections established\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\TCPv4\\Connection Failures\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"TCP connections failed\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\TCPv4\\Connections Reset\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"TCP connections reset\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\TCPv4\\Segments Sent/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"TCP segments sent\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\TCPv4\\Segments Received/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"TCP segments received\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\TCPv4\\Segments Retransmitted/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"TCP seg. restransmitted\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR Jit(_Global_)\\% Time in Jit\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\".NET CLR time in jit\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR Loading(_Global_)\\% Time Loading\" sampleRate=\"PT15S\" unit=\"Percent\">",
+        "diagnosticsBlock11": "<annotation displayName=\".NET CLR time loading\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR LocksAndThreads(_Global_)\\Current Queue Length\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\".NET CLR queue length\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR LocksAndThreads(_Global_)\\Contention Rate / sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\".NET CLR contention rate\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR LocksAndThreads(_Global_)\\# of current logical Threads\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\".NET CLR logical threads\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR LocksAndThreads(_Global_)\\# of current physical Threads\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\".NET CLR phys. threads\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR Memory(_Global_)\\% Time in GC\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\".NET CLR time in GC\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR Memory(_Global_)\\Allocated Bytes/sec\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\".NET CLR allocated\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR Memory(_Global_)\\Gen 0 heap size\" sampleRate=\"PT15S\" unit=\"Bytes\">",
+        "diagnosticsBlock12": "<annotation displayName=\".NET CLR gen 0 heap size\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR Memory(_Global_)\\Gen 1 heap size\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\".NET CLR gen 1 heap size\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR Memory(_Global_)\\Gen 2 heap size\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\".NET CLR gen 2 heap size\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR Memory(_Global_)\\Large Object Heap size\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\".NET CLR large obj. heap size\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR Memory(_Global_)\\# Bytes in all Heaps\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\".NET CLR heap bytes\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR Networking(_Global_)\\Connections Established\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\".NET CLR connections \"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR Remoting(_Global_)\\Remote Calls/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\".NET CLR remote calls\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR Exceptions(_Global_)\\# of Exceps Thrown / sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\".NET CLR exception rate\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\.NET CLR Interop(_Global_)\\# of marshalling\" sampleRate=\"PT15S\" unit=\"Count\">",
+        "diagnosticsBlock13": "<annotation displayName=\".NET CLR interop marsh.\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET\\Applications Running\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"ASP.NET running apps\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET\\Request Wait Time\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"ASP.NET wait time\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET\\Request Execution Time\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"ASP.NET execution time\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET\\Requests Queued\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"ASP.NET req. queued\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET\\Requests Rejected\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"ASP.NET req. rejected\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET Applications(__Total__)\\Requests/Sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"ASP.NET requests\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET Applications(__Total__)\\Errors Total/Sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"ASP.NET errors\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET Applications(__Total__)\\Requests In Application Queue\" sampleRate=\"PT15S\" unit=\"Count\">",
+        "diagnosticsBlock14": "<annotation displayName=\"ASP.NET req. in app queues\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET Applications(__Total__)\\Pipeline Instance Count\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"ASP.NET pipeline instances\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET Applications(__Total__)\\Requests Executing\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"ASP.NET req. executing\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQLServer:Buffer Manager\\Page life expectancy\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL buffer page life\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQLServer:Databases\\Transactions/sec\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL transaction rate\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQLServer:Databases\\Data file(s) size (KB)\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL total data file KB\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQLServer:Databases\\Log file(s) size (KB)\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL total log file KB\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQLServer:Databases\\Log file(s) used size (KB)\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL total log file used KB\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQLServer:General Statistics\\User Connections\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\">",
+        "diagnosticsBlock15": "<annotation displayName=\"SQL user connections\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQLServer:Memory Manager\\Total Server Memory (KB)\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL total memory KB\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQLServer:SQL Statistics\\Batch Requests/sec\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL batch request rate\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQLServer:SQL Statistics\\SQL Attention Rate\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL attention rate\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQLServer:SQL Statistics\\SQL Re-Compilations/Sec\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL recompilation rate\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQLServer: SQL errors\\Errors/sec\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL error rate\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQL Server: Workload group stats\\Active requests\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL active requests\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQL Server: Workload group stats\\Blocked tasks\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL blocked tasks\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQL Server: Workload group stats\\CPU usage %\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\">",
+        "diagnosticsBlock16": "<annotation displayName=\"SQL CPU percentage\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQL Server: Workload group stats\\Queued requests\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL queued requests\"/></PerformanceCounterConfiguration></PerformanceCounters>",
+        "diagnosticsBlock17": "</DiagnosticMonitorConfiguration></WadCfg>",
+        "diagnosticsBlock": "[concat(variables('diagnosticsBlock01'), variables('diagnosticsBlock02'), variables('diagnosticsBlock03'), variables('diagnosticsBlock04'), variables('diagnosticsBlock05'), variables('diagnosticsBlock06'), variables('diagnosticsBlock07'), variables('diagnosticsBlock08'), variables('diagnosticsBlock09'), variables('diagnosticsBlock10'), variables('diagnosticsBlock11'), variables('diagnosticsBlock12'), variables('diagnosticsBlock13'), variables('diagnosticsBlock14'), variables('diagnosticsBlock15'), variables('diagnosticsBlock16'), variables('diagnosticsBlock17'))]",
+        "computeApiVersion": "2017-03-30",
+        "networkApiVersion": "2018-01-01",
+        "storageApiVersion": "2015-06-15",
+        "insightsApiVersion": "2015-04-01",
+        "diagnosticsApiVersion": "2017-05-01-preview"
     },
     "resources": [
         {
@@ -413,7 +458,7 @@
                 "capacity": "[parameters('vmInstanceCount')]"
             },
             "name": "[parameters('vmssName')]",
-            "apiVersion": "2017-03-30",
+            "apiVersion": "[variables('computeApiVersion')]",
             "location": "[parameters('location')]",
             "properties": {
                 "singlePlacementGroup": true,
@@ -422,7 +467,7 @@
                 },
                 "virtualMachineProfile": {
                     "osProfile": {
-                        "computerNamePrefix": "[variables('vmNamePrefix')]",
+                        "computerNamePrefix": "[variables('vmNameInfix')]",
                         "adminUsername": "[parameters('vmAdminUserName')]",
                         "adminPassword": "[parameters('vmAdminPassword')]",
                         "windowsConfiguration": {
@@ -450,7 +495,7 @@
                     "networkProfile": {
                         "networkInterfaceConfigurations": [
                             {
-                                "name": "[concat(parameters('vmssName'),'_Nic')]",
+                                "name": "[variables('vmssNicName')]",
                                 "properties": {
                                     "primary": true,
                                     "enableAcceleratedNetworking": "[parameters('vmEnableAcceleratedNetworking')]",
@@ -459,7 +504,7 @@
                                     },
                                     "ipConfigurations": [
                                         {
-                                            "name": "[concat(parameters('vmssName'),'_IpConfig')]",
+                                            "name": "[variables('vmssIpConfigName')]",
                                             "properties": {
                                                 "subnet": {
                                                     "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
@@ -467,12 +512,12 @@
                                                 "privateIPAddressVersion": "IPv4",
                                                 "loadBalancerBackendAddressPools": [
                                                     {
-                                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', variables('loadBalancerBackendName'))]"
+                                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', variables('lbBackEndName'))]"
                                                     }
                                                 ],
                                                 "loadBalancerInboundNatPools": [
                                                     {
-                                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/inboundNatPools/', variables('loadBalancerNatPoolName'))]"
+                                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/inboundNatPools/', variables('lbNatPoolName'))]"
                                                     }
                                                 ],
                                                 "networkSecurityGroup": {
@@ -481,6 +526,28 @@
                                             }
                                         }
                                     ]
+                                }
+                            }
+                        ]
+                    },
+                    "extensionProfile": {
+                        "extensions": [
+                            {
+                                "name": "Microsoft.Insights.VMDiagnosticsSettings",
+                                "properties": {
+                                    "publisher": "Microsoft.Azure.Diagnostics",
+                                    "type": "IaaSDiagnostics",
+                                    "typeHandlerVersion": "1.5",
+                                    "autoUpgradeMinorVersion": true,
+                                    "settings": {
+                                        "xmlCfg": "[base64(variables('diagnosticsBlock'))]",
+                                        "storageAccount": "[parameters('diagnosticsStorageAccountName')]"
+                                    },
+                                    "protectedSettings": {
+                                        "storageAccountName": "[parameters('diagnosticsStorageAccountName')]",
+                                        "storageAccountKey": "[listkeys(variables('diagnosticsStorageAccountId'), variables('storageApiVersion')).key1]",
+                                        "storageAccountEndPoint": "https://core.windows.net"
+                                    }
                                 }
                             }
                         ]
@@ -495,9 +562,9 @@
             ]
         },
         {
-            "type": "microsoft.insights/autoscalesettings",
+            "type": "Microsoft.Insights/autoscaleSettings",
             "name": "[variables('vmssAutoScaleSettingName')]",
-            "apiVersion": "2015-04-01",
+            "apiVersion": "[variables('insightsApiVersion')]",
             "location": "[parameters('location')]",
             "tags": {},
             "properties": {
@@ -566,36 +633,33 @@
                 "name": "[parameters('loadBalancerSkuName')]"
             },
             "location": "[parameters('location')]",
-            "apiVersion": "2017-10-01",
-            "dependsOn": [
-                "[concat('Microsoft.Network/publicIPAddresses/', variables('loadBalancerPublicIPAddressName'))]"
-            ],
+            "apiVersion": "[variables('networkApiVersion')]",
             "properties": {
                 "frontendIPConfigurations": [
                     {
-                        "name": "[variables('loadBalancerFrontEndName')]",
+                        "name": "[variables('lbFrontEndName')]",
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('loadBalancerPublicIPAddressName'))]"
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('lbPublicIPAddressName'))]"
                             }
                         }
                     }
                 ],
                 "backendAddressPools": [
                     {
-                        "name": "[variables('loadBalancerBackendName')]"
+                        "name": "[variables('lbBackEndName')]"
                     }
                 ],
                 "loadBalancingRules": [
                     {
-                        "name": "[concat(parameters('loadBalancerName'), '_port80')]",
+                        "name": "[variables('lbRuleName_port80')]",
                         "properties": {
                             "frontendIPConfiguration": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIPConfigurations/', variables('loadBalancerFrontEndName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIPConfigurations/', variables('lbFrontEndName'))]"
                             },
                             "backendAddressPool": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', variables('loadBalancerBackendName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', variables('lbBackEndName'))]"
                             },
                             "protocol": "[parameters('loadBalancerRule_Protocol')]",
                             "frontendPort": 80,
@@ -603,18 +667,18 @@
                             "enableFloatingIP": false,
                             "idleTimeoutInMinutes": 4,
                             "probe": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/', variables('loadBalancerProbeName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/', variables('lbProbeName'))]"
                             }
                         }
                     },
                     {
-                        "name": "[concat(parameters('loadBalancerName'), '_port443')]",
+                        "name": "[variables('lbRuleName_port443')]",
                         "properties": {
                             "frontendIPConfiguration": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIPConfigurations/', variables('loadBalancerFrontEndName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIPConfigurations/', variables('lbFrontEndName'))]"
                             },
                             "backendAddressPool": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', variables('loadBalancerBackendName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', variables('lbBackEndName'))]"
                             },
                             "protocol": "[parameters('loadBalancerRule_Protocol')]",
                             "frontendPort": 443,
@@ -622,14 +686,14 @@
                             "enableFloatingIP": false,
                             "idleTimeoutInMinutes": 4,
                             "probe": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/', variables('loadBalancerProbeName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/', variables('lbProbeName'))]"
                             }
                         }
                     }
                 ],
                 "probes": [
                     {
-                        "name": "[variables('loadBalancerProbeName')]",
+                        "name": "[variables('lbProbeName')]",
                         "properties": {
                             "protocol": "Tcp",
                             "port": 80,
@@ -640,10 +704,10 @@
                 ],
                 "inboundNatPools": [
                     {
-                        "name": "[variables('loadBalancerNatPoolName')]",
+                        "name": "[variables('lbNatPoolName')]",
                         "properties": {
                             "frontendIPConfiguration": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIPConfigurations/', variables('loadBalancerFrontEndName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIPConfigurations/', variables('lbFrontEndName'))]"
                             },
                             "protocol": "[parameters('inboundNatPool_Protocol')]",
                             "frontendPortRangeStart": "[parameters('inboundNatPool_PortRangeFrontEnd_Start')]",
@@ -652,15 +716,60 @@
                         }
                     }
                 ]
-            }
+            },
+            "resources": [
+                {
+                    "type": "providers/diagnosticSettings",
+                    "name": "[concat('Microsoft.Insights/', parameters('loadBalancerName'))]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName'))]"
+                    ],
+                    "apiVersion": "[variables('diagnosticsApiVersion')]",
+                    "properties": {
+                        "name": "[concat(parameters('loadBalancerName'), '_diagnostics_logs')]",
+                        "storageAccountId": "[variables('diagnosticsStorageAccountId')]",
+                        "logs": [
+                            {
+                                "category": "LoadBalancerAlertEvent",
+                                "enabled": true,
+                                "retentionPolicy": {
+                                    "days": 0,
+                                    "enabled": false
+                                }
+                            },
+                            {
+                                "category": "LoadBalancerProbeHealthStatus",
+                                "enabled": true,
+                                "retentionPolicy": {
+                                    "days": 0,
+                                    "enabled": false
+                                }
+                            }
+                        ],
+                        "metrics": [
+                            {
+                                "category": "AllMetrics",
+                                "enabled": true,
+                                "retentionPolicy": {
+                                    "days": 0,
+                                    "enabled": false
+                                }
+                            }
+                        ]
+                    }
+                }
+            ],
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('lbPublicIPAddressName'))]"
+            ]
         },
         {
             "type": "Microsoft.Network/publicIPAddresses",
             "sku": {
                 "name": "[parameters('loadBalancerPublicIPAddressSkuName')]"
             },
-            "name": "[variables('loadBalancerPublicIPAddressName')]",
-            "apiVersion": "2017-10-01",
+            "name": "[variables('lbPublicIPAddressName')]",
+            "apiVersion": "[variables('networkApiVersion')]",
             "location": "[parameters('location')]",
             "properties": {
                 "publicIPAddressVersion": "IPv4",
@@ -671,12 +780,46 @@
                     "fqdn": "concat([toLower(parameters('vmssFqdnLabel'))], '.', [parameters('location')], '.cloudapp.azure.com')"
                 }
             },
+            "resources": [
+                {
+                    "type": "providers/diagnosticSettings",
+                    "name": "[concat('Microsoft.Insights/', variables('lbPublicIPAddressName'))]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/publicIPAddresses', variables('lbPublicIPAddressName'))]"
+                    ],
+                    "apiVersion": "[variables('diagnosticsApiVersion')]",
+                    "properties": {
+                        "name": "[concat(variables('lbPublicIPAddressName'), '_diagnostics_logs')]",
+                        "storageAccountId": "[variables('diagnosticsStorageAccountId')]",
+                        "logs": [
+                            {
+                                "category": "DDoSProtectionNotifications",
+                                "enabled": true,
+                                "retentionPolicy": {
+                                    "days": 0,
+                                    "enabled": false
+                                }
+                            }
+                        ],
+                        "metrics": [
+                            {
+                                "category": "AllMetrics",
+                                "enabled": true,
+                                "retentionPolicy": {
+                                    "days": 0,
+                                    "enabled": false
+                                }
+                            }
+                        ]
+                    }
+                }
+            ],
             "dependsOn": []
         },
         {
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[parameters('vnetName')]",
-            "apiVersion": "2017-10-01",
+            "apiVersion": "[variables('networkApiVersion')]",
             "location": "[parameters('location')]",
             "properties": {
                 "addressSpace": {
@@ -700,26 +843,10 @@
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[parameters('nsgName')]",
-            "apiVersion": "2017-06-01",
+            "apiVersion": "[variables('networkApiVersion')]",
             "location": "[parameters('location')]",
-            "scale": null,
             "properties": {
                 "securityRules": [
-                    {
-                        "name": "NATPoolRDP",
-                        "properties": {
-                            "protocol": "*",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "[concat(parameters('inboundNatPool_PortRangeFrontEnd_Start'), '-', parameters('inboundNatPool_PortRangeFrontEnd_End'))]",
-                            "sourceAddressPrefix": "[parameters('nsgRule_Source_AdminAccess')]",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 100,
-                            "direction": "Inbound",
-                            "sourceAddressPrefixes": [],
-                            "destinationAddressPrefixes": []
-                        }
-                    },
                     {
                         "name": "port80",
                         "properties": {
@@ -729,7 +856,7 @@
                             "sourceAddressPrefix": "*",
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
-                            "priority": 110,
+                            "priority": 100,
                             "direction": "Inbound",
                             "sourceAddressPrefixes": [],
                             "destinationAddressPrefixes": []
@@ -744,7 +871,22 @@
                             "sourceAddressPrefix": "*",
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
-                            "priority": 120,
+                            "priority": 110,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "[parameters('nsgRule_Name_AdminAccess')]",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "[parameters('nsgRule_Source_AdminAccess')]",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1000,
                             "direction": "Inbound",
                             "sourceAddressPrefixes": [],
                             "destinationAddressPrefixes": []
@@ -850,6 +992,38 @@
                     }
                 ]
             },
+            "resources": [
+                {
+                    "type": "providers/diagnosticSettings",
+                    "name": "[concat('Microsoft.Insights/', parameters('nsgName'))]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+                    ],
+                    "apiVersion": "[variables('diagnosticsApiVersion')]",
+                    "properties": {
+                        "name": "[concat(parameters('nsgName'), '_diagnostics_logs')]",
+                        "storageAccountId": "[variables('diagnosticsStorageAccountId')]",
+                        "logs": [
+                            {
+                                "category": "NetworkSecurityGroupEvent",
+                                "enabled": true,
+                                "retentionPolicy": {
+                                    "days": 0,
+                                    "enabled": false
+                                }
+                            },
+                            {
+                                "category": "NetworkSecurityGroupRuleCounter",
+                                "enabled": true,
+                                "retentionPolicy": {
+                                    "days": 0,
+                                    "enabled": false
+                                }
+                            }
+                        ]
+                    }
+                }
+            ],
             "dependsOn": []
         }
     ]
