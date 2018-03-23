@@ -384,6 +384,41 @@
                 "displayName": "Diagnostics storage account resource group",
                 "description": "Diagnostics storage account resource group"
             }
+        },
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Base URL for DSC resources",
+                "description": "Base URL for DSC resources. This should not include the folder that holds DSC zip files and other resources."
+            }
+        },
+        "dscFolder": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Folder for DSC resources",
+                "description": "Folder under Base URL that contains the DSC resources to be used with this VM."
+            }
+        },
+        "dscFileName": {
+            "type": "string",
+            "metadata": {
+                "displayName": "DSC .zip file",
+                "description": "Zip file name that contains the DSC module file and script"
+            }
+        },
+        "dscModule": {
+            "type": "string",
+            "metadata": {
+                "displayName": "DSC module file",
+                "description": "DSC .ps1 file contained in the DSC .zip file"
+            }
+        },
+        "dscFunction": {
+            "type": "string",
+            "metadata": {
+                "displayName": "DSC function",
+                "description": "Name of the DSC function to call inside the DSC module file"
+            }
         }
     },
     "variables": {
@@ -523,6 +558,46 @@
                                         "storageAccountName": "[parameters('diagnosticsStorageAccountName')]",
                                         "storageAccountKey": "[listkeys(variables('diagnosticsStorageAccountId'), variables('storageApiVersion')).key1]",
                                         "storageAccountEndPoint": "https://core.windows.net"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "Microsoft.IaaSAntimalware",
+                                "properties": {
+                                    "publisher": "Microsoft.Azure.Security",
+                                    "type": "IaaSAntimalware",
+                                    "typeHandlerVersion": "1.3",
+                                    "autoUpgradeMinorVersion": true,
+                                    "settings": {
+                                        "AntimalwareEnabled": true,
+                                        "RealtimeProtectionEnabled": "true",
+                                        "ScheduledScanSettings": {
+                                            "isEnabled": "true",
+                                            "day": "7",
+                                            "time": "120",
+                                            "scanType": "Quick"
+                                        },
+                                        "Exclusions": {
+                                            "Extensions": "",
+                                            "Paths": "",
+                                            "Processes": ""
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "name": "Microsoft.Powershell.DSC",
+                                "properties": {
+                                    "publisher": "Microsoft.Powershell",
+                                    "type": "DSC",
+                                    "typeHandlerVersion": "2.9",
+                                    "autoUpgradeMinorVersion": true,
+                                    "settings": {
+                                        "configuration": {
+                                            "url": "[concat(parameters('_artifactsLocation'), '/', parameters('dscFolder'), '/', parameters('dscFileName'))]",
+                                            "script": "[parameters('dscModule')]",
+                                            "function": "[parameters('dscFunction')]"
+                                        }
                                     }
                                 }
                             }

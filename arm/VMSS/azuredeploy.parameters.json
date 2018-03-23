@@ -130,6 +130,21 @@
         },
         "diagnosticsStorageAccountResourceGroup": {
             "value": ""
+        },
+        "_artifactsLocation": {
+            "value": "https://pz17sa.blob.core.windows.net/public/dsc"
+        },
+        "dscFolder": {
+            "value": "IIS_ASPNet46"
+        },
+        "dscFileName" : {
+            "value": "IIS_ASPNet46.zip"
+        },
+        "dscModule" : {
+            "value": "IIS_ASPNet46.ps1"
+        },
+        "dscFunction" : {
+            "value": "IIS_ASPNet46"
         }
     }
 }
