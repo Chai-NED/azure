@@ -80,23 +80,14 @@
         "vmOsDiskSizeInGB": {
             "value": 129
         },
+        "vNetResourceGroupName": {
+            "value": "pzvmss"
+        },
         "vNetName": {
             "value": "vmss_vnet"
         },
-        "vNetAddressSpace": {
-            "value": "10.0.0.0/16"
-        },
         "subnetName": {
             "value": "subnet1"
-        },
-        "subnetAddressSpace": {
-            "value": "10.0.1.0/24"
-        },
-        "vnetEnableDdosProtection": {
-            "value": false
-        },
-        "vnetEnableVmProtection": {
-            "value": false
         },
         "nsgName": {
             "value": "vmss_nsg"

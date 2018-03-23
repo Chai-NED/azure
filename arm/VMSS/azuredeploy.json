@@ -166,24 +166,24 @@
             "type": "bool",
             "defaultValue": true,
             "metadata": {
-                "displayName": "",
-                "description": ""
+                "displayName": "Provision VM Agent",
+                "description": "Provision VM Agent"
             }
         },
         "vmEnableAutomaticUpdates": {
             "type": "bool",
             "defaultValue": true,
             "metadata": {
-                "displayName": "",
-                "description": ""
+                "displayName": "Enable automatic VM updates",
+                "description": "Enable automatic VM updates"
             }
         },
         "vmEnableAcceleratedNetworking": {
             "type": "bool",
             "defaultValue": true,
             "metadata": {
-                "displayName": "",
-                "description": ""
+                "displayName": "Enable Accelerated VM Networking",
+                "description": "Whether to enable VM accelerated networking. Not all VM sizes support accelerated networking."
             }
         },
         "vmOsDiskStorageType": {
@@ -221,52 +221,28 @@
                 "description": "OS disk size in GB"
             }
         },
+        "vnetResourceGroupName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "displayName": "Existing VNet Resource Group Name",
+                "description": "Existing VNet Resource Group Name"
+            }
+        },
         "vnetName": {
             "type": "string",
             "defaultValue": "",
             "metadata": {
-                "displayName": "",
-                "description": ""
-            }
-        },
-        "vnetAddressSpace": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "displayName": "",
-                "description": ""
+                "displayName": "Existing VNet Name to deploy VMSS into",
+                "description": "Existing VNet Name to deploy VMSS into"
             }
         },
         "subnetName": {
             "type": "string",
             "defaultValue": "",
             "metadata": {
-                "displayName": "",
-                "description": ""
-            }
-        },
-        "subnetAddressSpace": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "displayName": "",
-                "description": ""
-            }
-        },
-        "vnetEnableDdosProtection": {
-            "type": "bool",
-            "defaultValue": false,
-            "metadata": {
-                "displayName": "",
-                "description": ""
-            }
-        },
-        "vnetEnableVmProtection": {
-            "type": "bool",
-            "defaultValue": false,
-            "metadata": {
-                "displayName": "",
-                "description": ""
+                "displayName": "Existing Subnet Name to deploy VMSS into",
+                "description": "Existing Subnet Name to deploy VMSS into"
             }
         },
         "nsgName": {
@@ -507,7 +483,7 @@
                                             "name": "[variables('vmssIpConfigName')]",
                                             "properties": {
                                                 "subnet": {
-                                                    "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
+                                                    "id": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
                                                 },
                                                 "privateIPAddressVersion": "IPv4",
                                                 "loadBalancerBackendAddressPools": [
@@ -556,7 +532,6 @@
                 "overprovision": "[parameters('vmssOverprovision')]"
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks/', parameters('vnetName'))]",
                 "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
             ]
@@ -815,30 +790,6 @@
                 }
             ],
             "dependsOn": []
-        },
-        {
-            "type": "Microsoft.Network/virtualNetworks",
-            "name": "[parameters('vnetName')]",
-            "apiVersion": "[variables('networkApiVersion')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[parameters('vnetAddressSpace')]"
-                    ]
-                },
-                "subnets": [
-                    {
-                        "name": "[parameters('subnetName')]",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnetAddressSpace')]"
-                        }
-                    }
-                ],
-                "virtualNetworkPeerings": [],
-                "enableDdosProtection": "[parameters('vnetEnableDdosProtection')]",
-                "enableVmProtection": "[parameters('vnetEnableVmProtection')]"
-            }
         },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
