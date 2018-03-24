@@ -12,13 +12,13 @@
             "value": "pzvmss"
         },
         "vmssAutoScaleMinimum": {
-            "value": 1
+            "value": 2
         },
         "vmssAutoScaleMaximum": {
             "value": 10
         },
         "vmssAutoScaleDefault": {
-            "value": 1
+            "value": 2
         },
         "vmssAutoScaleTriggerCpuPctGreaterThan": {
             "value": 75
@@ -54,7 +54,7 @@
             "value": "Standard_DS3_v2"
         },
         "vmInstanceCount": {
-            "value": 1
+            "value": 2
         },
         "vmAdminUserName": {
             "value": "vmAdmin"
@@ -148,6 +148,30 @@
         },
         "scriptFileName": {
             "value": "vmss.ps1"
+        },
+        "octopusServerUrl": {
+            "value": "http://octopus"
+        },
+        "octopusApiKey": {
+            "value": "OCTOPUSAPIKEY"
+        },
+        "octopusEnvironments": {
+            "value": "Azure"
+        },
+        "octopusRoles": {
+            "value": "AppServerXYZ"
+        },
+        "octopusCommunicationMode": {
+            "value": "Poll"
+        },
+        "octopusListenOnPort": {
+            "value": 10933
+        },
+        "octopusPublicHostNameConfiguration": {
+            "value": "ComputerName"
+        },
+        "octopusCustomPublicHostName": {
+            "value": ""
         }
     }
 }

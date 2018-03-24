@@ -425,6 +425,75 @@
                 "displayName": "Script file",
                 "description": "Script file name"
             }
+        },
+        "octopusServerUrl": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Octopus Server URL",
+                "description": "Octopus Server URL"
+            }
+        },
+        "octopusApiKey": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Octopus API Key",
+                "description": "Octopus API Key"
+            }
+        },
+        "octopusEnvironments": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Octopus Environments",
+                "description": "Octopus Environments (comma-delimited)"
+            }
+        },
+        "octopusRoles": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Octopus Roles",
+                "description": "Octopus Roles (comma-delimited)"
+            }
+        },
+        "octopusCommunicationMode": {
+            "type": "string",
+            "allowedValues": [
+                "Listen",
+                "Poll"
+            ],
+            "metadata": {
+                "displayName": "Octopus Communication Mode",
+                "description": "Octopus Communication Mode"
+            }
+        },
+        "octopusListenOnPort": {
+            "type": "int",
+            "defaultValue": 10933,
+            "minValue": 0,
+            "maxValue": 65535,
+            "metadata": {
+                "displayName": "Octopus Port",
+                "description": "Octopus Port to listen on"
+            }
+        },
+        "octopusPublicHostNameConfiguration": {
+            "type": "string",
+            "allowedValues": [
+                "PublicIP",
+                "FQDN",
+                "ComputerName",
+                "Custom"
+            ],
+            "metadata": {
+                "displayName": "Octopus Public Hostname Configuration",
+                "description": "Octopus Public Hostname Configuration"
+            }
+        },
+        "octopusCustomPublicHostName": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Octopus Custom Public Hostname",
+                "description": "Octopus Custom Public Hostname when Public Hostname Configuration of Custom is selected"
+            }
         }
     },
     "variables": {
@@ -609,6 +678,27 @@
                                 }
                             },
                             {
+                                "name": "OctopusDeployWindowsTentacle",
+                                "properties": {
+                                    "publisher": "OctopusDeploy.Tentacle",
+                                    "type": "OctopusDeployWindowsTentacle",
+                                    "typeHandlerVersion": "2.0",
+                                    "autoUpgradeMinorVersion": true,
+                                    "settings": {
+                                        "OctopusServerUrl": "[parameters('octopusServerUrl')]",
+                                        "Environments": "[split(parameters('octopusEnvironments'), ',')]",
+                                        "Roles": "[split(parameters('octopusRoles'), ',')]",
+                                        "CommunicationMode": "[parameters('octopusCommunicationMode')]",
+                                        "Port": "[parameters('octopusListenOnPort')]",
+                                        "PublicHostNameConfiguration": "[parameters('octopusPublicHostNameConfiguration')]",
+                                        "CustomPublicHostName": "[parameters('octopusCustomPublicHostName')]"
+                                    },
+                                    "protectedSettings": {
+                                        "ApiKey": "[parameters('octopusApiKey')]"
+                                    }
+                                }
+                            },
+                            {
                                 "name": "customScript",
                                 "properties": {
                                     "publisher": "Microsoft.Compute",
@@ -624,7 +714,7 @@
                                     },
                                     "type": "CustomScriptExtension"
                                 }
-                            }                            
+                            }
                         ]
                     }
                 },
