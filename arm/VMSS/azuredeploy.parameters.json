@@ -12,13 +12,13 @@
             "value": "pzvmss"
         },
         "vmssAutoScaleMinimum": {
-            "value": 2
+            "value": 1
         },
         "vmssAutoScaleMaximum": {
             "value": 10
         },
         "vmssAutoScaleDefault": {
-            "value": 2
+            "value": 1
         },
         "vmssAutoScaleTriggerCpuPctGreaterThan": {
             "value": 75
@@ -54,7 +54,7 @@
             "value": "Standard_DS3_v2"
         },
         "vmInstanceCount": {
-            "value": 4
+            "value": 1
         },
         "vmAdminUserName": {
             "value": "vmAdmin"
@@ -87,7 +87,7 @@
             "value": "vmss_vnet"
         },
         "subnetName": {
-            "value": "subnet1"
+            "value": "default"
         },
         "nsgName": {
             "value": "vmss_nsg"
@@ -97,9 +97,6 @@
         },
         "nsgRule_Source_AdminAccess": {
             "value": ""
-        },
-        "loadBalancerName": {
-            "value": "vmss_lb"
         },
         "loadBalancerSkuName": {
             "value": "Basic"
@@ -132,19 +129,25 @@
             "value": ""
         },
         "_artifactsLocation": {
-            "value": "https://pz17sa.blob.core.windows.net/public/dsc"
+            "value": "https://pz17sa.blob.core.windows.net/public"
         },
         "dscFolder": {
-            "value": "IIS_ASPNet46"
+            "value": "dsc/IIS_ASPNet46"
         },
-        "dscFileName" : {
+        "dscFileName": {
             "value": "IIS_ASPNet46.zip"
         },
-        "dscModule" : {
+        "dscModule": {
             "value": "IIS_ASPNet46.ps1"
         },
-        "dscFunction" : {
+        "dscFunction": {
             "value": "IIS_ASPNet46"
+        },
+        "scriptFolder": {
+            "value": "scripts/vmss"
+        },
+        "scriptFileName": {
+            "value": "vmss.ps1"
         }
     }
 }

@@ -269,14 +269,6 @@
                 "description": "NSG Rule Source Range for Admin Access"
             }
         },
-        "loadBalancerName": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "displayName": "Load balancer Name",
-                "description": "Load balancer Name"
-            }
-        },
         "loadBalancerSkuName": {
             "type": "string",
             "allowedValues": [
@@ -396,7 +388,7 @@
             "type": "string",
             "metadata": {
                 "displayName": "Folder for DSC resources",
-                "description": "Folder under Base URL that contains the DSC resources to be used with this VM."
+                "description": "Folder under Base URL that contains the DSC resources to be used with VMs in this VMSS."
             }
         },
         "dscFileName": {
@@ -419,6 +411,20 @@
                 "displayName": "DSC function",
                 "description": "Name of the DSC function to call inside the DSC module file"
             }
+        },
+        "scriptFolder": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Folder for Script resources",
+                "description": "Folder under Base URL that contains the Script resources to be used with VMs in this VMSS. Do not leave this path blank, or remove it from script file URL and execution path below."
+            }
+        },
+        "scriptFileName": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Script file",
+                "description": "Script file name"
+            }
         }
     },
     "variables": {
@@ -427,13 +433,14 @@
         "vmssAutoScaleProfileName": "[concat(parameters('vmssName'), '_autoScaleProfile')]",
         "vmssNicName": "[concat(parameters('vmssName'),'_nic')]",
         "vmssIpConfigName": "[concat(parameters('vmssName'),'_ipConfig')]",
-        "lbPublicIPAddressName": "[concat(parameters('loadBalancerName'), '_pip')]",
-        "lbFrontEndName": "[concat(parameters('loadBalancerName'), '_frontEnd')]",
-        "lbBackEndName": "[concat(parameters('loadBalancerName'), '_backEnd')]",
-        "lbProbeName": "[concat(parameters('loadBalancerName'), '_httpProbe')]",
-        "lbNatPoolName": "[concat(parameters('loadBalancerName'), '_natPool')]",
-        "lbRuleName_port80": "[concat(parameters('loadBalancerName'), '_port80')]",
-        "lbRuleName_port443": "[concat(parameters('loadBalancerName'), '_port443')]",
+        "lbName": "[concat(parameters('vmssName'), '_lb')]",
+        "lbPublicIPAddressName": "[concat(variables('lbName'), '_pip')]",
+        "lbFrontEndName": "[concat(variables('lbName'), '_frontEnd')]",
+        "lbBackEndName": "[concat(variables('lbName'), '_backEnd')]",
+        "lbProbeName": "[concat(variables('lbName'), '_httpProbe')]",
+        "lbNatPoolName": "[concat(variables('lbName'), '_natPool')]",
+        "lbRuleName_port80": "[concat(variables('lbName'), '_port80')]",
+        "lbRuleName_port443": "[concat(variables('lbName'), '_port443')]",
         "diagnosticsStorageAccountId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('diagnosticsStorageAccountResourceGroup'), '/providers/', 'Microsoft.Storage/storageAccounts/', parameters('diagnosticsStorageAccountName'))]",
         "diagnosticsMetricsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/', 'Microsoft.Compute/virtualMachineScaleSets/', variables('vmNameInfix'))]",
         "diagnosticsBlock01": "<WadCfg><DiagnosticMonitorConfiguration overallQuotaInMB=\"16384\" xmlns=\"http://schemas.microsoft.com/ServiceHosting/2010/10/DiagnosticsConfiguration\">",
@@ -523,12 +530,12 @@
                                                 "privateIPAddressVersion": "IPv4",
                                                 "loadBalancerBackendAddressPools": [
                                                     {
-                                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', variables('lbBackEndName'))]"
+                                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/backendAddressPools/', variables('lbBackEndName'))]"
                                                     }
                                                 ],
                                                 "loadBalancerInboundNatPools": [
                                                     {
-                                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/inboundNatPools/', variables('lbNatPoolName'))]"
+                                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/inboundNatPools/', variables('lbNatPoolName'))]"
                                                     }
                                                 ],
                                                 "networkSecurityGroup": {
@@ -600,14 +607,31 @@
                                         }
                                     }
                                 }
-                            }
+                            },
+                            {
+                                "name": "customScript",
+                                "properties": {
+                                    "publisher": "Microsoft.Compute",
+                                    "settings": {
+                                        "fileUris": [
+                                            "[concat(parameters('_artifactsLocation'), '/', parameters('scriptFolder'), '/', parameters('scriptFileName'))]"
+                                        ]
+                                    },
+                                    "typeHandlerVersion": "1.9",
+                                    "autoUpgradeMinorVersion": true,
+                                    "protectedSettings": {
+                                        "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', parameters('scriptFolder'), '/', parameters('scriptFileName'))]"
+                                    },
+                                    "type": "CustomScriptExtension"
+                                }
+                            }                            
                         ]
                     }
                 },
                 "overprovision": "[parameters('vmssOverprovision')]"
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName'))]",
+                "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
             ]
         },
@@ -678,7 +702,7 @@
         },
         {
             "type": "Microsoft.Network/loadBalancers",
-            "name": "[parameters('loadBalancerName')]",
+            "name": "[variables('lbName')]",
             "sku": {
                 "name": "[parameters('loadBalancerSkuName')]"
             },
@@ -706,10 +730,10 @@
                         "name": "[variables('lbRuleName_port80')]",
                         "properties": {
                             "frontendIPConfiguration": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIPConfigurations/', variables('lbFrontEndName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/frontendIPConfigurations/', variables('lbFrontEndName'))]"
                             },
                             "backendAddressPool": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', variables('lbBackEndName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/backendAddressPools/', variables('lbBackEndName'))]"
                             },
                             "protocol": "[parameters('loadBalancerRule_Protocol')]",
                             "frontendPort": 80,
@@ -717,7 +741,7 @@
                             "enableFloatingIP": false,
                             "idleTimeoutInMinutes": 4,
                             "probe": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/', variables('lbProbeName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/probes/', variables('lbProbeName'))]"
                             }
                         }
                     },
@@ -725,10 +749,10 @@
                         "name": "[variables('lbRuleName_port443')]",
                         "properties": {
                             "frontendIPConfiguration": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIPConfigurations/', variables('lbFrontEndName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/frontendIPConfigurations/', variables('lbFrontEndName'))]"
                             },
                             "backendAddressPool": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', variables('lbBackEndName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/backendAddressPools/', variables('lbBackEndName'))]"
                             },
                             "protocol": "[parameters('loadBalancerRule_Protocol')]",
                             "frontendPort": 443,
@@ -736,7 +760,7 @@
                             "enableFloatingIP": false,
                             "idleTimeoutInMinutes": 4,
                             "probe": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/', variables('lbProbeName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/probes/', variables('lbProbeName'))]"
                             }
                         }
                     }
@@ -757,7 +781,7 @@
                         "name": "[variables('lbNatPoolName')]",
                         "properties": {
                             "frontendIPConfiguration": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIPConfigurations/', variables('lbFrontEndName'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/frontendIPConfigurations/', variables('lbFrontEndName'))]"
                             },
                             "protocol": "[parameters('inboundNatPool_Protocol')]",
                             "frontendPortRangeStart": "[parameters('inboundNatPool_PortRangeFrontEnd_Start')]",
@@ -770,13 +794,13 @@
             "resources": [
                 {
                     "type": "providers/diagnosticSettings",
-                    "name": "[concat('Microsoft.Insights/', parameters('loadBalancerName'))]",
+                    "name": "[concat('Microsoft.Insights/', variables('lbName'))]",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName'))]"
+                        "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]"
                     ],
                     "apiVersion": "[variables('diagnosticsApiVersion')]",
                     "properties": {
-                        "name": "[concat(parameters('loadBalancerName'), '_diagnostics_logs')]",
+                        "name": "[concat(variables('lbName'), '_diagnostics_logs')]",
                         "storageAccountId": "[variables('diagnosticsStorageAccountId')]",
                         "logs": [
                             {
