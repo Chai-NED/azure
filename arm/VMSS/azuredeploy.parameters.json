@@ -80,6 +80,9 @@
         "vmOsDiskSizeInGB": {
             "value": 129
         },
+        "vmTimeZone": {
+            "value": "Eastern Standard Time"
+        },
         "vNetResourceGroupName": {
             "value": "pzvmss"
         },

@@ -221,6 +221,14 @@
                 "description": "OS disk size in GB"
             }
         },
+		"vmTimeZone": {
+			"type": "string",
+			"defaultValue": "UTC",
+			"minLength": 2,
+			"metadata": {
+				"description": "Time zone of the VMs. Type '[TimeZoneInfo]::GetSystemTimeZones().Id' in PowerShell to get the list. Note that 'UTC' works but 'UTC+xx' does NOT work."
+			}
+		},
         "vnetResourceGroupName": {
             "type": "string",
             "defaultValue": "",
@@ -559,6 +567,7 @@
                         "adminPassword": "[parameters('vmAdminPassword')]",
                         "windowsConfiguration": {
                             "provisionVMAgent": "[parameters('vmProvisionVMAgent')]",
+                            "timeZone": "[parameters('vmTimeZone')]",
                             "enableAutomaticUpdates": "[parameters('vmEnableAutomaticUpdates')]"
                         },
                         "secrets": []
