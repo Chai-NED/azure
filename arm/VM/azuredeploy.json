@@ -260,7 +260,11 @@
 		"osDiskName": "[concat(parameters('virtualMachineName'), '_os')]",
 		"dataDiskNamePrefix": "[concat(parameters('virtualMachineName'), '_data_')]",
 		"networkInterfaceName": "[concat(parameters('virtualMachineName'), '_nic_1')]",
-		"publicIpAddressName": "[concat(parameters('virtualMachineName'), '_pip_1')]"
+		"publicIpAddressName": "[concat(parameters('virtualMachineName'), '_pip_1')]",
+        "computeApiVersion": "2017-03-30",
+        "networkApiVersion": "2018-01-01",
+        "storageApiVersion": "2015-06-15",
+        "diagnosticsApiVersion": "2017-05-01-preview"
 	},
 	"resources": [
 		{
@@ -269,7 +273,7 @@
 				"name": "Aligned"
 			},
 			"name": "[parameters('availabilitySetName')]",
-			"apiVersion": "2017-03-30",
+			"apiVersion": "[variables('computeApiVersion')]",
 			"location": "[parameters('location')]",
 			"scale": null,
 			"properties": {
@@ -282,7 +286,7 @@
 		{
 			"name": "[parameters('virtualMachineName')]",
 			"type": "Microsoft.Compute/virtualMachines",
-			"apiVersion": "2017-03-30",
+			"apiVersion": "[variables('computeApiVersion')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
 				"[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
@@ -345,7 +349,7 @@
 				"diagnosticsProfile": {
 					"bootDiagnostics": {
 						"enabled": true,
-						"storageUri": "[reference(resourceId(parameters('resourceGroupNameDiagnostics'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
+						"storageUri": "[reference(resourceId(parameters('resourceGroupNameDiagnostics'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), variables('storageApiVersion')).primaryEndpoints['blob']]"
 					}
 				}
 			},
@@ -353,7 +357,7 @@
 		},
 		{
 			"name": "[concat(parameters('virtualMachineName'),'IaaSAntimalware')]",
-			"apiVersion": "2015-01-01",
+			"apiVersion": "2018-02-01",
 			"type": "Microsoft.Resources/deployments",
 			"properties": {
 				"mode": "Incremental",
@@ -415,7 +419,7 @@
 		{
 			"name": "[concat(parameters('virtualMachineName'),'/', variables('diagnosticsExtensionName'))]",
 			"type": "Microsoft.Compute/virtualMachines/extensions",
-			"apiVersion": "2016-04-30-preview",
+			"apiVersion": "2017-12-01",
 			"location": "[parameters('location')]",
 			"dependsOn": [
 				"[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
@@ -652,7 +656,7 @@
 				},
 				"protectedSettings": {
 					"storageAccountName": "[parameters('diagnosticsStorageAccountName')]",
-					"storageAccountKey": "[listKeys(variables('diagnosticsStorageAccountId'),'2015-06-15').key1]",
+					"storageAccountKey": "[listKeys(variables('diagnosticsStorageAccountId'), variables('storageApiVersion')).key1]",
 					"storageAccountEndPoint": "https://core.windows.net/"
 				}
 			}
@@ -660,7 +664,7 @@
 		{
 			"name": "[variables('networkInterfaceName')]",
 			"type": "Microsoft.Network/networkInterfaces",
-			"apiVersion": "2016-09-01",
+			"apiVersion": "[variables('networkApiVersion')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
 				"[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
@@ -685,7 +689,7 @@
 		{
 			"name": "[variables('publicIpAddressName')]",
 			"type": "Microsoft.Network/publicIpAddresses",
-			"apiVersion": "2017-08-01",
+			"apiVersion": "[variables('networkApiVersion')]",
 			"location": "[parameters('location')]",
 			"properties": {
 				"publicIpAllocationMethod": "[parameters('publicIpAddressType')]"

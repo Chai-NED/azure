@@ -41,7 +41,7 @@ param(
  $templateFilePath = 'azuredeploy.json',
 
  [string]
- $parametersFilePath = 'azuredeploy.parameters.json'
+ $parametersFilePath = ''
 )
 
 <#

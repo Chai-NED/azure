@@ -81,7 +81,7 @@
             "value": "Eastern Standard Time"
         },
         "vmAutoShutdownTime": {
-            "value": "9999"
+            "value": "1900"
         },
         "enableAutoShutdownNotification": {
             "value": "Disabled"

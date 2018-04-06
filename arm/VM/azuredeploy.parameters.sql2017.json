@@ -1,0 +1,96 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subscriptionId": {
+            "value": ""
+        },
+        "location": {
+            "value": ""
+        },
+        "availabilitySetName": {
+            "value": ""
+        },
+        "resourceGroupNameVM": {
+            "value": ""
+        },
+        "virtualMachineName": {
+            "value": ""
+        },
+        "virtualMachineSize": {
+            "value": "Standard_DS3_v2"
+        },
+        "publisher": {
+            "value": "MicrosoftSQLServer"
+        },
+        "offer": {
+            "value": "SQL2017-WS2016"
+        },
+        "sku": {
+            "value": "SQLDEV"
+        },
+        "version": {
+            "value": "latest"
+        },
+        "licenseType": {
+            "value": "Windows_Server"
+        },
+        "adminUsername": {
+            "value": ""
+        },
+        "adminPassword": {
+            "value": ""
+        },
+        "osDiskStorageType": {
+            "value": "Premium_LRS"
+        },
+        "osDiskSizeInGB": {
+            "value": 129
+        },
+        "dataDiskStorageType": {
+            "value": "Premium_LRS"
+        },
+        "dataDiskCount": {
+            "value": 1
+        },
+        "dataDiskSizeInGB": {
+            "value": 257
+        },
+        "publicIpAddressType": {
+            "value": "Dynamic"
+        },
+        "publicIpAddressSku": {
+            "value": "Basic"
+        },
+        "resourceGroupNameNetwork": {
+            "value": ""
+        },
+        "virtualNetworkName": {
+            "value": ""
+        },
+        "subnetName": {
+            "value": ""
+        },
+        "resourceGroupNameDiagnostics": {
+            "value": ""
+        },
+        "diagnosticsStorageAccountName": {
+            "value": ""
+        },
+        "vmTimeZone": {
+            "value": "Eastern Standard Time"
+        },
+        "vmAutoShutdownTime": {
+            "value": "9999"
+        },
+        "enableAutoShutdownNotification": {
+            "value": "Disabled"
+        },
+        "autoShutdownNotificationWebhookURL": {
+            "value": ""
+        },
+        "autoShutdownNotificationMinutesBefore": {
+            "value": 15
+        }
+    }
+}
