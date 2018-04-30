@@ -4,6 +4,8 @@
 # Author: Patrick El-Azem
 #
 # Notes: this script assumes you have created RGs, VNets, subnets, NSGs. It does create the availability set you designate, if it doesn't exist yet.
+#
+# To avoid interactive prompt for credential, see https://stackoverflow.com/questions/6239647/using-powershell-credentials-without-being-prompted-for-a-password
 # ##############################
 
 # Arguments with defaults
@@ -27,12 +29,12 @@ param
     [string]$VMName = '',
     [string]$VMSize = 'Standard_DS3_v2',
 
-    [string]$OsDiskSkuName = 'PremiumLRS',
+    [string]$OsDiskSkuName = 'Premium_LRS',
     [string]$OsTypeName = 'Windows',
     [string]$OsDiskFileNameTail = '_os',
     [int]$OSDiskSizeInGB = 128,
 
-    [string]$DataDiskSkuName = 'PremiumLRS',
+    [string]$DataDiskSkuName = 'Premium_LRS',
     [string]$DataDiskFileNameTail = '_data_',
     [int]$DataDiskSizeInGB = 256,
     [int]$NumberOfDataDisks = 1,
@@ -51,9 +53,6 @@ param
 )
 
 $credPromptText = 'Type the name and password of the VM local administrator account.'
-
-# Ensure diagnostics storage account exists
-$diagsa = .\StorageAccount-CreateGet.ps1 -ResourceGroupName $ResourceGroupNameDiagnostics -Location $Location -StorageAccountName $StorageAccountNameDiagnostics -StorageAccountSkuName 'Standard_LRS'
 
 # Get VNet
 $vnet = Get-AzureRmVirtualNetwork -Name $VNetName -ResourceGroupName $ResourceGroupNameVNet
@@ -119,7 +118,7 @@ for ($ddi = 1; $ddi -le $NumberOfDataDisks; $ddi++)
 New-AzureRmVM `
     -ResourceGroupName $ResourceGroupNameVM `
     -Location $Location `
-    -VM $vm | Out-Null
+    -VM $vm
 
 # Add diagnostics
 .\VM-AddDiagnostics.ps1 -SubscriptionId $SubscriptionId -Location $Location -ResourceGroupNameVM $ResourceGroupNameVM -ResourceGroupNameStorageAccountDiagnostics $ResourceGroupNameDiagnostics -StorageAccountNameDiagnostics $StorageAccountNameDiagnostics -VMName $VMName
