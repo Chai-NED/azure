@@ -1,0 +1,34 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "displayName": "Azure region",
+                "description": "The Azure region within which to deploy. Examples: 'eastus', 'westus', and so on. See https://azure.microsoft.com/regions/."
+            }
+        },
+        "topicName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "displayName": "Event Grid Topic Name",
+                "description": "Event Grid Topic Name"
+            }
+        }
+    },
+    "variables": {
+        "eventGridApiVersion": "2018-01-01"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.EventGrid/topics",
+            "name": "[parameters('topicName')]",
+            "apiVersion": "[variables('eventGridApiVersion')]",
+            "location": "[parameters('location')]",
+            "dependsOn": []
+        }
+    ]
+}
