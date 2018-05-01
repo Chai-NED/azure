@@ -54,7 +54,7 @@
             "value": 1
         },
         "dataDiskSizeInGB": {
-            "value": 129
+            "value": 257
         },
         "publicIpAddressType": {
             "value": "Dynamic"
@@ -90,22 +90,7 @@
             "value": ""
         },
         "autoShutdownNotificationMinutesBefore": {
-            "value": 0
-        },
-        "_artifactsLocation": {
-            "value": "https://pz17sa.blob.core.windows.net/public/dsc"
-        },
-        "dscFolder": {
-            "value": "IIS_ASPNet46_Net35"
-        },
-        "dscFileName" : {
-            "value": "IIS_ASPNet46_Net35.zip"
-        },
-        "dscModule" : {
-            "value": "IIS_ASPNet46_Net35.ps1"
-        },
-        "dscFunction" : {
-            "value": "IIS_ASPNet46_Net35"
+            "value": 15
         }
     }
 }
