@@ -1,0 +1,70 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+		"subscriptionId": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Azure subscription ID",
+				"description": "An existing, valid Azure subscription ID."
+			}
+		},
+        "location": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Azure region",
+                "description": "The Azure region within which to deploy. Examples: 'East US', 'West US', and so on. See https://azure.microsoft.com/regions/."
+            }
+        },
+		"resourceGroupNameStorage": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Resource Group for Storage Account",
+				"description": "The resource group name that should contain the storage account."
+			}
+		},
+        "storageAccountName": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Storage Account Name",
+                "description": "Name for the Storage Account"
+            }
+        }
+    },
+    "variables": {
+		"storageAccountId": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupNameStorage'), '/providers/Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
+        "storageApiVersion": "2018-07-01",
+        "storageKind": "StorageV2"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[parameters('storageAccountName')]",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "[variables('storageKind')]",
+            "apiVersion": "[variables('storageApiVersion')]",
+            "location": "[parameters('location')]",
+            "tags": {},
+            "scale": null,
+            "properties": {
+                "accessTier": "Hot",
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "enabled": true
+                        },
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            },
+            "dependsOn": []
+        }
+    ]
+}
