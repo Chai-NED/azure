@@ -13,7 +13,7 @@
 			"type": "string",
 			"metadata": {
 				"displayName": "Azure region",
-				"description": "The Azure region within which to deploy. Examples: 'East US', 'West US', and so on. See https://azure.microsoft.com/regions/."
+				"description": "The Azure region within which to deploy. Examples: 'eastus', 'westus', and so on. See https://azure.microsoft.com/regions/."
 			}
 		},
 		"availabilitySetName": {
@@ -48,7 +48,7 @@
 			"type": "string",
 			"metadata": {
 				"displayName": "Publisher",
-				"description": "CLI: az vm image list-publishers -l [Azure region]. For Windows 10, use MicrosoftWindowsDesktop"
+				"description": "CLI: az vm image list-publishers -l [Azure region]"
 			}
 		},
 		"offer": {
@@ -62,7 +62,7 @@
 			"type": "string",
 			"metadata": {
 				"displayName": "SKU",
-				"description": "CLI: az vm image list-skus -l [Azure region] --publisher [Publisher] --offer [Offer]. For Windows 10 1709, use RS3-Pro"
+				"description": "CLI: az vm image list-skus -l [Azure region] --publisher [Publisher] --offer [Offer]"
 			}
 		},
 		"version": {
@@ -209,13 +209,15 @@
 	"variables": {
 		"vnetId": "[resourceId(parameters('resourceGroupNameNetwork'), 'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
 		"subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
+		"uniqueDnsLabelPrefix": "[concat('oravm-', uniquestring(resourceGroup().id))]",
 		"osDiskName": "[concat(parameters('virtualMachineName'), '_os')]",
 		"dataDiskNamePrefix": "[concat(parameters('virtualMachineName'), '_data_')]",
 		"networkInterfaceName": "[concat(parameters('virtualMachineName'), '_nic')]",
 		"publicIpAddressName": "[concat(parameters('virtualMachineName'), '_pip')]",
+		"publicIpAddressId": "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]",
         "computeApiVersion": "2017-03-30",
         "networkApiVersion": "2018-01-01",
-        "storageApiVersion": "2015-06-15"
+        "storageApiVersion": "2018-07-01"
 	},
 	"resources": [
 		{
@@ -347,7 +349,16 @@
 			},
 			"sku": {
 				"name": "[parameters('publicIpAddressSku')]"
+			},
+			"dnsSettings": {
+			  "domainNameLabel": "[variables('uniqueDnsLabelPrefix')]"
 			}
 		}
-	]
+	],
+	"outputs": {
+		"sshCommand": {
+			"type": "string",
+			"value": "[concat('ssh ', parameters('adminUsername'), '@', variables('uniqueDnsLabelPrefix'), '.', parameters('location'), '.cloudapp.azure.com')]"
+		  } 
+	}
 }

@@ -7,10 +7,10 @@ param
  $resourceGroupName = '',
 
  [string]
- $resourceGroupLocation = 'eastus',
+ $resourceGroupLocation = '',
 
  [string]
- $deploymentName = 'Oracle'
+ $deploymentName = ''
 )
 
 $templateFilePath_Storage = '.\Storage\azuredeploy.json'

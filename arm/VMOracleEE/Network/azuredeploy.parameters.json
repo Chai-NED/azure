@@ -3,19 +3,19 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "eastus"
+            "value": ""
         },
         "virtualNetworkName": {
             "value": ""
         },
         "virtualNetworkAddressSpace": {
-            "value": "172.16.0.0/16"
+            "value": ""
         },
         "subnetName": {
-            "value": "subnet1"
+            "value": ""
         },
         "subnetAddressSpace": {
-            "value": "172.16.1.0/24"
+            "value": ""
         },
         "networkSecurityGroupName": {
             "value": ""

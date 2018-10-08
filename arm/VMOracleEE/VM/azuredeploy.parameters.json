@@ -6,7 +6,7 @@
             "value": ""
         },
         "location": {
-            "value": "eastus"
+            "value": ""
         },
         "availabilitySetName": {
             "value": ""
@@ -76,5 +76,6 @@
         },
         "diagnosticsStorageAccountName": {
             "value": ""
-        }    }
+        }
+    }
 }
