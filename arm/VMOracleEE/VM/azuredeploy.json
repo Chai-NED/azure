@@ -345,13 +345,13 @@
 			"apiVersion": "[variables('networkApiVersion')]",
 			"location": "[parameters('location')]",
 			"properties": {
-				"publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
+				"publicIpAllocationMethod": "[parameters('publicIpAddressType')]",
+				"dnsSettings": {
+					"domainNameLabel": "[variables('uniqueDnsLabelPrefix')]"
+				  }	  
 			},
 			"sku": {
 				"name": "[parameters('publicIpAddressSku')]"
-			},
-			"dnsSettings": {
-			  "domainNameLabel": "[variables('uniqueDnsLabelPrefix')]"
 			}
 		}
 	],
