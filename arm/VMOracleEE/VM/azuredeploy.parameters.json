@@ -51,10 +51,10 @@
             "value": "Premium_LRS"
         },
         "dataDiskCount": {
-            "value": 1
+            "value": 6
         },
         "dataDiskSizeInGB": {
-            "value": 128
+            "value": 1023
         },
         "publicIpAddressType": {
             "value": "Dynamic"

@@ -323,6 +323,7 @@
 				"[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
 			],
 			"properties": {
+				"enableAcceleratedNetworking": true,
 				"ipConfigurations": [
 					{
 						"name": "ipconfig1",
@@ -356,6 +357,10 @@
 		}
 	],
 	"outputs": {
+		"hostname": {
+		  "type": "string",
+		  "value": "[reference(variables('publicIpAddressName')).dnsSettings.fqdn]"
+		},
 		"sshCommand": {
 			"type": "string",
 			"value": "[concat('ssh ', parameters('adminUsername'), '@', variables('uniqueDnsLabelPrefix'), '.', parameters('location'), '.cloudapp.azure.com')]"
