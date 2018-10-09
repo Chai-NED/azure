@@ -6,6 +6,8 @@ This repo contains three Azure Resource Manager (ARM) templates to create an Ora
 
 The deployment is split into three templates for more flexibility, e.g. to use existing network or storage resources instead of creating new ones.
 
+PLEASE NOTE the summary disclaimer for this entire github repo: https://github.com/plzm/azure
+
 ## References
 
 - Oracle solutions on Azure: https://docs.microsoft.com/azure/virtual-machines/workloads/oracle/oracle-considerations
