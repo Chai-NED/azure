@@ -27,7 +27,7 @@
             "value": "Oracle-Database-Ee"
         },
         "sku": {
-            "value": "12.2.0.1"
+            "value": "12.1.0.2"
         },
         "version": {
             "value": "latest"
@@ -51,7 +51,7 @@
             "value": "Premium_LRS"
         },
         "dataDiskCount": {
-            "value": 6
+            "value": 8
         },
         "dataDiskSizeInGB": {
             "value": 1023
