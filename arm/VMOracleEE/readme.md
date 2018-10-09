@@ -42,7 +42,7 @@ PLEASE NOTE the summary disclaimer for this entire github repo: https://github.c
    * Be consistent across files with location names, resource group names, etc.
    * None of the named resources need to exist yet. The deploy.ps1 script will create the resource group if it does not exist yet, and the ARM templates will create the other resources.
 6. Network template: this template creates an initial inbound rule, e.g. to enable SSH or RDP access from your public IP address. Please provide your public IP address (e.g. go to bing.com and search "what is my IP").
-7. Storage template: this template creates a storage account which will be used for diagnostic logs by. If you prefer to use an existing storage account for diagnostics, do not run the Storage template (comment it out in deploy.ps1), and provide appropriate storage account info in VM/azuredeploy.parameters.json, lines 74-78.
+7. Storage template: this template creates a storage account which will be used for diagnostic logs. If you prefer to use an existing storage account for diagnostics, do not run the Storage template (comment it out in deploy.ps1), and provide appropriate storage account info in VM/azuredeploy.parameters.json, lines 74-78.
 8. VM template:
    * provide appropriate values for publisher, offer, sku, and version. The parameters file as delivered uses the latest (as of this date) Oracle 12 EE version. You can find which ones are available on Azure with this CLI command:\
 ```az vm image list --publisher oracle --offer Oracle-Database-Ee -o table --all```
