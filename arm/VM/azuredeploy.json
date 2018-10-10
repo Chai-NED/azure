@@ -670,6 +670,7 @@
 				"[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
 			],
 			"properties": {
+				"enableAcceleratedNetworking": true,
 				"ipConfigurations": [
 					{
 						"name": "ipconfig1",

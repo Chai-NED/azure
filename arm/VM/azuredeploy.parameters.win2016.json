@@ -54,7 +54,7 @@
             "value": 1
         },
         "dataDiskSizeInGB": {
-            "value": 257
+            "value": 65
         },
         "publicIpAddressType": {
             "value": "Dynamic"
