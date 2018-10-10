@@ -8,9 +8,9 @@
 # Arguments with defaults
 param
 (
-    [string]$SubscriptionId = 'e61e4c75-268b-4c94-ad48-237aa3231481',
-    [string]$ResourceGroupName = 'pz-oracle',
-    [string]$NamePrefixToDelete = 'oravm'
+    [string]$SubscriptionId = '',
+    [string]$ResourceGroupName = '',
+    [string]$NamePrefixToDelete = ''
 )
 
 # Delete VMs first to remove any leases

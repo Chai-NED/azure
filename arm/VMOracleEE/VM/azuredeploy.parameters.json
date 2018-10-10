@@ -18,7 +18,7 @@
             "value": ""
         },
         "virtualMachineSize": {
-            "value": "Standard_DS12_v2"
+            "value": "Standard_DS13_v2"
         },
         "publisher": {
             "value": "Oracle"
@@ -33,7 +33,7 @@
             "value": "latest"
         },
         "adminUsername": {
-            "value": ""
+            "value": "oraadmin"
         },
         "adminPassword": {
             "value": ""
@@ -51,10 +51,19 @@
             "value": "Premium_LRS"
         },
         "dataDiskCount": {
-            "value": 8
+            "value": 1
         },
         "dataDiskSizeInGB": {
             "value": 1023
+        },
+        "recoDiskStorageType": {
+            "value": "Premium_LRS"
+        },
+        "recoDiskCount": {
+            "value": 1
+        },
+        "recoDiskSizeInGB": {
+            "value": 128
         },
         "publicIpAddressType": {
             "value": "Dynamic"
