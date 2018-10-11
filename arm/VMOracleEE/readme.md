@@ -19,7 +19,7 @@ PLEASE NOTE the summary disclaimer for this entire github repo: https://github.c
 - Azure Linux VM premium storage: https://docs.microsoft.com/azure/virtual-machines/linux/premium-storage
 - Azure Windows VM sizes: https://docs.microsoft.com/azure/virtual-machines/linux/sizes
 - Azure Windows VM premium storage: https://docs.microsoft.com/azure/virtual-machines/linux/premium-storage
-
+- How to add a Swap File in Azure Linux VMs: https://support.microsoft.com/en-us/help/4010058/how-to-add-a-swap-file-in-linux-azure-virtual-machines
 - SwingBench: http://dominicgiles.com/swingbench.html
 
 ## Pre-Requisites
@@ -51,3 +51,4 @@ PLEASE NOTE the summary disclaimer for this entire github repo: https://github.c
 9. Once all param values are provided in deploy.ps1 and the three azuredeploy.parameters.json files, I recommend stepping through deploy.ps1 in the VS Code Powershell debugger so that you can run the `Test-AzureRmResourceGroupDeployment` calls one by one, and address any problems found, before running the actual deployments with `New-AzureRmResourceGroupDeployment`.
 10. When deploy.ps1 completes, it will output the DNS hostname for the newly-created Oracle VM as well as an ssh command line to connect to the VM. Ensure that you have the SSH private key file (.ppk) available that corresponds to the public key you provided in the VM ARM parameters file.
 11. If you provided a source IP in the Network ARM parameters file, you should be able to SSH to the VM right away. Otherwise - and/or if you have other network security between you and this Azure deployment - you may need to address SSH being blocked from you to Azure.
+12. If you intend to install Oracle Automatic Storage Management, please proceed with the steps in the file `readme_asm_and_grid.md` also found in this repo.

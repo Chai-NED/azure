@@ -51,7 +51,7 @@
             "value": "Premium_LRS"
         },
         "dataDiskCount": {
-            "value": 1
+            "value": 8
         },
         "dataDiskSizeInGB": {
             "value": 1023
@@ -60,7 +60,7 @@
             "value": "Premium_LRS"
         },
         "recoDiskCount": {
-            "value": 1
+            "value": 4
         },
         "recoDiskSizeInGB": {
             "value": 128
