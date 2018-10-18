@@ -41,7 +41,7 @@
 			"type": "string",
 			"metadata": {
 				"displayName": "Virtual Machine size",
-				"description": "The VM size. See https://docs.microsoft.com/azure/virtual-machines/windows/sizes or use Azure CLI command 'az vm list-sizes'."
+				"description": "The VM size. See https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes or use Azure CLI command 'az vm list-sizes'."
 			}
 		},
 		"publisher": {
