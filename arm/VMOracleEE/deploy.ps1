@@ -7,20 +7,20 @@ param
  $resourceGroupName = '',
 
  [string]
- $resourceGroupLocation = '',
+ $resourceGroupLocation = 'eastus',
 
  [string]
- $deploymentName = ''
+ $deploymentName = 'Oracle'
 )
 
-$templateFilePath_Storage = '.\Storage\azuredeploy.json'
-$parametersFilePath_Storage = '.\Storage\azuredeploy.parameters.json'
+$templateFilePath_Storage = '.\Storage\storage.deploy.json'
+$parametersFilePath_Storage = '.\Storage\storage.parameters.json'
 
-$templateFilePath_Network = '.\Network\azuredeploy.json'
-$parametersFilePath_Network = '.\Network\azuredeploy.parameters.json'
+$templateFilePath_Network = '.\VNetSubnetNsg\vnetSubnetNsg.deploy.json'
+$parametersFilePath_Network = '.\VNetSubnetNsg\vnetSubnetNsg.parameters.json'
 
-$templateFilePath_VM = '.\VM\azuredeploy.json'
-$parametersFilePath_VM = '.\VM\azuredeploy.parameters.json'
+$templateFilePath_VM = '.\VM\vm.deploy.json'
+$parametersFilePath_VM = '.\VM\vm.parameters.json'
 
 function New-DeploymentResultException([Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels.PSResourceManagerError]$error)
 {
@@ -63,7 +63,6 @@ Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Templ
 
 Write-Host "Testing deployment - VM";
 Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_VM -TemplateParameterFile $parametersFilePath_VM -Verbose
-
 
 # Start the deployments
 Write-Host "Deploying storage";

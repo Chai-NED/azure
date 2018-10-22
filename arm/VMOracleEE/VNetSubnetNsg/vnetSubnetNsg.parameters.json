@@ -3,31 +3,31 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": ""
+            "value": "eastus"
         },
         "virtualNetworkName": {
             "value": ""
         },
         "virtualNetworkAddressSpace": {
-            "value": ""
+            "value": "172.16.0.0/16"
         },
         "subnetName": {
-            "value": ""
+            "value": "subnet1"
         },
         "subnetAddressSpace": {
-            "value": ""
+            "value": "172.16.1.0/24"
         },
         "networkSecurityGroupName": {
-            "value": ""
+            "value": "oraclensg"
         },
         "networkSecurityGroupRule_Name": {
-            "value": ""
+            "value": "OurExternalIp"
         },
         "networkSecurityGroupRule_Source": {
             "value": ""
         },
         "networkSecurityGroupRule_Priority": {
-            "value": 100
+            "value": 105
         }
     }
 }

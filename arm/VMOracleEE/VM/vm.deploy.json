@@ -2,13 +2,6 @@
 	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
 	"contentVersion": "1.0.0.0",
 	"parameters": {
-		"subscriptionId": {
-			"type": "string",
-			"metadata": {
-				"displayName": "Azure subscription ID",
-				"description": "An existing, valid Azure subscription ID."
-			}
-		},
 		"location": {
 			"type": "string",
 			"metadata": {
@@ -21,13 +14,6 @@
 			"metadata": {
 				"displayName": "Availability set",
 				"description": "A managed availability set to which to join the VM. If the availability set does not yet exist, it will be created."
-			}
-		},
-		"resourceGroupNameVM": {
-			"type": "string",
-			"metadata": {
-				"displayName": "Resource Group for VM",
-				"description": "The resource group name that should contain the VM and its related resources, such as NIC and public IP."
 			}
 		},
 		"virtualMachineName": {
@@ -116,7 +102,6 @@
 				"description": "OS disk size in GB"
 			}
 		},
-
 		"dataDiskStorageType": {
 			"type": "string",
 			"allowedValues": [
@@ -147,7 +132,6 @@
 				"description": "Data disk size in GB. Each data disk will be created at this size"
 			}
 		},
-
 		"recoDiskStorageType": {
 			"type": "string",
 			"allowedValues": [
@@ -176,31 +160,6 @@
 			"metadata": {
 				"displayName": "Reco disk size",
 				"description": "Reco disk size in GB. Each data disk will be created at this size"
-			}
-		},
-		
-		"publicIpAddressType": {
-			"type": "string",
-			"allowedValues": [
-				"Dynamic",
-				"Static"
-			],
-			"defaultValue": "Dynamic",
-			"metadata": {
-				"displayName": "Public IP address type",
-				"description": "The public IP address type: Static or Dynamic."
-			}
-		},
-		"publicIpAddressSku": {
-			"type": "string",
-			"allowedValues": [
-				"Basic",
-				"Standard"
-			],
-			"defaultValue": "Basic",
-			"metadata": {
-				"displayName": "Public IP address SKU",
-				"description": "The public IP address SKU to use. See https://docs.microsoft.com/azure/virtual-network/virtual-network-ip-addresses-overview-arm"
 			}
 		},
 		"resourceGroupNameNetwork": {
@@ -241,16 +200,16 @@
 	},
 	"variables": {
 		"vnetId": "[resourceId(parameters('resourceGroupNameNetwork'), 'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-		"subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
-		"uniqueDnsLabelPrefix": "[concat('oravm-', uniquestring(resourceGroup().id))]",
+		"subnetReference": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
+		"uniqueDnsLabelPrefix": "[concat(parameters('virtualMachineName'), uniquestring(resourceGroup().id))]",
 		"osDiskName": "[concat(parameters('virtualMachineName'), '_os')]",
-		"dataDiskNamePrefix": "[concat(parameters('virtualMachineName'), '_data_')]",
-		"recoDiskNamePrefix": "[concat(parameters('virtualMachineName'), '_reco_')]",
+		"diskGroup1Prefix": "[concat(parameters('virtualMachineName'), '_data_')]",
+		"diskGroup2Prefix": "[concat(parameters('virtualMachineName'), '_reco_')]",
+		"ipConfigName": "ipconfig1",
 		"networkInterfaceName": "[concat(parameters('virtualMachineName'), '_nic')]",
-		"publicIpAddressName": "[concat(parameters('virtualMachineName'), '_pip')]",
-        "computeApiVersion": "2017-03-30",
-        "networkApiVersion": "2018-01-01",
-        "storageApiVersion": "2018-07-01"
+		"computeApiVersion": "2017-03-30",
+		"networkApiVersion": "2018-08-01",
+		"storageApiVersion": "2018-07-01"
 	},
 	"resources": [
 		{
@@ -288,12 +247,12 @@
 					"linuxConfiguration": {
 						"disablePasswordAuthentication": false,
 						"ssh": {
-						  "publicKeys": [
-							{
-							  "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-							  "keyData": "[parameters('sshKeyData')]"
-							}
-						  ]
+							"publicKeys": [
+								{
+									"path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+									"keyData": "[parameters('sshKeyData')]"
+								}
+							]
 						}
 					}
 				},
@@ -322,7 +281,7 @@
 							"input": {
 								"lun": "[copyIndex('dataDisks')]",
 								"createOption": "Empty",
-								"name": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('dataDiskCount')), concat(variables('dataDiskNamePrefix'), copyIndex('dataDisks', 1)), concat(variables('recoDiskNamePrefix'), sub(copyIndex('dataDisks', 1), parameters('dataDiskCount'))))]",
+								"name": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('dataDiskCount')), concat(variables('diskGroup1Prefix'), copyIndex('dataDisks', 1)), concat(variables('diskGroup2Prefix'), sub(copyIndex('dataDisks', 1), parameters('dataDiskCount'))))]",
 								"diskSizeGB": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('dataDiskCount')), parameters('dataDiskSizeInGB'), parameters('recoDiskSizeInGB'))]",
 								"managedDisk": {
 									"storageAccountType": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('dataDiskCount')), parameters('dataDiskStorageType'), parameters('recoDiskStorageType'))]"
@@ -352,51 +311,50 @@
 			"type": "Microsoft.Network/networkInterfaces",
 			"apiVersion": "[variables('networkApiVersion')]",
 			"location": "[parameters('location')]",
-			"dependsOn": [
-				"[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
-			],
 			"properties": {
 				"enableAcceleratedNetworking": true,
 				"ipConfigurations": [
 					{
-						"name": "ipconfig1",
+						"name": "[variables('ipConfigName')]",
 						"properties": {
 							"subnet": {
-								"id": "[variables('subnetRef')]"
+								"id": "[variables('subnetReference')]"
 							},
-							"privateIPAllocationMethod": "Dynamic",
-							"publicIpAddress": {
-								"id": "[resourceId(parameters('resourceGroupNameVM'), 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
-							}
+							"privateIPAllocationMethod": "Dynamic"
 						}
 					}
-				]
-			}
-		},
-		{
-			"name": "[variables('publicIpAddressName')]",
-			"type": "Microsoft.Network/publicIpAddresses",
-			"apiVersion": "[variables('networkApiVersion')]",
-			"location": "[parameters('location')]",
-			"properties": {
-				"publicIpAllocationMethod": "[parameters('publicIpAddressType')]",
+				],
 				"dnsSettings": {
-					"domainNameLabel": "[variables('uniqueDnsLabelPrefix')]"
-				  }	  
-			},
-			"sku": {
-				"name": "[parameters('publicIpAddressSku')]"
+					"internalDnsNameLabel": "[variables('uniqueDnsLabelPrefix')]",
+					"dnsServers": []
+				}
 			}
 		}
 	],
 	"outputs": {
-		"hostname": {
-		  "type": "string",
-		  "value": "[reference(variables('publicIpAddressName')).dnsSettings.fqdn]"
-		},
-		"sshCommand": {
+		"privateIpAddress": {
 			"type": "string",
-			"value": "[concat('ssh ', parameters('adminUsername'), '@', variables('uniqueDnsLabelPrefix'), '.', parameters('location'), '.cloudapp.azure.com')]"
-		  } 
+			"value": "[reference(variables('networkInterfaceName')).ipConfigurations[0].properties.privateIPAddress]"
+		},
+		"appliedDnsServers": {
+			"type": "array",
+			"value": "[reference(variables('networkInterfaceName')).dnsSettings.appliedDnsServers]"
+		},
+		"dnsServers": {
+			"type": "array",
+			"value": "[reference(variables('networkInterfaceName')).dnsSettings.dnsServers]"
+		},
+		"internalDnsNameLabel": {
+			"type": "string",
+			"value": "[reference(variables('networkInterfaceName')).dnsSettings.internalDnsNameLabel]"
+		},
+		"internalDomainNameSuffix": {
+			"type": "string",
+			"value": "[reference(variables('networkInterfaceName')).dnsSettings.internalDomainNameSuffix]"
+		},
+		"internalFqdn": {
+			"type": "string",
+			"value": "[reference(variables('networkInterfaceName')).dnsSettings.internalFqdn]"
+		}
 	}
 }

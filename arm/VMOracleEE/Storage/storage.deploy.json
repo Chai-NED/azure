@@ -32,7 +32,6 @@
         }
     },
     "variables": {
-		"storageAccountId": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupNameStorage'), '/providers/Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
         "storageApiVersion": "2018-07-01",
         "storageKind": "StorageV2"
     },
