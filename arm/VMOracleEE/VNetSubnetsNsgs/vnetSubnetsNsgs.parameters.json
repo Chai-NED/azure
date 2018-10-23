@@ -1,0 +1,45 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "eastus"
+        },
+        "vnet_name": {
+            "value": "vnet1"
+        },
+        "vnet_address_space": {
+            "value": "172.16.0.0/16"
+        },
+        "subnet_public_name": {
+            "value": "public"
+        },
+        "subnet_public_address_space": {
+            "value": "172.16.1.0/24"
+        },
+        "subnet_private1_name": {
+            "value": "private1"
+        },
+        "subnet_private1_address_space": {
+            "value": "172.16.2.0/24"
+        },
+        "subnet_private2_name": {
+            "value": "private2"
+        },
+        "subnet_private2_address_space": {
+            "value": "172.16.3.0/24"
+        },
+        "nsg_public_name": {
+            "value": "public"
+        },
+        "nsg_private1_name": {
+            "value": "private1"
+        },
+        "nsg_private2_name": {
+            "value": "private2"
+        },
+        "securityRules_ExternalSourceIP_source": {
+            "value": ""
+        }
+    }
+}
