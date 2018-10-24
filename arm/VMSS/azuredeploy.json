@@ -538,11 +538,11 @@
         "diagnosticsBlock16": "<annotation displayName=\"SQL CPU percentage\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\SQL Server: Workload group stats\\Queued requests\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"SQL queued requests\"/></PerformanceCounterConfiguration></PerformanceCounters>",
         "diagnosticsBlock17": "</DiagnosticMonitorConfiguration></WadCfg>",
         "diagnosticsBlock": "[concat(variables('diagnosticsBlock01'), variables('diagnosticsBlock02'), variables('diagnosticsBlock03'), variables('diagnosticsBlock04'), variables('diagnosticsBlock05'), variables('diagnosticsBlock06'), variables('diagnosticsBlock07'), variables('diagnosticsBlock08'), variables('diagnosticsBlock09'), variables('diagnosticsBlock10'), variables('diagnosticsBlock11'), variables('diagnosticsBlock12'), variables('diagnosticsBlock13'), variables('diagnosticsBlock14'), variables('diagnosticsBlock15'), variables('diagnosticsBlock16'), variables('diagnosticsBlock17'))]",
-        "computeApiVersion": "2017-03-30",
+        "computeApiVersion": "2017-12-01",
         "networkApiVersion": "2018-01-01",
-        "storageApiVersion": "2015-06-15",
-        "insightsApiVersion": "2015-04-01",
+        "storageApiVersion": "2018-07-01",
         "diagnosticsApiVersion": "2017-05-01-preview"
+        "insightsApiVersion": "2015-04-01"
     },
     "resources": [
         {

@@ -5,26 +5,32 @@
         "location": {
             "value": "centralus"
         },
-        "availabilityZones": {
-            "value": ["2"]
+        "resourceGroupNameVM": {
+            "value": "oracle-rg"
+        },
+        "availabilitySetName": {
+            "value": "bastionwin_avset"
         },
         "virtualMachineName": {
-            "value": "oravm2"
+            "value": "bastionwin1"
         },
         "virtualMachineSize": {
-            "value": "Standard_DS13_v2"
+            "value": "Standard_DS3_v2"
         },
         "publisher": {
-            "value": "Oracle"
+            "value": "MicrosoftWindowsServer"
         },
         "offer": {
-            "value": "Oracle-Database-Ee"
+            "value": "WindowsServer"
         },
         "sku": {
-            "value": "12.1.0.2"
+            "value": "2016-Datacenter"
         },
         "version": {
             "value": "latest"
+        },
+        "licenseType": {
+            "value": "Windows_Server"
         },
         "adminUsername": {
             "value": "oraadmin"
@@ -32,32 +38,26 @@
         "adminPassword": {
             "value": ""
         },
-        "sshKeyData": {
-            "value": ""
-        },
         "osDiskStorageType": {
             "value": "Premium_LRS"
         },
         "osDiskSizeInGB": {
-            "value": 128
+            "value": 129
         },
         "dataDiskStorageType": {
             "value": "Premium_LRS"
         },
         "dataDiskCount": {
-            "value": 16
+            "value": 1
         },
         "dataDiskSizeInGB": {
-            "value": 1023
+            "value": 32
         },
-        "recoDiskStorageType": {
-            "value": "Premium_LRS"
+        "publicIpAddressType": {
+            "value": "Dynamic"
         },
-        "recoDiskCount": {
-            "value": 4
-        },
-        "recoDiskSizeInGB": {
-            "value": 128
+        "publicIpAddressSku": {
+            "value": "Basic"
         },
         "resourceGroupNameNetwork": {
             "value": "oracle-rg"
@@ -66,13 +66,7 @@
             "value": "oracle-vnet"
         },
         "subnetName": {
-            "value": "private2"
-        },
-        "resourceGroupNameDiagnostics": {
-            "value": "oracle-rg"
-        },
-        "diagnosticsStorageAccountName": {
-            "value": ""
+            "value": "public"
         }
     }
 }

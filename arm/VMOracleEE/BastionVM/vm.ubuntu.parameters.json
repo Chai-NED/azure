@@ -5,23 +5,26 @@
         "location": {
             "value": "centralus"
         },
-        "availabilityZones": {
-            "value": ["1"]
+        "availabilitySetName": {
+            "value": "bastionubuntu_avset"
+        },
+        "resourceGroupNameVM": {
+            "value": "oracle-rg"
         },
         "virtualMachineName": {
-            "value": "oravm1"
+            "value": "bastionubuntu1"
         },
         "virtualMachineSize": {
-            "value": "Standard_DS13_v2"
+            "value": "Standard_DS3_v2"
         },
         "publisher": {
-            "value": "Oracle"
+            "value": "Canonical"
         },
         "offer": {
-            "value": "Oracle-Database-Ee"
+            "value": "UbuntuServer"
         },
         "sku": {
-            "value": "12.1.0.2"
+            "value": "18.10"
         },
         "version": {
             "value": "latest"
@@ -33,31 +36,19 @@
             "value": ""
         },
         "sshKeyData": {
-            "value": ""
+            "value": "ssh-rsa KEY oraadmin"
         },
         "osDiskStorageType": {
             "value": "Premium_LRS"
         },
         "osDiskSizeInGB": {
-            "value": 128
+            "value": 129
         },
-        "dataDiskStorageType": {
-            "value": "Premium_LRS"
+        "publicIpAddressType": {
+            "value": "Dynamic"
         },
-        "dataDiskCount": {
-            "value": 16
-        },
-        "dataDiskSizeInGB": {
-            "value": 1023
-        },
-        "recoDiskStorageType": {
-            "value": "Premium_LRS"
-        },
-        "recoDiskCount": {
-            "value": 4
-        },
-        "recoDiskSizeInGB": {
-            "value": 128
+        "publicIpAddressSku": {
+            "value": "Basic"
         },
         "resourceGroupNameNetwork": {
             "value": "oracle-rg"
@@ -66,13 +57,7 @@
             "value": "oracle-vnet"
         },
         "subnetName": {
-            "value": "private1"
-        },
-        "resourceGroupNameDiagnostics": {
-            "value": "oracle-rg"
-        },
-        "diagnosticsStorageAccountName": {
-            "value": ""
+            "value": "public"
         }
     }
 }

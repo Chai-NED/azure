@@ -73,7 +73,7 @@
                 "accessTier": "Hot",
                 "supportsHttpsTrafficOnly": true,
                 "networkAcls": {
-                    "bypass": "AzureServices",
+                    "bypass": "AzureServices,Logging,Metrics",
                     "copy": [
                         {
                             "name": "virtualNetworkRules",

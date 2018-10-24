@@ -6,14 +6,21 @@
 			"type": "string",
 			"metadata": {
 				"displayName": "Azure region",
-				"description": "The Azure region within which to deploy. Examples: 'eastus', 'westus', and so on. See https://azure.microsoft.com/regions/."
+				"description": "The Azure region within which to deploy. Examples: 'East US', 'West US', and so on. See https://azure.microsoft.com/regions/."
 			}
 		},
-		"availabilityZones": {
-			"type": "array",
+		"availabilitySetName": {
+			"type": "string",
 			"metadata": {
-				"displayName": "Availability zone(s)",
-				"description": "Availability zone(s). See https://docs.microsoft.com/en-us/azure/virtual-machines/linux/create-cli-availability-zone#check-vm-sku-availability or use Azure CLI command 'az vm list-skus --location (REGION) --output table'"
+				"displayName": "Availability set",
+				"description": "A managed availability set to which to join the VM. If the availability set does not yet exist, it will be created."
+			}
+		},
+		"resourceGroupNameVM": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Resource Group for VM",
+				"description": "The resource group name that should contain the VM and its related resources, such as NIC and public IP."
 			}
 		},
 		"virtualMachineName": {
@@ -27,14 +34,14 @@
 			"type": "string",
 			"metadata": {
 				"displayName": "Virtual Machine size",
-				"description": "The VM size. See https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes or use Azure CLI command 'az vm list-sizes'."
+				"description": "The VM size. See https://docs.microsoft.com/azure/virtual-machines/windows/sizes or use Azure CLI command 'az vm list-sizes'."
 			}
 		},
 		"publisher": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Publisher",
-				"description": "CLI: az vm image list-publishers -l [Azure region]"
+				"description": "CLI: az vm image list-publishers -l [Azure region]. For Windows 10, use MicrosoftWindowsDesktop"
 			}
 		},
 		"offer": {
@@ -48,7 +55,7 @@
 			"type": "string",
 			"metadata": {
 				"displayName": "SKU",
-				"description": "CLI: az vm image list-skus -l [Azure region] --publisher [Publisher] --offer [Offer]"
+				"description": "CLI: az vm image list-skus -l [Azure region] --publisher [Publisher] --offer [Offer]. For Windows 10 1709, use RS3-Pro"
 			}
 		},
 		"version": {
@@ -57,6 +64,14 @@
 			"metadata": {
 				"displayName": "Version",
 				"description": "Image version. Typically use latest."
+			}
+		},
+		"licenseType": {
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"displayName": "License Type",
+				"description": "For Windows 10, use Windows_Client"
 			}
 		},
 		"adminUsername": {
@@ -73,13 +88,6 @@
 				"description": "VM administrator password"
 			}
 		},
-		"sshKeyData": {
-			"type": "string",
-			"metadata": {
-				"displayName": "SSH public key as a string",
-				"description": "SSH public key as a string"
-			}
-		},
 		"osDiskStorageType": {
 			"type": "string",
 			"allowedValues": [
@@ -94,7 +102,7 @@
 		},
 		"osDiskSizeInGB": {
 			"type": "int",
-			"defaultValue": 128,
+			"defaultValue": 129,
 			"minValue": 32,
 			"maxValue": 1023,
 			"metadata": {
@@ -119,47 +127,41 @@
 			"defaultValue": 1,
 			"metadata": {
 				"displayName": "Number of data disks",
-				"description": "Number of data disks to attach to the VM. At this writing, ARM template language requires an integer 1-800 for loops; less than or equal to 0 (zero) is not allowed."
+				"description": "Number of data disks to attach to the VM. At this writing, ARM template language requires an integer 1-800; less then or equal to 0 (zero) is not allowed."
 			}
 		},
 		"dataDiskSizeInGB": {
 			"type": "int",
-			"defaultValue": 1023,
+			"defaultValue": 257,
 			"minValue": 32,
 			"maxValue": 1023,
 			"metadata": {
 				"displayName": "Data disk size",
-				"description": "Data disk size in GB. Each data disk will be created at this size"
+				"description": "Data disk size in DB. Each data disk will be created at this size"
 			}
 		},
-		"recoDiskStorageType": {
+		"publicIpAddressType": {
 			"type": "string",
 			"allowedValues": [
-				"Standard_LRS",
-				"Premium_LRS"
+				"Dynamic",
+				"Static"
 			],
-			"defaultValue": "Premium_LRS",
+			"defaultValue": "Dynamic",
 			"metadata": {
-				"displayName": "Reco disk storage type",
-				"description": "Reco disk storage type. Standard_LRS uses HDD storage, Premium_LRS uses SSD storage"
+				"displayName": "Public IP address type",
+				"description": "The public IP address type: Static or Dynamic."
 			}
 		},
-		"recoDiskCount": {
-			"type": "int",
-			"defaultValue": 1,
+		"publicIpAddressSku": {
+			"type": "string",
+			"allowedValues": [
+				"Basic",
+				"Standard"
+			],
+			"defaultValue": "Basic",
 			"metadata": {
-				"displayName": "Number of reco disks",
-				"description": "Number of reco disks to attach to the VM. At this writing, ARM template language requires an integer 1-800 for loops; less than or equal to 0 (zero) is not allowed."
-			}
-		},
-		"recoDiskSizeInGB": {
-			"type": "int",
-			"defaultValue": 1023,
-			"minValue": 32,
-			"maxValue": 1023,
-			"metadata": {
-				"displayName": "Reco disk size",
-				"description": "Reco disk size in GB. Each data disk will be created at this size"
+				"displayName": "Public IP address SKU",
+				"description": "The public IP address SKU to use. See https://docs.microsoft.com/azure/virtual-network/virtual-network-ip-addresses-overview-arm"
 			}
 		},
 		"resourceGroupNameNetwork": {
@@ -182,20 +184,6 @@
 				"displayName": "Subnet",
 				"description": "Subnet into which to deploy the VM"
 			}
-		},
-		"resourceGroupNameDiagnostics": {
-			"type": "string",
-			"metadata": {
-				"displayName": "Resource Group for VM diagnostics",
-				"description": "The Resource Group that contains the standard storage account to which VM diagnostic data will be written. Can be the same as the Resource Group where the VM will be deployed, or can refer to a separate Resource Group which contains durable and/or centralized diagnostics resources."
-			}
-		},
-		"diagnosticsStorageAccountName": {
-			"type": "string",
-			"metadata": {
-				"displayName": "Storage Account for VM diagnostics",
-				"description": "The standard storage account to which VM diagnostics data will be written."
-			}
 		}
 	},
 	"variables": {
@@ -203,40 +191,50 @@
 		"subnetReference": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
 		"uniqueDnsLabelPrefix": "[concat(parameters('virtualMachineName'), uniquestring(resourceGroup().id))]",
 		"osDiskName": "[concat(parameters('virtualMachineName'), '_os')]",
-		"diskGroup1Prefix": "[concat(parameters('virtualMachineName'), '_data_')]",
-		"diskGroup2Prefix": "[concat(parameters('virtualMachineName'), '_reco_')]",
-		"ipConfigName": "ipconfig1",
+		"dataDiskNamePrefix": "[concat(parameters('virtualMachineName'), '_data_')]",
 		"networkInterfaceName": "[concat(parameters('virtualMachineName'), '_nic')]",
-		"computeApiVersion": "2017-03-30",
-		"networkApiVersion": "2018-08-01",
-		"storageApiVersion": "2018-07-01"
+		"publicIpAddressName": "[concat(parameters('virtualMachineName'), '_pip')]",
+		"computeApiVersion": "2018-06-01",
+		"networkApiVersion": "2018-08-01"
 	},
 	"resources": [
+		{
+			"type": "Microsoft.Compute/availabilitySets",
+			"sku": {
+				"name": "Aligned"
+			},
+			"name": "[parameters('availabilitySetName')]",
+			"apiVersion": "[variables('computeApiVersion')]",
+			"location": "[parameters('location')]",
+			"properties": {
+				"platformUpdateDomainCount": 5,
+				"platformFaultDomainCount": 3,
+				"virtualMachines": []
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[parameters('virtualMachineName')]",
 			"type": "Microsoft.Compute/virtualMachines",
 			"apiVersion": "[variables('computeApiVersion')]",
 			"location": "[parameters('location')]",
-			"zones": "[parameters('availabilityZones')]",
 			"dependsOn": [
 				"[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
 			],
 			"properties": {
+				"availabilitySet": {
+					"id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"
+				},
 				"osProfile": {
 					"computerName": "[parameters('virtualMachineName')]",
 					"adminUsername": "[parameters('adminUsername')]",
 					"adminPassword": "[parameters('adminPassword')]",
-					"linuxConfiguration": {
-						"disablePasswordAuthentication": false,
-						"ssh": {
-							"publicKeys": [
-								{
-									"path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-									"keyData": "[parameters('sshKeyData')]"
-								}
-							]
-						}
-					}
+					"allowExtensionOperations": true,
+					"windowsConfiguration": {
+						"provisionVmAgent": true,
+						"enableAutomaticUpdates": true
+					},
+					"secrets": []
 				},
 				"hardwareProfile": {
 					"vmSize": "[parameters('virtualMachineSize')]"
@@ -251,6 +249,7 @@
 					"osDisk": {
 						"createOption": "FromImage",
 						"name": "[variables('osDiskName')]",
+						"caching": "ReadWrite",
 						"diskSizeGB": "[parameters('osDiskSizeInGB')]",
 						"managedDisk": {
 							"storageAccountType": "[parameters('osDiskStorageType')]"
@@ -259,14 +258,14 @@
 					"copy": [
 						{
 							"name": "dataDisks",
-							"count": "[add(parameters('dataDiskCount'), parameters('recoDiskCount'))]",
+							"count": "[parameters('dataDiskCount')]",
 							"input": {
 								"lun": "[copyIndex('dataDisks')]",
 								"createOption": "Empty",
-								"name": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('dataDiskCount')), concat(variables('diskGroup1Prefix'), copyIndex('dataDisks', 1)), concat(variables('diskGroup2Prefix'), sub(copyIndex('dataDisks', 1), parameters('dataDiskCount'))))]",
-								"diskSizeGB": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('dataDiskCount')), parameters('dataDiskSizeInGB'), parameters('recoDiskSizeInGB'))]",
+								"name": "[concat(variables('dataDiskNamePrefix'), copyIndex('dataDisks', 1))]",
+								"diskSizeGB": "[parameters('dataDiskSizeInGB')]",
 								"managedDisk": {
-									"storageAccountType": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('dataDiskCount')), parameters('dataDiskStorageType'), parameters('recoDiskStorageType'))]"
+									"storageAccountType": "[parameters('dataDiskStorageType')]"
 								}
 							}
 						}
@@ -279,12 +278,7 @@
 						}
 					]
 				},
-				"diagnosticsProfile": {
-					"bootDiagnostics": {
-						"enabled": true,
-						"storageUri": "[reference(resourceId(parameters('resourceGroupNameDiagnostics'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), variables('storageApiVersion')).primaryEndpoints['blob']]"
-					}
-				}
+				"licenseType": "[parameters('licenseType')]"
 			},
 			"resources": []
 		},
@@ -293,30 +287,59 @@
 			"type": "Microsoft.Network/networkInterfaces",
 			"apiVersion": "[variables('networkApiVersion')]",
 			"location": "[parameters('location')]",
+			"dependsOn": [
+				"[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
+			],
 			"properties": {
 				"enableAcceleratedNetworking": true,
 				"ipConfigurations": [
 					{
-						"name": "[variables('ipConfigName')]",
+						"name": "ipconfig1",
 						"properties": {
 							"subnet": {
 								"id": "[variables('subnetReference')]"
 							},
-							"privateIPAllocationMethod": "Dynamic"
+							"privateIPAllocationMethod": "Dynamic",
+							"publicIpAddress": {
+								"id": "[resourceId(parameters('resourceGroupNameVM'), 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+							}
 						}
 					}
-				],
+				]
+			}
+		},
+		{
+			"name": "[variables('publicIpAddressName')]",
+			"type": "Microsoft.Network/publicIpAddresses",
+			"apiVersion": "[variables('networkApiVersion')]",
+			"location": "[parameters('location')]",
+			"properties": {
+				"publicIpAllocationMethod": "[parameters('publicIpAddressType')]",
 				"dnsSettings": {
-					"internalDnsNameLabel": "[variables('uniqueDnsLabelPrefix')]",
-					"dnsServers": []
+					"domainNameLabel": "[variables('uniqueDnsLabelPrefix')]"
 				}
+			},
+			"sku": {
+				"name": "[parameters('publicIpAddressSku')]"
 			}
 		}
 	],
 	"outputs": {
+		"vmName": {
+			"type": "string",
+			"value": "[parameters('virtualMachineName')]"
+		},
+		"publicFqdn": {
+			"type": "string",
+			"value": "[reference(variables('publicIpAddressName')).dnsSettings.fqdn]"
+		},
 		"privateIpAddress": {
 			"type": "string",
 			"value": "[reference(variables('networkInterfaceName')).ipConfigurations[0].properties.privateIPAddress]"
+		},
+		"internalDomainNameSuffix": {
+			"type": "string",
+			"value": "[reference(variables('networkInterfaceName')).dnsSettings.internalDomainNameSuffix]"
 		},
 		"appliedDnsServers": {
 			"type": "array",
@@ -325,18 +348,6 @@
 		"dnsServers": {
 			"type": "array",
 			"value": "[reference(variables('networkInterfaceName')).dnsSettings.dnsServers]"
-		},
-		"internalDnsNameLabel": {
-			"type": "string",
-			"value": "[reference(variables('networkInterfaceName')).dnsSettings.internalDnsNameLabel]"
-		},
-		"internalDomainNameSuffix": {
-			"type": "string",
-			"value": "[reference(variables('networkInterfaceName')).dnsSettings.internalDomainNameSuffix]"
-		},
-		"internalFqdn": {
-			"type": "string",
-			"value": "[reference(variables('networkInterfaceName')).dnsSettings.internalFqdn]"
-		}
+		}	
 	}
 }

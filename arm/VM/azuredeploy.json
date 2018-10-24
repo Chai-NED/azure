@@ -261,10 +261,10 @@
 		"dataDiskNamePrefix": "[concat(parameters('virtualMachineName'), '_data_')]",
 		"networkInterfaceName": "[concat(parameters('virtualMachineName'), '_nic')]",
 		"publicIpAddressName": "[concat(parameters('virtualMachineName'), '_pip')]",
-        "computeApiVersion": "2017-03-30",
+        "computeApiVersion": "2017-12-01",
         "networkApiVersion": "2018-01-01",
-        "storageApiVersion": "2015-06-15",
-        "diagnosticsApiVersion": "2017-05-01-preview"
+        "storageApiVersion": "2018-07-01",
+        "diagnosticsApiVersion": "2017-12-01"
 	},
 	"resources": [
 		{
@@ -419,7 +419,7 @@
 		{
 			"name": "[concat(parameters('virtualMachineName'),'/', variables('diagnosticsExtensionName'))]",
 			"type": "Microsoft.Compute/virtualMachines/extensions",
-			"apiVersion": "2017-12-01",
+			"apiVersion": "[variables('diagnosticsApiVersion')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
 				"[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
