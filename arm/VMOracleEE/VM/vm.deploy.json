@@ -9,11 +9,11 @@
 				"description": "The Azure region within which to deploy. Examples: 'eastus', 'westus', and so on. See https://azure.microsoft.com/regions/."
 			}
 		},
-		"availabilitySetName": {
-			"type": "string",
+		"availabilityZones": {
+			"type": "array",
 			"metadata": {
-				"displayName": "Availability set",
-				"description": "A managed availability set to which to join the VM. If the availability set does not yet exist, it will be created."
+				"displayName": "Availability zone(s)",
+				"description": "Availability zone(s). See https://docs.microsoft.com/en-us/azure/virtual-machines/linux/create-cli-availability-zone#check-vm-sku-availability or use Azure CLI command 'az vm list-skus --location (REGION) --output table'"
 			}
 		},
 		"virtualMachineName": {
@@ -213,33 +213,15 @@
 	},
 	"resources": [
 		{
-			"type": "Microsoft.Compute/availabilitySets",
-			"sku": {
-				"name": "Aligned"
-			},
-			"name": "[parameters('availabilitySetName')]",
-			"apiVersion": "[variables('computeApiVersion')]",
-			"location": "[parameters('location')]",
-			"scale": null,
-			"properties": {
-				"platformUpdateDomainCount": 5,
-				"platformFaultDomainCount": 3,
-				"virtualMachines": []
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[parameters('virtualMachineName')]",
 			"type": "Microsoft.Compute/virtualMachines",
 			"apiVersion": "[variables('computeApiVersion')]",
 			"location": "[parameters('location')]",
+			"zones": "[parameters('availabilityZones')]",
 			"dependsOn": [
 				"[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
 			],
 			"properties": {
-				"availabilitySet": {
-					"id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"
-				},
 				"osProfile": {
 					"computerName": "[parameters('virtualMachineName')]",
 					"adminUsername": "[parameters('adminUsername')]",

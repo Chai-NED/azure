@@ -16,18 +16,39 @@
                 "description": "The Azure region within which to deploy. Examples: 'East US', 'West US', and so on. See https://azure.microsoft.com/regions/."
             }
         },
-		"resourceGroupNameStorage": {
-			"type": "string",
-			"metadata": {
-				"displayName": "Resource Group for Storage Account",
-				"description": "The resource group name that should contain the storage account."
-			}
-		},
         "storageAccountName": {
             "type": "string",
             "metadata": {
                 "displayName": "Storage Account Name",
                 "description": "Name for the Storage Account"
+            }
+        },
+        "resourceGroupNameVNet": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Resource group for VNet to which access is limited with service endpoint",
+                "description": "Resource group for VNet to which access is limited with service endpoint"
+            }
+        },
+        "vnetName": {
+            "type": "string",
+            "metadata": {
+                "displayName": "VNet to which access is limited with service endpoint",
+                "description": "VNet to which access is limited with service endpoint"
+            }
+        },
+        "subnetNames": {
+            "type": "array",
+            "metadata": {
+                "displayName": "Subnet names in the VNet to which to grant access",
+                "description": "Subnet names in the VNet to which to grant access"
+            }
+        },
+        "externalSourceIP": {
+            "type": "string",
+            "metadata": {
+                "displayName": "External source IP to which to grant access",
+                "description": "External source IP to which to grant access"
             }
         }
     },
@@ -51,6 +72,26 @@
             "properties": {
                 "accessTier": "Hot",
                 "supportsHttpsTrafficOnly": true,
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "copy": [
+                        {
+                            "name": "virtualNetworkRules",
+                            "count": "[length(parameters('subnetNames'))]",
+                            "input": {
+                                "id": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupNameVNet'), '/providers/Microsoft.Network/virtualNetworks/', parameters('vnetName'), '/subnets/', parameters('subnetNames')[copyIndex('virtualNetworkRules')])]",
+                                "action": "Allow"
+                            }
+                        }
+                    ],
+                    "ipRules": [
+                        {
+                            "value": "[parameters('externalSourceIP')]",
+                            "action": "Allow"
+                        }
+                    ],
+                    "defaultAction": "Deny"
+                },
                 "encryption": {
                     "services": {
                         "file": {

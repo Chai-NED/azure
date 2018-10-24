@@ -6,12 +6,21 @@
             "value": ""
         },
         "location": {
-            "value": "eastus"
-        },
-        "resourceGroupNameStorage": {
-            "value": ""
+            "value": "centralus"
         },
         "storageAccountName": {
+            "value": ""
+        },
+        "resourceGroupNameVNet": {
+            "value": "oracle-rg"
+        },
+        "vnetName": {
+            "value": "oracle-vnet"
+        },
+        "subnetNames": {
+            "value": ["public", "private1", "private2"]
+        },
+        "externalSourceIP": {
             "value": ""
         }
     }

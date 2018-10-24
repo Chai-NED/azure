@@ -3,13 +3,13 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "eastus"
+            "value": "centralus"
         },
-        "availabilitySetName": {
-            "value": "oravm-avset"
+        "availabilityZones": {
+            "value": ["2"]
         },
         "virtualMachineName": {
-            "value": ""
+            "value": "oravm2"
         },
         "virtualMachineSize": {
             "value": "Standard_DS13_v2"
@@ -60,16 +60,16 @@
             "value": 128
         },
         "resourceGroupNameNetwork": {
-            "value": ""
+            "value": "oracle-rg"
         },
         "virtualNetworkName": {
-            "value": ""
+            "value": "oracle-vnet"
         },
         "subnetName": {
-            "value": ""
+            "value": "private2"
         },
         "resourceGroupNameDiagnostics": {
-            "value": ""
+            "value": "oracle-rg"
         },
         "diagnosticsStorageAccountName": {
             "value": ""

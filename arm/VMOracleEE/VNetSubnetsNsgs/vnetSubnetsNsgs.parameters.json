@@ -3,10 +3,10 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "eastus"
+            "value": "centralus"
         },
         "vnet_name": {
-            "value": "vnet1"
+            "value": "oracle-vnet"
         },
         "vnet_address_space": {
             "value": "172.16.0.0/16"

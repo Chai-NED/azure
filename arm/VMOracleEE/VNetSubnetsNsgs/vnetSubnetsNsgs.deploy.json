@@ -118,7 +118,14 @@
                             "networkSecurityGroup": {
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_public_name'))]"
                             },
-                            "serviceEndpoints": []
+                            "serviceEndpoints": [
+                                {
+                                    "service": "Microsoft.Storage",
+                                    "locations": [
+                                        "[parameters('location')]"
+                                    ]
+                                }
+                            ]
                         }
                     },
                     {
@@ -128,7 +135,14 @@
                             "networkSecurityGroup": {
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_private1_name'))]"
                             },
-                            "serviceEndpoints": []
+                            "serviceEndpoints": [
+                                {
+                                    "service": "Microsoft.Storage",
+                                    "locations": [
+                                        "[parameters('location')]"
+                                    ]
+                                }
+                            ]
                         }
                     },
                     {
@@ -138,7 +152,14 @@
                             "networkSecurityGroup": {
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_private2_name'))]"
                             },
-                            "serviceEndpoints": []
+                            "serviceEndpoints": [
+                                {
+                                    "service": "Microsoft.Storage",
+                                    "locations": [
+                                        "[parameters('location')]"
+                                    ]
+                                }
+                            ]
                         }
                     }
                 ],
@@ -149,54 +170,6 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_public_name'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_private1_name'))]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_private2_name'))]"
-            ]
-        },
-        {
-            "type": "Microsoft.Network/virtualNetworks/subnets",
-            "name": "[concat(parameters('vnet_name'), '/', parameters('subnet_public_name'))]",
-            "apiVersion": "[variables('networkApiVersion')]",
-            "properties": {
-                "addressPrefix": "[parameters('subnet_public_address_space')]",
-                "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_public_name'))]"
-                },
-                "serviceEndpoints": []
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_name'))]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_public_name'))]"
-            ]
-        },
-        {
-            "type": "Microsoft.Network/virtualNetworks/subnets",
-            "name": "[concat(parameters('vnet_name'), '/', parameters('subnet_private1_name'))]",
-            "apiVersion": "[variables('networkApiVersion')]",
-            "properties": {
-                "addressPrefix": "[parameters('subnet_private1_address_space')]",
-                "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_private1_name'))]"
-                },
-                "serviceEndpoints": []
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_name'))]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_private1_name'))]"
-            ]
-        },
-        {
-            "type": "Microsoft.Network/virtualNetworks/subnets",
-            "name": "[concat(parameters('vnet_name'), '/', parameters('subnet_private2_name'))]",
-            "apiVersion": "[variables('networkApiVersion')]",
-            "properties": {
-                "addressPrefix": "[parameters('subnet_private2_address_space')]",
-                "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_private2_name'))]"
-                },
-                "serviceEndpoints": []
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_name'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_private2_name'))]"
             ]
         },

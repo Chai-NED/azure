@@ -17,13 +17,13 @@ function GetResources()
 # Delete VMs first to remove any leases
 Write-Host 'Removing VMs'
 
-$vms = GetResources  | where {$_.Name -like ($NamePrefixToDelete + '*') -and $_.ResourceType -eq 'Microsoft.Compute/virtualMachines'}
+$vms = GetResources  | Where-Object {$_.Name -like ($NamePrefixToDelete + '*') -and $_.ResourceType -eq 'Microsoft.Compute/virtualMachines'}
 
-$vms | foreach {Write-Host ('Removing ' + $_.Name + ' | ' + $_.ResourceId); Remove-AzureRmResource -ResourceId $_.ResourceId -Force}
+$vms | ForEach-Object {Write-Host ('Removing ' + $_.Name + ' | ' + $_.ResourceId); Remove-AzureRmResource -ResourceId $_.ResourceId -Force}
 
 # Delete other resources
 Write-Host 'Removing other resources'
 
-$resources = GetResources | where {$_.Name -like ($NamePrefixToDelete + '*')}
+$resources = GetResources | Where-Object {$_.Name -like ($NamePrefixToDelete + '*')}
 
-$resources | foreach {Write-Host ('Removing ' + $_.Name + ' | ' + $_.ResourceId); Remove-AzureRmResource -ResourceId $_.ResourceId -Force}
+$resources | ForEach-Object {Write-Host ('Removing ' + $_.Name + ' | ' + $_.ResourceId); Remove-AzureRmResource -ResourceId $_.ResourceId -Force}
