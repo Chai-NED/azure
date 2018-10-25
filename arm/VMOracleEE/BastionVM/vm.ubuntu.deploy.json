@@ -81,7 +81,7 @@
 			}
 		},
 		"sshKeyData": {
-			"type": "string",
+			"type": "securestring",
 			"metadata": {
 				"displayName": "SSH public key as a string",
 				"description": "SSH public key as a string"
@@ -153,6 +153,13 @@
 				"displayName": "Subnet",
 				"description": "Subnet into which to deploy the VM"
 			}
+		},
+		"storageShellCommand": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Storage shell command",
+				"description": "Storage shell command to mount external storage"
+			}
 		}
 	},
 	"variables": {
@@ -162,8 +169,8 @@
 		"osDiskName": "[concat(parameters('virtualMachineName'), '_os')]",
 		"networkInterfaceName": "[concat(parameters('virtualMachineName'), '_nic')]",
 		"publicIpAddressName": "[concat(parameters('virtualMachineName'), '_pip')]",
-        "computeApiVersion": "2018-06-01",
-        "networkApiVersion": "2018-08-01"
+		"computeApiVersion": "2018-06-01",
+		"networkApiVersion": "2018-08-01"
 	},
 	"resources": [
 		{
@@ -279,6 +286,24 @@
 			"sku": {
 				"name": "[parameters('publicIpAddressSku')]"
 			}
+		},
+		{
+			"name": "[concat(parameters('virtualMachineName'),'/','extensions')]",
+			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"location": "[parameters('location')]",
+			"apiVersion": "[variables('computeApiVersion')]",
+			"dependsOn": [
+				"[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+			],
+			"properties": {
+				"publisher": "Microsoft.Azure.Extensions",
+				"type": "CustomScript",
+				"typeHandlerVersion": "2.0",
+				"autoUpgradeMinorVersion": true,
+				"settings": {
+					"commandToExecute": "[parameters('storageShellCommand')]"
+				}
+			}
 		}
 	],
 	"outputs": {
@@ -305,6 +330,6 @@
 		"dnsServers": {
 			"type": "array",
 			"value": "[reference(variables('networkInterfaceName')).dnsSettings.dnsServers]"
-		}	
+		}
 	}
 }

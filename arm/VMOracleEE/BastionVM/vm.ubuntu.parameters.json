@@ -58,6 +58,9 @@
         },
         "subnetName": {
             "value": "public"
+        },
+        "storageShellCommand": {
+            "value": ""
         }
     }
 }
