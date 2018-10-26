@@ -196,6 +196,13 @@
 				"displayName": "Storage Account for VM diagnostics",
 				"description": "The standard storage account to which VM diagnostics data will be written."
 			}
+		},
+		"storageShellCommand": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Storage shell command",
+				"description": "Storage shell command to mount external storage"
+			}
 		}
 	},
 	"variables": {

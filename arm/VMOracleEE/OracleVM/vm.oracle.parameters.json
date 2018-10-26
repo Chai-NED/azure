@@ -6,10 +6,10 @@
             "value": "centralus"
         },
         "availabilityZones": {
-            "value": ["2"]
+            "value": null
         },
         "virtualMachineName": {
-            "value": "oravm2"
+            "value": ""
         },
         "virtualMachineSize": {
             "value": "Standard_DS13_v2"
@@ -66,12 +66,15 @@
             "value": "oracle-vnet"
         },
         "subnetName": {
-            "value": "private2"
+            "value": ""
         },
         "resourceGroupNameDiagnostics": {
             "value": "oracle-rg"
         },
         "diagnosticsStorageAccountName": {
+            "value": ""
+        },
+        "storageShellCommand": {
             "value": ""
         }
     }
