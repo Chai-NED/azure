@@ -73,9 +73,6 @@
         },
         "diagnosticsStorageAccountName": {
             "value": ""
-        },
-        "storageShellCommand": {
-            "value": ""
         }
     }
 }

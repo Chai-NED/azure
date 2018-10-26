@@ -97,7 +97,10 @@ $share = New-AzureStorageShare $storageShareName -Context $storageContext
 
 # Prepare shell command to run in Linux VMs for persistent mount point to Azure Files storage
 $shell_start_ubuntu = "sudo apt-get update && sudo apt-get install cifs-utils && "
-$shell_start_oracle = "sudo yum -y install cifs-utils && "
+
+# Oracle Enterprise Linux 6.6 uses Linux kernel 3.8. I have not been able to get OEL to mount Azure Files shares, even after downgrading to SMB 2.1.
+# See for example https://community.oracle.com/thread/3650780
+# $shell_start_oracle = "sudo yum -y install cifs-utils && "
 
 $shell_main = `
 "sudo mkdir " + $storageMountPoint + " && " + `
@@ -108,7 +111,7 @@ $shell_main = `
 "sudo mount -a;"
 
 $shell_ubuntu = $shell_start_ubuntu + $shell_main
-$shell_oracle = $shell_start_oracle + $shell_main
+# $shell_oracle = $shell_start_oracle + $shell_main
 
 # Deploy Bastion Host - Ubuntu
 Write-Host "Deploying Bastion VM - Ubuntu Server 18.10";
@@ -117,12 +120,12 @@ New-AzureRmResourceGroupDeployment -Name ($deploymentName + '-BastionUbuntu') -R
 
 # Deploy first of two Oracle VMs
 Write-Host "Deploying Oracle VM1";
-New-AzureRmResourceGroupDeployment -Name ($deploymentName + '-OracleVM1') -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_OracleVM -TemplateParameterFile $parametersFilePath_OracleVM -virtualMachineName "oravm1" -availabilityZones 1 -subnetName "private1" -storageShellCommand $shell_oracle -Verbose -DeploymentDebugLogLevel All
+New-AzureRmResourceGroupDeployment -Name ($deploymentName + '-OracleVM1') -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_OracleVM -TemplateParameterFile $parametersFilePath_OracleVM -virtualMachineName "oravm1" -availabilityZones 1 -subnetName "private1" -Verbose -DeploymentDebugLogLevel All
 # Get-AzureRmResourceGroupDeploymentOperation -DeploymentName ($deploymentName + '-OracleVM1') -ResourceGroupName $resourceGroupName
 
 # Deploy second of two Oracle VMs
 Write-Host "Deploying Oracle VM2";
-New-AzureRmResourceGroupDeployment -Name ($deploymentName + '-OracleVM2') -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_OracleVM -TemplateParameterFile $parametersFilePath_OracleVM -virtualMachineName "oravm2" -availabilityZones 2 -subnetName "private2" -storageShellCommand $shell_oracle -Verbose -DeploymentDebugLogLevel All
+New-AzureRmResourceGroupDeployment -Name ($deploymentName + '-OracleVM2') -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_OracleVM -TemplateParameterFile $parametersFilePath_OracleVM -virtualMachineName "oravm2" -availabilityZones 2 -subnetName "private2" -Verbose -DeploymentDebugLogLevel All
 # Get-AzureRmResourceGroupDeploymentOperation -DeploymentName ($deploymentName + '-OracleVM2') -ResourceGroupName $resourceGroupName
 
 # Deploy Bastion Host - Windows
