@@ -30,16 +30,21 @@ $parametersFilePath_Storage = '.\Storage\storage.parameters.json'
 $templateFilePath_BastionVM_Ubuntu = '.\BastionVM\vm.ubuntu.deploy.json'
 $parametersFilePath_BastionVM_Ubuntu = '.\BastionVM\vm.ubuntu.parameters.json'
 
-$templateFilePath_OracleVM = '.\OracleVM\vm.oracle.deploy.json'
-$parametersFilePath_OracleVM = '.\OracleVM\vm.oracle.parameters.json'
+$templateFilePath_OracleVM_OEL = '.\OracleVM-OEL\vm.oracle.deploy.json'
+$parametersFilePath_OracleVM_OEL = '.\OracleVM-OEL\vm.oracle.parameters.json'
 
-$templateFilePath_BastionVM_Win2016 = '.\BastionVM\vm.win2016.deploy.json'
-$parametersFilePath_BastionVM_Win2016 = '.\BastionVM\vm.win2016.parameters.json'
+$templateFilePath_OracleVM_Ubuntu = '.\OracleVM-Ubuntu\vm.oracle.deploy.json'
+$parametersFilePath_OracleVM_Ubuntu = '.\OracleVM-Ubuntu\vm.oracle.parameters.json'
+
+# $templateFilePath_BastionVM_Win2016 = '.\BastionVM\vm.win2016.deploy.json'
+# $parametersFilePath_BastionVM_Win2016 = '.\BastionVM\vm.win2016.parameters.json'
 #
 
 # Storage management for Linux VMs
 $storageShareName = "software"
+$storageShareFolder = "scripts"
 $storageMountPoint = "/mnt/azure"
+$script1 = "script1.sh"
 # ##########
 
 
@@ -63,14 +68,14 @@ Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Templ
 Write-Host "Testing deployment - Storage";
 Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_Storage -TemplateParameterFile $parametersFilePath_Storage -Verbose
 
-Write-Host "Testing deployment - Oracle VM";
-Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_OracleVM -TemplateParameterFile $parametersFilePath_OracleVM -virtualMachineName "test" -availabilityZones 1 -subnetName "test" -storageShellCommand "test" -Verbose
-
 Write-Host "Testing deployment - Bastion VM - Ubuntu Server 18.10";
-Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_BastionVM_Ubuntu -TemplateParameterFile $parametersFilePath_BastionVM_Ubuntu -Verbose
+Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_BastionVM_Ubuntu -TemplateParameterFile $parametersFilePath_BastionVM_Ubuntu -storageShellCommand "test" -Verbose
 
-Write-Host "Testing deployment - Bastion VM - Windows Server 2016 Datacenter";
-Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_BastionVM_Win2016 -TemplateParameterFile $parametersFilePath_BastionVM_Win2016 -Verbose
+Write-Host "Testing deployment - Oracle VM - Ubuntu";
+Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_OracleVM_Ubuntu -TemplateParameterFile $parametersFilePath_OracleVM_Ubuntu -virtualMachineName "test" -availabilityZones 1 -subnetName "test" -storageShellCommand "test" -Verbose
+
+# Write-Host "Testing deployment - Bastion VM - Windows Server 2016 Datacenter";
+# Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_BastionVM_Win2016 -TemplateParameterFile $parametersFilePath_BastionVM_Win2016 -Verbose
 
 
 
@@ -87,20 +92,21 @@ New-AzureRmResourceGroupDeployment -Name ($deploymentName + '-Storage') -Resourc
 
 # Get Storage Account Key and use it to create an Azure File Share called software
 $key = (Get-AzureRmStorageAccountKey -ResourceGroupName $resourceGroupName -Name $storageAccountName)[0].Value
-# $keySecure = ConvertTo-SecureString -String $key -AsPlainText -Force
 $storageContext = New-AzureStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $key
 $share = New-AzureStorageShare $storageShareName -Context $storageContext
-
+$share = (Get-AzureStorageShare -Context $storageContext -Prefix $storageShareName)[0]
+$shareDir = New-AzureStorageDirectory -Share $share -Path $storageShareFolder
+$script1 = Set-AzureStorageFileContent -Source (".\BashScripts\" + $script1) -Directory $shareDir
 
 # Linux VMs - we will pass several parameters dynamically in addition to the parameters file.
 # Dynamic params include a shell script to mount Azure storage, and for the Oracle VMs, we also pass per-VM name, availability zone, and subnet.
 
-# Prepare shell command to run in Linux VMs for persistent mount point to Azure Files storage
-$shell_start_ubuntu = "sudo apt-get update && sudo apt-get install cifs-utils && "
-
 # Oracle Enterprise Linux 6.6 uses Linux kernel 3.8. I have not been able to get OEL to mount Azure Files shares, even after downgrading to SMB 2.1.
 # See for example https://community.oracle.com/thread/3650780
 # $shell_start_oracle = "sudo yum -y install cifs-utils && "
+
+# Prepare shell command to run in Linux VMs for persistent mount point to Azure Files storage
+$shell_start_ubuntu = "sudo apt-get update && sudo apt-get install cifs-utils && "
 
 $shell_main = `
 "sudo mkdir " + $storageMountPoint + " && " + `
@@ -108,27 +114,34 @@ $shell_main = `
 "if [ ! -f ""/etc/smbcredentials/" + $storageAccountName + ".cred"" ]; then sudo bash -c 'echo -e ""username=" + $storageAccountName + "\npassword=" + $key + """ >> /etc/smbcredentials/" + $storageAccountName + ".cred'; fi && " + `
 "sudo chmod 600 /etc/smbcredentials/" + $storageAccountName + ".cred && " + `
 "sudo bash -c 'echo ""//" + $storageAccountName + ".file.core.windows.net/" + $storageShareName + " " + $storageMountPoint + " cifs nofail,vers=3.0,credentials=/etc/smbcredentials/" + $storageAccountName + ".cred,dir_mode=0777,file_mode=0777,serverino"" >> /etc/fstab' && " + `
-"sudo mount -a;"
+"sudo mount -a && " + `
+"sudo bash " + $storageMountPoint + "/" + $storageShareFolder + "/" + $script1 + ";"
 
-$shell_ubuntu = $shell_start_ubuntu + $shell_main
 # $shell_oracle = $shell_start_oracle + $shell_main
+$shell_ubuntu = $shell_start_ubuntu + $shell_main
 
 # Deploy Bastion Host - Ubuntu
 Write-Host "Deploying Bastion VM - Ubuntu Server 18.10";
-New-AzureRmResourceGroupDeployment -Name ($deploymentName + '-BastionUbuntu') -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_BastionVM_Ubuntu -TemplateParameterFile $parametersFilePath_BastionVM_Ubuntu -storageShellCommand $shell_ubuntu -DeploymentDebugLogLevel All
+New-AzureRmResourceGroupDeployment -Name ($deploymentName + '-bastionubuntu') -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_BastionVM_Ubuntu -TemplateParameterFile $parametersFilePath_BastionVM_Ubuntu -storageShellCommand $shell_ubuntu -DeploymentDebugLogLevel All
 # Get-AzureRmResourceGroupDeploymentOperation -DeploymentName ($deploymentName + '-BastionUbuntu') -ResourceGroupName $resourceGroupName
 
 # Deploy first of two Oracle VMs
-Write-Host "Deploying Oracle VM1";
-New-AzureRmResourceGroupDeployment -Name ($deploymentName + '-OracleVM1') -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_OracleVM -TemplateParameterFile $parametersFilePath_OracleVM -virtualMachineName "oravm1" -availabilityZones 1 -subnetName "private1" -Verbose -DeploymentDebugLogLevel All
+Write-Host "Deploying Oracle VM1 - Ubuntu Server 18.10";
+$vmName = "oravm1"
+$avZone = 1
+$subnetName = "private1"
+New-AzureRmResourceGroupDeployment -Name ($deploymentName + "-" + $vmName) -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_OracleVM_Ubuntu -TemplateParameterFile $parametersFilePath_OracleVM_Ubuntu -virtualMachineName $vmName -availabilityZones $avZone -subnetName $subnetName -storageShellCommand $shell_ubuntu -Verbose -DeploymentDebugLogLevel All
 # Get-AzureRmResourceGroupDeploymentOperation -DeploymentName ($deploymentName + '-OracleVM1') -ResourceGroupName $resourceGroupName
 
 # Deploy second of two Oracle VMs
-Write-Host "Deploying Oracle VM2";
-New-AzureRmResourceGroupDeployment -Name ($deploymentName + '-OracleVM2') -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_OracleVM -TemplateParameterFile $parametersFilePath_OracleVM -virtualMachineName "oravm2" -availabilityZones 2 -subnetName "private2" -Verbose -DeploymentDebugLogLevel All
+Write-Host "Deploying Oracle VM2 - Ubuntu Server 18.10";
+$vmName = "oravm2"
+$avZone = 2
+$subnetName = "private2"
+New-AzureRmResourceGroupDeployment -Name ($deploymentName + "-" + $vmName) -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_OracleVM_Ubuntu -TemplateParameterFile $parametersFilePath_OracleVM_Ubuntu -virtualMachineName $vmName -availabilityZones $avZone -subnetName $subnetName -storageShellCommand $shell_ubuntu -Verbose -DeploymentDebugLogLevel All
 # Get-AzureRmResourceGroupDeploymentOperation -DeploymentName ($deploymentName + '-OracleVM2') -ResourceGroupName $resourceGroupName
 
 # Deploy Bastion Host - Windows
-Write-Host "Deploying Bastion VM - Windows Server 2016 Datacenter";
-New-AzureRmResourceGroupDeployment -Name ($deploymentName + '-BastionWindows') -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_BastionVM_Win2016 -TemplateParameterFile $parametersFilePath_BastionVM_Win2016 -Verbose -DeploymentDebugLogLevel All
+# Write-Host "Deploying Bastion VM - Windows Server 2016 Datacenter";
+# New-AzureRmResourceGroupDeployment -Name ($deploymentName + '-BastionWindows') -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath_BastionVM_Win2016 -TemplateParameterFile $parametersFilePath_BastionVM_Win2016 -Verbose -DeploymentDebugLogLevel All
 # Get-AzureRmResourceGroupDeploymentOperation -DeploymentName ($deploymentName + '-BastionWindows') -ResourceGroupName $resourceGroupName

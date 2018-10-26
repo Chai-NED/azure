@@ -1,0 +1,81 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "centralus"
+        },
+        "availabilityZones": {
+            "value": null
+        },
+        "virtualMachineName": {
+            "value": ""
+        },
+        "virtualMachineSize": {
+            "value": "Standard_DS13_v2"
+        },
+        "publisher": {
+            "value": "Canonical"
+        },
+        "offer": {
+            "value": "UbuntuServer"
+        },
+        "sku": {
+            "value": "18.10"
+        },
+        "version": {
+            "value": "latest"
+        },
+        "adminUsername": {
+            "value": "oraadmin"
+        },
+        "adminPassword": {
+            "value": ""
+        },
+        "sshKeyData": {
+            "value": "ssh-rsa KEY oraadmin"
+        },
+        "osDiskStorageType": {
+            "value": "Premium_LRS"
+        },
+        "osDiskSizeInGB": {
+            "value": 128
+        },
+        "dataDiskStorageType": {
+            "value": "Premium_LRS"
+        },
+        "dataDiskCount": {
+            "value": 16
+        },
+        "dataDiskSizeInGB": {
+            "value": 1023
+        },
+        "recoDiskStorageType": {
+            "value": "Premium_LRS"
+        },
+        "recoDiskCount": {
+            "value": 4
+        },
+        "recoDiskSizeInGB": {
+            "value": 150
+        },
+        "resourceGroupNameNetwork": {
+            "value": "oracle-rg"
+        },
+        "virtualNetworkName": {
+            "value": "oracle-vnet"
+        },
+        "subnetName": {
+            "value": ""
+        },
+        "resourceGroupNameDiagnostics": {
+            "value": "oracle-rg"
+        },
+        "diagnosticsStorageAccountName": {
+            "value": ""
+        },
+        "storageShellCommand": {
+            "value": ""
+        }
+    }
+}
