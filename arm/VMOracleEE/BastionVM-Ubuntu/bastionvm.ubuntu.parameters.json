@@ -15,7 +15,7 @@
             "value": ""
         },
         "virtual_machine_size": {
-            "value": "Standard_DS3_v2"
+            "value": ""
         },
         "publisher": {
             "value": "Canonical"

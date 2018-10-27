@@ -75,6 +75,7 @@ $shellScriptFileName = "script1.sh"
 $shellScriptLocalPath = ".\BashScripts\" + $shellScriptFileName
 
 # Bastion VM
+$bastionVMSize = "Standard_DS3_v2"
 $bastionVMAvailabilitySetName = "bastionubuntu_avset"
 $bastionVMName = "bastionubuntu1"
 $bastionVMAdminUsername = "bastionadmin"
@@ -242,6 +243,7 @@ Test-AzureRmResourceGroupDeployment `
 	-availability_set_name $bastionVMAvailabilitySetName `
 	-resource_group_name_vm $ResourceGroupName `
 	-virtual_machine_name $bastionVMName `
+	-virtual_machine_size $bastionVMSize `
 	-admin_username $bastionVMAdminUsername `
 	-admin_password $bastionVMAdminPassword `
 	-ssh_key_data $bastionVMSSHKeyData `
@@ -261,6 +263,7 @@ New-AzureRmResourceGroupDeployment `
 	-availability_set_name $bastionVMAvailabilitySetName `
 	-resource_group_name_vm $ResourceGroupName `
 	-virtual_machine_name $bastionVMName `
+	-virtual_machine_size $bastionVMSize `
 	-admin_username $bastionVMAdminUsername `
 	-admin_password $bastionVMAdminPassword `
 	-ssh_key_data $bastionVMSSHKeyData `
