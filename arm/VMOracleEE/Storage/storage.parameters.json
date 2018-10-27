@@ -2,25 +2,25 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "subscriptionId": {
+        "subscription_id": {
             "value": ""
         },
         "location": {
-            "value": "centralus"
-        },
-        "storageAccountName": {
             "value": ""
         },
-        "resourceGroupNameVNet": {
-            "value": "oracle-rg"
+        "storage_account_name": {
+            "value": ""
         },
-        "vnetName": {
-            "value": "oracle-vnet"
+        "resource_group_name_vnet": {
+            "value": ""
         },
-        "subnetNames": {
-            "value": ["public", "private1", "private2"]
+        "vnet_name": {
+            "value": ""
         },
-        "externalSourceIP": {
+        "subnet_names": {
+            "value": null
+        },
+        "external_source_ip": {
             "value": ""
         }
     }

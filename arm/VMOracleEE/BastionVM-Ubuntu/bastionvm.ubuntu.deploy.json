@@ -9,29 +9,30 @@
 				"description": "The Azure region within which to deploy. Examples: 'East US', 'West US', and so on. See https://azure.microsoft.com/regions/."
 			}
 		},
-		"availabilitySetName": {
+		"availability_set_name": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Availability set",
 				"description": "A managed availability set to which to join the VM. If the availability set does not yet exist, it will be created."
 			}
 		},
-		"resourceGroupNameVM": {
+		"resource_group_name_vm": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Resource Group for VM",
 				"description": "The resource group name that should contain the VM and its related resources, such as NIC and public IP."
 			}
 		},
-		"virtualMachineName": {
+		"virtual_machine_name": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Virtual Machine name",
 				"description": "The VM name. Should be unique within the resource group."
 			}
 		},
-		"virtualMachineSize": {
+		"virtual_machine_size": {
 			"type": "string",
+			"defaultValue": "Standard_DS3_v2",
 			"metadata": {
 				"displayName": "Virtual Machine size",
 				"description": "The VM size. See https://docs.microsoft.com/azure/virtual-machines/windows/sizes or use Azure CLI command 'az vm list-sizes'."
@@ -66,28 +67,28 @@
 				"description": "Image version. Typically use latest."
 			}
 		},
-		"adminUsername": {
+		"admin_username": {
 			"type": "string",
 			"metadata": {
 				"displayName": "VM administrator username",
 				"description": "VM administrator username"
 			}
 		},
-		"adminPassword": {
+		"admin_password": {
 			"type": "securestring",
 			"metadata": {
 				"displayName": "VM administrator password",
 				"description": "VM administrator password"
 			}
 		},
-		"sshKeyData": {
+		"ssh_key_data": {
 			"type": "securestring",
 			"metadata": {
 				"displayName": "SSH public key as a string",
 				"description": "SSH public key as a string"
 			}
 		},
-		"osDiskStorageType": {
+		"os_disk_storage_type": {
 			"type": "string",
 			"allowedValues": [
 				"Standard_LRS",
@@ -99,7 +100,7 @@
 				"description": "OS disk storage type. Standard_LRS uses HDD storage, Premium_LRS uses SSD storage"
 			}
 		},
-		"osDiskSizeInGB": {
+		"os_disk_size_gb": {
 			"type": "int",
 			"defaultValue": 129,
 			"minValue": 32,
@@ -109,7 +110,7 @@
 				"description": "OS disk size in GB"
 			}
 		},
-		"publicIpAddressType": {
+		"public_ip_address_type": {
 			"type": "string",
 			"allowedValues": [
 				"Dynamic",
@@ -121,7 +122,7 @@
 				"description": "The public IP address type: Static or Dynamic."
 			}
 		},
-		"publicIpAddressSku": {
+		"public_ip_address_sku": {
 			"type": "string",
 			"allowedValues": [
 				"Basic",
@@ -133,28 +134,28 @@
 				"description": "The public IP address SKU to use. See https://docs.microsoft.com/azure/virtual-network/virtual-network-ip-addresses-overview-arm"
 			}
 		},
-		"resourceGroupNameNetwork": {
+		"resource_group_name_network": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Resource Group for networking resources",
 				"description": "The Resource Group that contains the VNet, subnet, and NSG to use. Can be the same as the Resource Group where the VM will be deployed, or can refer to a separate Resource Group which contains durable networking resources."
 			}
 		},
-		"virtualNetworkName": {
+		"vnet_name": {
 			"type": "string",
 			"metadata": {
 				"displayName": "VNet",
 				"description": "Virtual network into which to deploy the VM"
 			}
 		},
-		"subnetName": {
+		"subnet_name": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Subnet",
 				"description": "Subnet into which to deploy the VM"
 			}
 		},
-		"storageShellCommand": {
+		"post_deploy_shell_command": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Storage shell command",
@@ -163,12 +164,12 @@
 		}
 	},
 	"variables": {
-		"vnetId": "[resourceId(parameters('resourceGroupNameNetwork'), 'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-		"subnetReference": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
-		"uniqueDnsLabelPrefix": "[concat(parameters('virtualMachineName'), uniquestring(resourceGroup().id))]",
-		"osDiskName": "[concat(parameters('virtualMachineName'), '_os')]",
-		"networkInterfaceName": "[concat(parameters('virtualMachineName'), '_nic')]",
-		"publicIpAddressName": "[concat(parameters('virtualMachineName'), '_pip')]",
+		"vnetId": "[resourceId(parameters('resource_group_name_network'), 'Microsoft.Network/virtualNetworks', parameters('vnet_name'))]",
+		"subnetReference": "[concat(variables('vnetId'), '/subnets/', parameters('subnet_name'))]",
+		"uniqueDnsLabelPrefix": "[concat(parameters('virtual_machine_name'), uniquestring(resourceGroup().id))]",
+		"osDiskName": "[concat(parameters('virtual_machine_name'), '_os')]",
+		"networkInterfaceName": "[concat(parameters('virtual_machine_name'), '_nic')]",
+		"publicIpAddressName": "[concat(parameters('virtual_machine_name'), '_pip')]",
 		"computeApiVersion": "2018-06-01",
 		"networkApiVersion": "2018-08-01"
 	},
@@ -178,7 +179,7 @@
 			"sku": {
 				"name": "Aligned"
 			},
-			"name": "[parameters('availabilitySetName')]",
+			"name": "[parameters('availability_set_name')]",
 			"apiVersion": "[variables('computeApiVersion')]",
 			"location": "[parameters('location')]",
 			"properties": {
@@ -189,7 +190,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[parameters('virtualMachineName')]",
+			"name": "[parameters('virtual_machine_name')]",
 			"type": "Microsoft.Compute/virtualMachines",
 			"apiVersion": "[variables('computeApiVersion')]",
 			"location": "[parameters('location')]",
@@ -198,27 +199,27 @@
 			],
 			"properties": {
 				"availabilitySet": {
-					"id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"
+					"id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availability_set_name'))]"
 				},
 				"osProfile": {
-					"computerName": "[parameters('virtualMachineName')]",
-					"adminUsername": "[parameters('adminUsername')]",
-					"adminPassword": "[parameters('adminPassword')]",
+					"computerName": "[parameters('virtual_machine_name')]",
+					"adminUsername": "[parameters('admin_username')]",
+					"adminPassword": "[parameters('admin_password')]",
 					"linuxConfiguration": {
 						"provisionVMAgent": "true",
 						"disablePasswordAuthentication": false,
 						"ssh": {
 							"publicKeys": [
 								{
-									"path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-									"keyData": "[parameters('sshKeyData')]"
+									"path": "[concat('/home/', parameters('admin_username'), '/.ssh/authorized_keys')]",
+									"keyData": "[parameters('ssh_key_data')]"
 								}
 							]
 						}
 					}
 				},
 				"hardwareProfile": {
-					"vmSize": "[parameters('virtualMachineSize')]"
+					"vmSize": "[parameters('virtual_machine_size')]"
 				},
 				"storageProfile": {
 					"imageReference": {
@@ -230,9 +231,9 @@
 					"osDisk": {
 						"createOption": "FromImage",
 						"name": "[variables('osDiskName')]",
-						"diskSizeGB": "[parameters('osDiskSizeInGB')]",
+						"diskSizeGB": "[parameters('os_disk_size_gb')]",
 						"managedDisk": {
-							"storageAccountType": "[parameters('osDiskStorageType')]"
+							"storageAccountType": "[parameters('os_disk_storage_type')]"
 						}
 					}
 				},
@@ -265,7 +266,7 @@
 							},
 							"privateIPAllocationMethod": "Dynamic",
 							"publicIpAddress": {
-								"id": "[resourceId(parameters('resourceGroupNameVM'), 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+								"id": "[resourceId(parameters('resource_group_name_vm'), 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
 							}
 						}
 					}
@@ -278,22 +279,22 @@
 			"apiVersion": "[variables('networkApiVersion')]",
 			"location": "[parameters('location')]",
 			"properties": {
-				"publicIpAllocationMethod": "[parameters('publicIpAddressType')]",
+				"publicIpAllocationMethod": "[parameters('public_ip_address_type')]",
 				"dnsSettings": {
 					"domainNameLabel": "[variables('uniqueDnsLabelPrefix')]"
 				}
 			},
 			"sku": {
-				"name": "[parameters('publicIpAddressSku')]"
+				"name": "[parameters('public_ip_address_sku')]"
 			}
 		},
 		{
-			"name": "[concat(parameters('virtualMachineName'),'/','extensions')]",
+			"name": "[concat(parameters('virtual_machine_name'),'/','extensions')]",
 			"type": "Microsoft.Compute/virtualMachines/extensions",
 			"location": "[parameters('location')]",
 			"apiVersion": "[variables('computeApiVersion')]",
 			"dependsOn": [
-				"[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+				"[concat('Microsoft.Compute/virtualMachines/', parameters('virtual_machine_name'))]"
 			],
 			"properties": {
 				"publisher": "Microsoft.Azure.Extensions",
@@ -301,7 +302,7 @@
 				"typeHandlerVersion": "2.0",
 				"autoUpgradeMinorVersion": true,
 				"settings": {
-					"commandToExecute": "[parameters('storageShellCommand')]"
+					"commandToExecute": "[parameters('post_deploy_shell_command')]"
 				}
 			}
 		}
@@ -309,7 +310,7 @@
 	"outputs": {
 		"vmName": {
 			"type": "string",
-			"value": "[parameters('virtualMachineName')]"
+			"value": "[parameters('virtual_machine_name')]"
 		},
 		"publicFqdn": {
 			"type": "string",

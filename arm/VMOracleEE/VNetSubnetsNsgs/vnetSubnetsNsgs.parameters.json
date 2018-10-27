@@ -3,42 +3,42 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "centralus"
+            "value": ""
         },
         "vnet_name": {
-            "value": "oracle-vnet"
+            "value": ""
         },
         "vnet_address_space": {
-            "value": "172.16.0.0/16"
+            "value": ""
         },
         "subnet_public_name": {
-            "value": "public"
+            "value": ""
         },
         "subnet_public_address_space": {
-            "value": "172.16.1.0/24"
+            "value": ""
         },
         "subnet_private1_name": {
-            "value": "private1"
+            "value": ""
         },
         "subnet_private1_address_space": {
-            "value": "172.16.2.0/24"
+            "value": ""
         },
         "subnet_private2_name": {
-            "value": "private2"
+            "value": ""
         },
         "subnet_private2_address_space": {
-            "value": "172.16.3.0/24"
+            "value": ""
         },
         "nsg_public_name": {
-            "value": "public"
+            "value": ""
         },
         "nsg_private1_name": {
-            "value": "private1"
+            "value": ""
         },
         "nsg_private2_name": {
-            "value": "private2"
+            "value": ""
         },
-        "securityRules_ExternalSourceIP_source": {
+        "external_source_ip": {
             "value": ""
         }
     }

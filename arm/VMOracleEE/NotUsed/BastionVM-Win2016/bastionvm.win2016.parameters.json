@@ -3,46 +3,55 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "centralus"
-        },
-        "availabilitySetName": {
-            "value": "bastionubuntu_avset"
+            "value": ""
         },
         "resourceGroupNameVM": {
-            "value": "oracle-rg"
+            "value": ""
+        },
+        "availabilitySetName": {
+            "value": ""
         },
         "virtualMachineName": {
-            "value": "bastionubuntu1"
+            "value": ""
         },
         "virtualMachineSize": {
             "value": "Standard_DS3_v2"
         },
         "publisher": {
-            "value": "Canonical"
+            "value": "MicrosoftWindowsServer"
         },
         "offer": {
-            "value": "UbuntuServer"
+            "value": "WindowsServer"
         },
         "sku": {
-            "value": "18.10"
+            "value": "2016-Datacenter"
         },
         "version": {
             "value": "latest"
         },
+        "licenseType": {
+            "value": "Windows_Server"
+        },
         "adminUsername": {
-            "value": "oraadmin"
+            "value": ""
         },
         "adminPassword": {
             "value": ""
-        },
-        "sshKeyData": {
-            "value": "ssh-rsa KEY oraadmin"
         },
         "osDiskStorageType": {
             "value": "Premium_LRS"
         },
         "osDiskSizeInGB": {
             "value": 129
+        },
+        "dataDiskStorageType": {
+            "value": "Premium_LRS"
+        },
+        "dataDiskCount": {
+            "value": 1
+        },
+        "dataDiskSizeInGB": {
+            "value": 32
         },
         "publicIpAddressType": {
             "value": "Dynamic"
@@ -51,15 +60,12 @@
             "value": "Basic"
         },
         "resourceGroupNameNetwork": {
-            "value": "oracle-rg"
+            "value": ""
         },
         "virtualNetworkName": {
-            "value": "oracle-vnet"
+            "value": ""
         },
         "subnetName": {
-            "value": "public"
-        },
-        "storageShellCommand": {
             "value": ""
         }
     }

@@ -1,7 +1,7 @@
 param
 (
     [string]$SubscriptionId = '',
-    [string]$ResourceGroupName = 'oracle-rg',
+    [string]$ResourceGroupName = '',
     [string]$NamePrefixToDelete = ''
 )
 

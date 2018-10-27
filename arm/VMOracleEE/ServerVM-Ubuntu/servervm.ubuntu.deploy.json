@@ -9,21 +9,21 @@
 				"description": "The Azure region within which to deploy. Examples: 'eastus', 'westus', and so on. See https://azure.microsoft.com/regions/."
 			}
 		},
-		"availabilityZones": {
+		"availability_zones": {
 			"type": "array",
 			"metadata": {
 				"displayName": "Availability zone(s)",
 				"description": "Availability zone(s). See https://docs.microsoft.com/en-us/azure/virtual-machines/linux/create-cli-availability-zone#check-vm-sku-availability or use Azure CLI command 'az vm list-skus --location (REGION) --output table'"
 			}
 		},
-		"virtualMachineName": {
+		"virtual_machine_name": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Virtual Machine name",
 				"description": "The VM name. Should be unique within the resource group."
 			}
 		},
-		"virtualMachineSize": {
+		"virtual_machine_size": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Virtual Machine size",
@@ -59,28 +59,28 @@
 				"description": "Image version. Typically use latest."
 			}
 		},
-		"adminUsername": {
+		"admin_username": {
 			"type": "string",
 			"metadata": {
 				"displayName": "VM administrator username",
 				"description": "VM administrator username"
 			}
 		},
-		"adminPassword": {
+		"admin_password": {
 			"type": "securestring",
 			"metadata": {
 				"displayName": "VM administrator password",
 				"description": "VM administrator password"
 			}
 		},
-		"sshKeyData": {
-			"type": "string",
+		"ssh_key_data": {
+			"type": "securestring",
 			"metadata": {
-				"displayName": "SSH public key as a string",
-				"description": "SSH public key as a string"
+				"displayName": "SSH public key string",
+				"description": "SSH public key string"
 			}
 		},
-		"osDiskStorageType": {
+		"os_disk_storage_type": {
 			"type": "string",
 			"allowedValues": [
 				"Standard_LRS",
@@ -92,7 +92,7 @@
 				"description": "OS disk storage type. Standard_LRS uses HDD storage, Premium_LRS uses SSD storage"
 			}
 		},
-		"osDiskSizeInGB": {
+		"os_disk_size_gb": {
 			"type": "int",
 			"defaultValue": 128,
 			"minValue": 32,
@@ -102,7 +102,7 @@
 				"description": "OS disk size in GB"
 			}
 		},
-		"dataDiskStorageType": {
+		"data_disk_storage_type_group1": {
 			"type": "string",
 			"allowedValues": [
 				"Standard_LRS",
@@ -110,29 +110,29 @@
 			],
 			"defaultValue": "Premium_LRS",
 			"metadata": {
-				"displayName": "Data disk storage type",
-				"description": "Data disk storage type. Standard_LRS uses HDD storage, Premium_LRS uses SSD storage"
+				"displayName": "Data disk storage type - disk group 1",
+				"description": "Data disk storage type - disk group 1. Standard_LRS uses HDD storage, Premium_LRS uses SSD storage"
 			}
 		},
-		"dataDiskCount": {
+		"data_disk_count_group1": {
 			"type": "int",
 			"defaultValue": 1,
 			"metadata": {
-				"displayName": "Number of data disks",
-				"description": "Number of data disks to attach to the VM. At this writing, ARM template language requires an integer 1-800 for loops; less than or equal to 0 (zero) is not allowed."
+				"displayName": "Number of data disks - disk group 1",
+				"description": "Number of data disks to attach to the VM - disk group 1. At this writing, ARM template language requires an integer 1-800 for loops; less than or equal to 0 (zero) is not allowed."
 			}
 		},
-		"dataDiskSizeInGB": {
+		"data_disk_size_gb_group1": {
 			"type": "int",
 			"defaultValue": 1023,
 			"minValue": 32,
 			"maxValue": 1023,
 			"metadata": {
-				"displayName": "Data disk size",
-				"description": "Data disk size in GB. Each data disk will be created at this size"
+				"displayName": "Data disk size - disk group 1",
+				"description": "Data disk size in GB - disk group 1. Each data disk will be created at this size"
 			}
 		},
-		"recoDiskStorageType": {
+		"data_disk_storage_type_group2": {
 			"type": "string",
 			"allowedValues": [
 				"Standard_LRS",
@@ -140,64 +140,64 @@
 			],
 			"defaultValue": "Premium_LRS",
 			"metadata": {
-				"displayName": "Reco disk storage type",
-				"description": "Reco disk storage type. Standard_LRS uses HDD storage, Premium_LRS uses SSD storage"
+				"displayName": "Data disk storage type - disk group 2",
+				"description": "Data disk storage type - disk group 2. Standard_LRS uses HDD storage, Premium_LRS uses SSD storage"
 			}
 		},
-		"recoDiskCount": {
+		"data_disk_count_group2": {
 			"type": "int",
 			"defaultValue": 1,
 			"metadata": {
-				"displayName": "Number of reco disks",
-				"description": "Number of reco disks to attach to the VM. At this writing, ARM template language requires an integer 1-800 for loops; less than or equal to 0 (zero) is not allowed."
+				"displayName": "Number of data disks - disk group 2",
+				"description": "Number of data disks to attach to the VM - disk group 2. At this writing, ARM template language requires an integer 1-800 for loops; less than or equal to 0 (zero) is not allowed."
 			}
 		},
-		"recoDiskSizeInGB": {
+		"data_disk_size_gb_group2": {
 			"type": "int",
 			"defaultValue": 1023,
 			"minValue": 32,
 			"maxValue": 1023,
 			"metadata": {
-				"displayName": "Reco disk size",
-				"description": "Reco disk size in GB. Each data disk will be created at this size"
+				"displayName": "Data disk size - disk group 2",
+				"description": "Data disk size in GB - disk group 2. Each data disk will be created at this size"
 			}
 		},
-		"resourceGroupNameNetwork": {
+		"resource_group_name_network": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Resource Group for networking resources",
 				"description": "The Resource Group that contains the VNet, subnet, and NSG to use. Can be the same as the Resource Group where the VM will be deployed, or can refer to a separate Resource Group which contains durable networking resources."
 			}
 		},
-		"virtualNetworkName": {
+		"vnet_name": {
 			"type": "string",
 			"metadata": {
 				"displayName": "VNet",
 				"description": "Virtual network into which to deploy the VM"
 			}
 		},
-		"subnetName": {
+		"subnet_name": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Subnet",
 				"description": "Subnet into which to deploy the VM"
 			}
 		},
-		"resourceGroupNameDiagnostics": {
+		"resource_group_name_diagnostics": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Resource Group for VM diagnostics",
 				"description": "The Resource Group that contains the standard storage account to which VM diagnostic data will be written. Can be the same as the Resource Group where the VM will be deployed, or can refer to a separate Resource Group which contains durable and/or centralized diagnostics resources."
 			}
 		},
-		"diagnosticsStorageAccountName": {
+		"storage_account_name_diagnostics": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Storage Account for VM diagnostics",
 				"description": "The standard storage account to which VM diagnostics data will be written."
 			}
 		},
-		"storageShellCommand": {
+		"post_deploy_shell_command": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Storage shell command",
@@ -206,48 +206,48 @@
 		}
 	},
 	"variables": {
-		"vnetId": "[resourceId(parameters('resourceGroupNameNetwork'), 'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-		"subnetReference": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
-		"uniqueDnsLabelPrefix": "[concat(parameters('virtualMachineName'), uniquestring(resourceGroup().id))]",
-		"osDiskName": "[concat(parameters('virtualMachineName'), '_os')]",
-		"diskGroup1Prefix": "[concat(parameters('virtualMachineName'), '_data_')]",
-		"diskGroup2Prefix": "[concat(parameters('virtualMachineName'), '_reco_')]",
+		"vnetId": "[resourceId(parameters('resource_group_name_network'), 'Microsoft.Network/virtualNetworks', parameters('vnet_name'))]",
+		"subnetReference": "[concat(variables('vnetId'), '/subnets/', parameters('subnet_name'))]",
+		"uniqueDnsLabelPrefix": "[concat(parameters('virtual_machine_name'), uniquestring(resourceGroup().id))]",
+		"osDiskName": "[concat(parameters('virtual_machine_name'), '_os')]",
+		"diskGroup1Prefix": "[concat(parameters('virtual_machine_name'), '_dg1_')]",
+		"diskGroup2Prefix": "[concat(parameters('virtual_machine_name'), '_dg2_')]",
 		"ipConfigName": "ipconfig1",
-		"networkInterfaceName": "[concat(parameters('virtualMachineName'), '_nic')]",
+		"networkInterfaceName": "[concat(parameters('virtual_machine_name'), '_nic')]",
 		"computeApiVersion": "2018-06-01",
 		"networkApiVersion": "2018-08-01",
 		"storageApiVersion": "2018-07-01"
 	},
 	"resources": [
 		{
-			"name": "[parameters('virtualMachineName')]",
+			"name": "[parameters('virtual_machine_name')]",
 			"type": "Microsoft.Compute/virtualMachines",
 			"apiVersion": "[variables('computeApiVersion')]",
 			"location": "[parameters('location')]",
-			"zones": "[parameters('availabilityZones')]",
+			"zones": "[parameters('availability_zones')]",
 			"dependsOn": [
 				"[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
 			],
 			"properties": {
 				"osProfile": {
-					"computerName": "[parameters('virtualMachineName')]",
-					"adminUsername": "[parameters('adminUsername')]",
-					"adminPassword": "[parameters('adminPassword')]",
+					"computerName": "[parameters('virtual_machine_name')]",
+					"adminUsername": "[parameters('admin_username')]",
+					"adminPassword": "[parameters('admin_password')]",
 					"linuxConfiguration": {
 						"provisionVMAgent": "true",
 						"disablePasswordAuthentication": false,
 						"ssh": {
 							"publicKeys": [
 								{
-									"path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-									"keyData": "[parameters('sshKeyData')]"
+									"path": "[concat('/home/', parameters('admin_username'), '/.ssh/authorized_keys')]",
+									"keyData": "[parameters('ssh_key_data')]"
 								}
 							]
 						}
 					}
 				},
 				"hardwareProfile": {
-					"vmSize": "[parameters('virtualMachineSize')]"
+					"vmSize": "[parameters('virtual_machine_size')]"
 				},
 				"storageProfile": {
 					"imageReference": {
@@ -259,22 +259,22 @@
 					"osDisk": {
 						"createOption": "FromImage",
 						"name": "[variables('osDiskName')]",
-						"diskSizeGB": "[parameters('osDiskSizeInGB')]",
+						"diskSizeGB": "[parameters('os_disk_size_gb')]",
 						"managedDisk": {
-							"storageAccountType": "[parameters('osDiskStorageType')]"
+							"storageAccountType": "[parameters('os_disk_storage_type')]"
 						}
 					},
 					"copy": [
 						{
 							"name": "dataDisks",
-							"count": "[add(parameters('dataDiskCount'), parameters('recoDiskCount'))]",
+							"count": "[add(parameters('data_disk_count_group1'), parameters('data_disk_count_group2'))]",
 							"input": {
 								"lun": "[copyIndex('dataDisks')]",
 								"createOption": "Empty",
-								"name": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('dataDiskCount')), concat(variables('diskGroup1Prefix'), copyIndex('dataDisks', 1)), concat(variables('diskGroup2Prefix'), sub(copyIndex('dataDisks', 1), parameters('dataDiskCount'))))]",
-								"diskSizeGB": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('dataDiskCount')), parameters('dataDiskSizeInGB'), parameters('recoDiskSizeInGB'))]",
+								"name": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('data_disk_count_group1')), concat(variables('diskGroup1Prefix'), copyIndex('dataDisks', 1)), concat(variables('diskGroup2Prefix'), sub(copyIndex('dataDisks', 1), parameters('data_disk_count_group1'))))]",
+								"diskSizeGB": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('data_disk_count_group1')), parameters('data_disk_size_gb_group1'), parameters('data_disk_size_gb_group2'))]",
 								"managedDisk": {
-									"storageAccountType": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('dataDiskCount')), parameters('dataDiskStorageType'), parameters('recoDiskStorageType'))]"
+									"storageAccountType": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('data_disk_count_group1')), parameters('data_disk_storage_type_group1'), parameters('data_disk_storage_type_group2'))]"
 								}
 							}
 						}
@@ -290,7 +290,7 @@
 				"diagnosticsProfile": {
 					"bootDiagnostics": {
 						"enabled": true,
-						"storageUri": "[reference(resourceId(parameters('resourceGroupNameDiagnostics'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), variables('storageApiVersion')).primaryEndpoints['blob']]"
+						"storageUri": "[reference(resourceId(parameters('resource_group_name_diagnostics'), 'Microsoft.Storage/storageAccounts', parameters('storage_account_name_diagnostics')), variables('storageApiVersion')).primaryEndpoints['blob']]"
 					}
 				}
 			},
@@ -321,12 +321,12 @@
 			}
 		},
 		{
-			"name": "[concat(parameters('virtualMachineName'),'/','extensions')]",
+			"name": "[concat(parameters('virtual_machine_name'),'/','extensions')]",
 			"type": "Microsoft.Compute/virtualMachines/extensions",
 			"location": "[parameters('location')]",
 			"apiVersion": "[variables('computeApiVersion')]",
 			"dependsOn": [
-				"[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+				"[concat('Microsoft.Compute/virtualMachines/', parameters('virtual_machine_name'))]"
 			],
 			"properties": {
 				"publisher": "Microsoft.Azure.Extensions",
@@ -334,7 +334,7 @@
 				"typeHandlerVersion": "2.0",
 				"autoUpgradeMinorVersion": true,
 				"settings": {
-					"commandToExecute": "[parameters('storageShellCommand')]"
+					"commandToExecute": "[parameters('post_deploy_shell_command')]"
 				}
 			}
 		}
@@ -342,7 +342,7 @@
 	"outputs": {
 		"vmName": {
 			"type": "string",
-			"value": "[parameters('virtualMachineName')]"
+			"value": "[parameters('virtual_machine_name')]"
 		},
 		"privateFqdn": {
 			"type": "string",

@@ -87,7 +87,7 @@
                 "description": ""
             }
         },
-        "securityRules_ExternalSourceIP_source": {
+        "external_source_ip": {
             "type": "string",
             "metadata": {
                 "displayName": "",
@@ -187,7 +187,7 @@
                             "protocol": "*",
                             "sourcePortRange": "*",
                             "destinationPortRange": "*",
-                            "sourceAddressPrefix": "[parameters('securityRules_ExternalSourceIP_source')]",
+                            "sourceAddressPrefix": "[parameters('external_source_ip')]",
                             "destinationAddressPrefix": "VirtualNetwork",
                             "access": "Allow",
                             "priority": 200,

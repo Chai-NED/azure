@@ -2,7 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-		"subscriptionId": {
+		"subscription_id": {
 			"type": "string",
 			"metadata": {
 				"displayName": "Azure subscription ID",
@@ -16,35 +16,35 @@
                 "description": "The Azure region within which to deploy. Examples: 'East US', 'West US', and so on. See https://azure.microsoft.com/regions/."
             }
         },
-        "storageAccountName": {
+        "storage_account_name": {
             "type": "string",
             "metadata": {
                 "displayName": "Storage Account Name",
                 "description": "Name for the Storage Account"
             }
         },
-        "resourceGroupNameVNet": {
+        "resource_group_name_vnet": {
             "type": "string",
             "metadata": {
                 "displayName": "Resource group for VNet to which access is limited with service endpoint",
                 "description": "Resource group for VNet to which access is limited with service endpoint"
             }
         },
-        "vnetName": {
+        "vnet_name": {
             "type": "string",
             "metadata": {
                 "displayName": "VNet to which access is limited with service endpoint",
                 "description": "VNet to which access is limited with service endpoint"
             }
         },
-        "subnetNames": {
+        "subnet_names": {
             "type": "array",
             "metadata": {
                 "displayName": "Subnet names in the VNet to which to grant access",
                 "description": "Subnet names in the VNet to which to grant access"
             }
         },
-        "externalSourceIP": {
+        "external_source_ip": {
             "type": "string",
             "metadata": {
                 "displayName": "External source IP to which to grant access",
@@ -59,7 +59,7 @@
     "resources": [
         {
             "type": "Microsoft.Storage/storageAccounts",
-            "name": "[parameters('storageAccountName')]",
+            "name": "[parameters('storage_account_name')]",
             "sku": {
                 "name": "Standard_LRS",
                 "tier": "Standard"
@@ -77,16 +77,16 @@
                     "copy": [
                         {
                             "name": "virtualNetworkRules",
-                            "count": "[length(parameters('subnetNames'))]",
+                            "count": "[length(parameters('subnet_names'))]",
                             "input": {
-                                "id": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupNameVNet'), '/providers/Microsoft.Network/virtualNetworks/', parameters('vnetName'), '/subnets/', parameters('subnetNames')[copyIndex('virtualNetworkRules')])]",
+                                "id": "[concat('/subscriptions/', parameters('subscription_id'), '/resourceGroups/', parameters('resource_group_name_vnet'), '/providers/Microsoft.Network/virtualNetworks/', parameters('vnet_name'), '/subnets/', parameters('subnet_names')[copyIndex('virtualNetworkRules')])]",
                                 "action": "Allow"
                             }
                         }
                     ],
                     "ipRules": [
                         {
-                            "value": "[parameters('externalSourceIP')]",
+                            "value": "[parameters('external_source_ip')]",
                             "action": "Allow"
                         }
                     ],
