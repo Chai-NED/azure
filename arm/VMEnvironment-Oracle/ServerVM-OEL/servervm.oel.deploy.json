@@ -1,0 +1,323 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"location": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Azure region",
+				"description": "The Azure region within which to deploy. Examples: 'eastus', 'westus', and so on. See https://azure.microsoft.com/regions/."
+			}
+		},
+		"availability_zones": {
+			"type": "array",
+			"metadata": {
+				"displayName": "Availability zone(s)",
+				"description": "Availability zone(s). See https://docs.microsoft.com/en-us/azure/virtual-machines/linux/create-cli-availability-zone#check-vm-sku-availability or use Azure CLI command 'az vm list-skus --location (REGION) --output table'"
+			}
+		},
+		"virtual_machine_name": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Virtual Machine name",
+				"description": "The VM name. Should be unique within the resource group."
+			}
+		},
+		"virtual_machine_size": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Virtual Machine size",
+				"description": "The VM size. See https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes or use Azure CLI command 'az vm list-sizes'."
+			}
+		},
+		"publisher": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Publisher",
+				"description": "CLI: az vm image list-publishers -l [Azure region]"
+			}
+		},
+		"offer": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Offer",
+				"description": "CLI: az vm image list-offers -l [Azure region] --publisher [Publisher]. For Windows 10, use Windows-10"
+			}
+		},
+		"sku": {
+			"type": "string",
+			"metadata": {
+				"displayName": "SKU",
+				"description": "CLI: az vm image list-skus -l [Azure region] --publisher [Publisher] --offer [Offer]"
+			}
+		},
+		"version": {
+			"type": "string",
+			"defaultValue": "latest",
+			"metadata": {
+				"displayName": "Version",
+				"description": "Image version. Typically use latest."
+			}
+		},
+		"admin_username": {
+			"type": "string",
+			"metadata": {
+				"displayName": "VM administrator username",
+				"description": "VM administrator username"
+			}
+		},
+		"admin_password": {
+			"type": "securestring",
+			"metadata": {
+				"displayName": "VM administrator password",
+				"description": "VM administrator password"
+			}
+		},
+		"ssh_key_data": {
+			"type": "securestring",
+			"metadata": {
+				"displayName": "SSH public key string",
+				"description": "SSH public key string"
+			}
+		},
+		"os_disk_storage_type": {
+			"type": "string",
+			"allowedValues": [
+				"Standard_LRS",
+				"Premium_LRS"
+			],
+			"defaultValue": "Premium_LRS",
+			"metadata": {
+				"displayName": "OS disk storage type",
+				"description": "OS disk storage type. Standard_LRS uses HDD storage, Premium_LRS uses SSD storage"
+			}
+		},
+		"os_disk_size_gb": {
+			"type": "int",
+			"defaultValue": 128,
+			"minValue": 32,
+			"maxValue": 1023,
+			"metadata": {
+				"displayName": "OS disk size",
+				"description": "OS disk size in GB"
+			}
+		},
+		"data_disk_storage_type_group1": {
+			"type": "string",
+			"allowedValues": [
+				"Standard_LRS",
+				"Premium_LRS"
+			],
+			"defaultValue": "Premium_LRS",
+			"metadata": {
+				"displayName": "Data disk storage type - disk group 1",
+				"description": "Data disk storage type - disk group 1. Standard_LRS uses HDD storage, Premium_LRS uses SSD storage"
+			}
+		},
+		"data_disk_count_group1": {
+			"type": "int",
+			"defaultValue": 1,
+			"metadata": {
+				"displayName": "Number of data disks - disk group 1",
+				"description": "Number of data disks to attach to the VM - disk group 1. At this writing, ARM template language requires an integer 1-800 for loops; less than or equal to 0 (zero) is not allowed."
+			}
+		},
+		"data_disk_size_gb_group1": {
+			"type": "int",
+			"defaultValue": 1023,
+			"minValue": 32,
+			"maxValue": 1023,
+			"metadata": {
+				"displayName": "Data disk size - disk group 1",
+				"description": "Data disk size in GB - disk group 1. Each data disk will be created at this size"
+			}
+		},
+		"data_disk_storage_type_group2": {
+			"type": "string",
+			"allowedValues": [
+				"Standard_LRS",
+				"Premium_LRS"
+			],
+			"defaultValue": "Premium_LRS",
+			"metadata": {
+				"displayName": "Data disk storage type - disk group 2",
+				"description": "Data disk storage type - disk group 2. Standard_LRS uses HDD storage, Premium_LRS uses SSD storage"
+			}
+		},
+		"data_disk_count_group2": {
+			"type": "int",
+			"defaultValue": 1,
+			"metadata": {
+				"displayName": "Number of data disks - disk group 2",
+				"description": "Number of data disks to attach to the VM - disk group 2. At this writing, ARM template language requires an integer 1-800 for loops; less than or equal to 0 (zero) is not allowed."
+			}
+		},
+		"data_disk_size_gb_group2": {
+			"type": "int",
+			"defaultValue": 1023,
+			"minValue": 32,
+			"maxValue": 1023,
+			"metadata": {
+				"displayName": "Data disk size - disk group 2",
+				"description": "Data disk size in GB - disk group 2. Each data disk will be created at this size"
+			}
+		},
+		"resource_group_name_network": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Resource Group for networking resources",
+				"description": "The Resource Group that contains the VNet, subnet, and NSG to use. Can be the same as the Resource Group where the VM will be deployed, or can refer to a separate Resource Group which contains durable networking resources."
+			}
+		},
+		"vnet_name": {
+			"type": "string",
+			"metadata": {
+				"displayName": "VNet",
+				"description": "Virtual network into which to deploy the VM"
+			}
+		},
+		"subnet_name": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Subnet",
+				"description": "Subnet into which to deploy the VM"
+			}
+		}
+	},
+	"variables": {
+		"vnetId": "[resourceId(parameters('resource_group_name_network'), 'Microsoft.Network/virtualNetworks', parameters('vnet_name'))]",
+		"subnetReference": "[concat(variables('vnetId'), '/subnets/', parameters('subnet_name'))]",
+		"uniqueDnsLabelPrefix": "[concat(parameters('virtual_machine_name'), uniquestring(resourceGroup().id))]",
+		"osDiskName": "[concat(parameters('virtual_machine_name'), '_os')]",
+		"diskGroup1Prefix": "[concat(parameters('virtual_machine_name'), '_dg1_')]",
+		"diskGroup2Prefix": "[concat(parameters('virtual_machine_name'), '_dg2_')]",
+		"ipConfigName": "ipconfig1",
+		"networkInterfaceName": "[concat(parameters('virtual_machine_name'), '_nic')]",
+		"computeApiVersion": "2018-06-01",
+		"networkApiVersion": "2018-08-01",
+		"storageApiVersion": "2018-07-01"
+	},
+	"resources": [
+		{
+			"name": "[parameters('virtual_machine_name')]",
+			"type": "Microsoft.Compute/virtualMachines",
+			"apiVersion": "[variables('computeApiVersion')]",
+			"location": "[parameters('location')]",
+			"zones": "[parameters('availability_zones')]",
+			"dependsOn": [
+				"[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+			],
+			"properties": {
+				"osProfile": {
+					"computerName": "[parameters('virtual_machine_name')]",
+					"adminUsername": "[parameters('admin_username')]",
+					"adminPassword": "[parameters('admin_password')]",
+					"linuxConfiguration": {
+						"provisionVMAgent": "true",
+						"disablePasswordAuthentication": false,
+						"ssh": {
+							"publicKeys": [
+								{
+									"path": "[concat('/home/', parameters('admin_username'), '/.ssh/authorized_keys')]",
+									"keyData": "[parameters('ssh_key_data')]"
+								}
+							]
+						}
+					}
+				},
+				"hardwareProfile": {
+					"vmSize": "[parameters('virtual_machine_size')]"
+				},
+				"storageProfile": {
+					"imageReference": {
+						"publisher": "[parameters('publisher')]",
+						"offer": "[parameters('offer')]",
+						"sku": "[parameters('sku')]",
+						"version": "[parameters('version')]"
+					},
+					"osDisk": {
+						"createOption": "FromImage",
+						"name": "[variables('osDiskName')]",
+						"diskSizeGB": "[parameters('os_disk_size_gb')]",
+						"managedDisk": {
+							"storageAccountType": "[parameters('os_disk_storage_type')]"
+						}
+					},
+					"copy": [
+						{
+							"name": "dataDisks",
+							"count": "[add(parameters('data_disk_count_group1'), parameters('data_disk_count_group2'))]",
+							"input": {
+								"lun": "[copyIndex('dataDisks')]",
+								"createOption": "Empty",
+								"name": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('data_disk_count_group1')), concat(variables('diskGroup1Prefix'), copyIndex('dataDisks', 1)), concat(variables('diskGroup2Prefix'), sub(copyIndex('dataDisks', 1), parameters('data_disk_count_group1'))))]",
+								"diskSizeGB": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('data_disk_count_group1')), parameters('data_disk_size_gb_group1'), parameters('data_disk_size_gb_group2'))]",
+								"managedDisk": {
+									"storageAccountType": "[if(lessOrEquals(copyIndex('dataDisks', 1), parameters('data_disk_count_group1')), parameters('data_disk_storage_type_group1'), parameters('data_disk_storage_type_group2'))]"
+								}
+							}
+						}
+					]
+				},
+				"networkProfile": {
+					"networkInterfaces": [
+						{
+							"id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+						}
+					]
+				}
+			},
+			"resources": []
+		},
+		{
+			"name": "[variables('networkInterfaceName')]",
+			"type": "Microsoft.Network/networkInterfaces",
+			"apiVersion": "[variables('networkApiVersion')]",
+			"location": "[parameters('location')]",
+			"properties": {
+				"enableAcceleratedNetworking": true,
+				"ipConfigurations": [
+					{
+						"name": "[variables('ipConfigName')]",
+						"properties": {
+							"subnet": {
+								"id": "[variables('subnetReference')]"
+							},
+							"privateIPAllocationMethod": "Dynamic"
+						}
+					}
+				],
+				"dnsSettings": {
+					"internalDnsNameLabel": "[variables('uniqueDnsLabelPrefix')]",
+					"dnsServers": []
+				}
+			}
+		}
+	],
+	"outputs": {
+		"vmName": {
+			"type": "string",
+			"value": "[parameters('virtual_machine_name')]"
+		},
+		"privateFqdn": {
+			"type": "string",
+			"value": "[reference(variables('networkInterfaceName')).dnsSettings.internalFqdn]"
+		},
+		"privateIpAddress": {
+			"type": "string",
+			"value": "[reference(variables('networkInterfaceName')).ipConfigurations[0].properties.privateIPAddress]"
+		},
+		"internalDomainNameSuffix": {
+			"type": "string",
+			"value": "[reference(variables('networkInterfaceName')).dnsSettings.internalDomainNameSuffix]"
+		},
+		"appliedDnsServers": {
+			"type": "array",
+			"value": "[reference(variables('networkInterfaceName')).dnsSettings.appliedDnsServers]"
+		},
+		"dnsServers": {
+			"type": "array",
+			"value": "[reference(variables('networkInterfaceName')).dnsSettings.dnsServers]"
+		}	
+	}
+}

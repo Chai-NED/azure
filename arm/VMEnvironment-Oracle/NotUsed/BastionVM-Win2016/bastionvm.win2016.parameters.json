@@ -1,0 +1,72 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": ""
+        },
+        "resourceGroupNameVM": {
+            "value": ""
+        },
+        "availabilitySetName": {
+            "value": ""
+        },
+        "virtualMachineName": {
+            "value": ""
+        },
+        "virtualMachineSize": {
+            "value": "Standard_DS3_v2"
+        },
+        "publisher": {
+            "value": "MicrosoftWindowsServer"
+        },
+        "offer": {
+            "value": "WindowsServer"
+        },
+        "sku": {
+            "value": "2016-Datacenter"
+        },
+        "version": {
+            "value": "latest"
+        },
+        "licenseType": {
+            "value": "Windows_Server"
+        },
+        "adminUsername": {
+            "value": ""
+        },
+        "adminPassword": {
+            "value": ""
+        },
+        "osDiskStorageType": {
+            "value": "Premium_LRS"
+        },
+        "osDiskSizeInGB": {
+            "value": 129
+        },
+        "dataDiskStorageType": {
+            "value": "Premium_LRS"
+        },
+        "dataDiskCount": {
+            "value": 1
+        },
+        "dataDiskSizeInGB": {
+            "value": 32
+        },
+        "publicIpAddressType": {
+            "value": "Dynamic"
+        },
+        "publicIpAddressSku": {
+            "value": "Basic"
+        },
+        "resourceGroupNameNetwork": {
+            "value": ""
+        },
+        "virtualNetworkName": {
+            "value": ""
+        },
+        "subnetName": {
+            "value": ""
+        }
+    }
+}

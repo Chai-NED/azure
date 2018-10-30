@@ -1,0 +1,110 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+		"subscription_id": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Azure subscription ID",
+				"description": "An existing, valid Azure subscription ID."
+			}
+		},
+        "location": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Azure region",
+                "description": "The Azure region within which to deploy. Examples: 'East US', 'West US', and so on. See https://azure.microsoft.com/regions/."
+            }
+        },
+        "storage_account_name": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Storage Account Name",
+                "description": "Name for the Storage Account"
+            }
+        },
+        "resource_group_name_vnet": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Resource group for VNet to which access is limited with service endpoint",
+                "description": "Resource group for VNet to which access is limited with service endpoint"
+            }
+        },
+        "vnet_name": {
+            "type": "string",
+            "metadata": {
+                "displayName": "VNet to which access is limited with service endpoint",
+                "description": "VNet to which access is limited with service endpoint"
+            }
+        },
+        "subnet_names": {
+            "type": "array",
+            "metadata": {
+                "displayName": "Subnet names in the VNet to which to grant access",
+                "description": "Subnet names in the VNet to which to grant access"
+            }
+        },
+        "external_source_ip": {
+            "type": "string",
+            "metadata": {
+                "displayName": "External source IP to which to grant access",
+                "description": "External source IP to which to grant access"
+            }
+        }
+    },
+    "variables": {
+        "storageApiVersion": "2018-07-01",
+        "storageKind": "StorageV2"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[parameters('storage_account_name')]",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "[variables('storageKind')]",
+            "apiVersion": "[variables('storageApiVersion')]",
+            "location": "[parameters('location')]",
+            "tags": {},
+            "scale": null,
+            "properties": {
+                "accessTier": "Hot",
+                "supportsHttpsTrafficOnly": true,
+                "networkAcls": {
+                    "bypass": "AzureServices,Logging,Metrics",
+                    "copy": [
+                        {
+                            "name": "virtualNetworkRules",
+                            "count": "[length(parameters('subnet_names'))]",
+                            "input": {
+                                "id": "[concat('/subscriptions/', parameters('subscription_id'), '/resourceGroups/', parameters('resource_group_name_vnet'), '/providers/Microsoft.Network/virtualNetworks/', parameters('vnet_name'), '/subnets/', parameters('subnet_names')[copyIndex('virtualNetworkRules')])]",
+                                "action": "Allow"
+                            }
+                        }
+                    ],
+                    "ipRules": [
+                        {
+                            "value": "[parameters('external_source_ip')]",
+                            "action": "Allow"
+                        }
+                    ],
+                    "defaultAction": "Deny"
+                },
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "enabled": true
+                        },
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            },
+            "dependsOn": []
+        }
+    ]
+}

@@ -1,0 +1,66 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": ""
+        },
+        "availability_set_name": {
+            "value": ""
+        },
+        "resource_group_name_vm": {
+            "value": ""
+        },
+        "virtual_machine_name": {
+            "value": ""
+        },
+        "virtual_machine_size": {
+            "value": ""
+        },
+        "publisher": {
+            "value": "Canonical"
+        },
+        "offer": {
+            "value": "UbuntuServer"
+        },
+        "sku": {
+            "value": "18.10"
+        },
+        "version": {
+            "value": "latest"
+        },
+        "admin_username": {
+            "value": ""
+        },
+        "admin_password": {
+            "value": ""
+        },
+        "ssh_key_data": {
+            "value": ""
+        },
+        "os_disk_storage_type": {
+            "value": "Premium_LRS"
+        },
+        "os_disk_size_gb": {
+            "value": 129
+        },
+        "public_ip_address_type": {
+            "value": "Dynamic"
+        },
+        "public_ip_address_sku": {
+            "value": "Basic"
+        },
+        "resource_group_name_network": {
+            "value": ""
+        },
+        "vnet_name": {
+            "value": ""
+        },
+        "subnet_name": {
+            "value": ""
+        },
+        "post_deploy_shell_command": {
+            "value": ""
+        }
+    }
+}

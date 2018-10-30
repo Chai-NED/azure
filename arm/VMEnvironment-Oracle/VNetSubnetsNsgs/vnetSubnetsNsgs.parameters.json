@@ -1,0 +1,45 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": ""
+        },
+        "vnet_name": {
+            "value": ""
+        },
+        "vnet_address_space": {
+            "value": ""
+        },
+        "subnet_public_name": {
+            "value": ""
+        },
+        "subnet_public_address_space": {
+            "value": ""
+        },
+        "subnet_private1_name": {
+            "value": ""
+        },
+        "subnet_private1_address_space": {
+            "value": ""
+        },
+        "subnet_private2_name": {
+            "value": ""
+        },
+        "subnet_private2_address_space": {
+            "value": ""
+        },
+        "nsg_public_name": {
+            "value": ""
+        },
+        "nsg_private1_name": {
+            "value": ""
+        },
+        "nsg_private2_name": {
+            "value": ""
+        },
+        "external_source_ip": {
+            "value": ""
+        }
+    }
+}

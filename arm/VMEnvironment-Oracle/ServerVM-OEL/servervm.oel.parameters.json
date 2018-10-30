@@ -1,0 +1,72 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": ""
+        },
+        "availability_zones": {
+            "value": null
+        },
+        "virtual_machine_name": {
+            "value": ""
+        },
+        "virtual_machine_size": {
+            "value": ""
+        },
+        "publisher": {
+            "value": "Oracle"
+        },
+        "offer": {
+            "value": "Oracle-Linux"
+        },
+        "sku": {
+            "value": "7.5"
+        },
+        "version": {
+            "value": "latest"
+        },
+        "admin_username": {
+            "value": ""
+        },
+        "admin_password": {
+            "value": ""
+        },
+        "ssh_key_data": {
+            "value": ""
+        },
+        "os_disk_storage_type": {
+            "value": "Premium_LRS"
+        },
+        "os_disk_size_gb": {
+            "value": 129
+        },
+        "data_disk_storage_type_group1": {
+            "value": "Premium_LRS"
+        },
+        "data_disk_count_group1": {
+            "value": 0
+        },
+        "data_disk_size_gb_group1": {
+            "value": 0
+        },
+        "data_disk_storage_type_group2": {
+            "value": "Premium_LRS"
+        },
+        "data_disk_count_group2": {
+            "value": 0
+        },
+        "data_disk_size_gb_group2": {
+            "value": 0
+        },
+        "resource_group_name_network": {
+            "value": ""
+        },
+        "vnet_name": {
+            "value": ""
+        },
+        "subnet_name": {
+            "value": ""
+        }
+    }
+}
