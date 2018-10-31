@@ -21,7 +21,7 @@
             "value": "Oracle-Linux"
         },
         "sku": {
-            "value": "7.5"
+            "value": "7.4"
         },
         "version": {
             "value": "latest"
@@ -66,6 +66,9 @@
             "value": ""
         },
         "subnet_name": {
+            "value": ""
+        },
+        "post_deploy_shell_command": {
             "value": ""
         }
     }

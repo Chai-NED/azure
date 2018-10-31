@@ -182,6 +182,13 @@
 				"displayName": "Subnet",
 				"description": "Subnet into which to deploy the VM"
 			}
+		},
+		"post_deploy_shell_command": {
+			"type": "string",
+			"metadata": {
+				"displayName": "Post-deploy shell command",
+				"description": "Post-deploy shell command"
+			}
 		}
 	},
 	"variables": {
@@ -290,6 +297,24 @@
 				"dnsSettings": {
 					"internalDnsNameLabel": "[variables('uniqueDnsLabelPrefix')]",
 					"dnsServers": []
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('virtual_machine_name'),'/','extensions')]",
+			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"location": "[parameters('location')]",
+			"apiVersion": "[variables('computeApiVersion')]",
+			"dependsOn": [
+				"[concat('Microsoft.Compute/virtualMachines/', parameters('virtual_machine_name'))]"
+			],
+			"properties": {
+				"publisher": "Microsoft.Azure.Extensions",
+				"type": "CustomScript",
+				"typeHandlerVersion": "2.0",
+				"autoUpgradeMinorVersion": true,
+				"settings": {
+					"commandToExecute": "[parameters('post_deploy_shell_command')]"
 				}
 			}
 		}

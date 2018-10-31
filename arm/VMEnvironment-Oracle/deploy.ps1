@@ -13,7 +13,7 @@
 param
 (
 	[string]$SubscriptionId = '',
-	[string]$ResourceGroupName = 'OracleEnvironment',
+	[string]$ResourceGroupName = '',
 	[string]$AzureRegion = 'centralus',
 	[string]$StorageAccountName = '',
 	[string]$DeploymentName = 'OracleEnvironment'
@@ -71,10 +71,11 @@ $nsgNamePrivate2 = "private2"
 
 # Storage management for Linux VMs
 $linuxMountPoint = "/mnt/azure"
-$azureFilesShareName = "software"
-$azureFilesShareFolder = "scripts"
+$azureStorageContainerName = "software"
+$azureStorageScriptsFolder = "scripts"
 $shellScriptFileName = "script1.sh"
-$shellScriptLocalPath = ".\BashScripts\" + $shellScriptFileName
+$shellScriptToUploadLocalPath = ".\BashScripts\" + $shellScriptFileName
+$shellScriptToUploadAzurePath = $azureStorageScriptsFolder + "/" + $shellScriptFileName
 
 # Bastion VM
 $bastionVMSize = "Standard_DS3_v2"
@@ -85,14 +86,14 @@ $bastionVMAdminPassword = ConvertTo-SecureString -String $plainTextPassword -AsP
 $bastionVMSSHKeyData = ConvertTo-SecureString -String ($sshKeyData + " " + $bastionVMAdminUsername) -AsPlainText -Force
 
 # OEL VMs
-$serverVMSize = "Standard_DS3_v2"
+$serverVMSize = "Standard_E16s_v3"
 $serverVMAdminUsername = "oraadmin"
 $serverVMAdminPassword = ConvertTo-SecureString -String $plainTextPassword -AsPlainText -Force
 $serverVMSSHKeyData = ConvertTo-SecureString -String ($sshKeyData + " " + $serverVMAdminUsername) -AsPlainText -Force
-$serverVMDataDiskCountGroup1 = 1
-$serverVMDataDiskSizeGBGroup1 = 129
-$serverVMDataDiskCountGroup2 = 1
-$serverVMDataDiskSizeGBGroup2 = 129
+$serverVMDataDiskCountGroup1 = 16
+$serverVMDataDiskSizeGBGroup1 = 1023
+$serverVMDataDiskCountGroup2 = 4
+$serverVMDataDiskSizeGBGroup2 = 150
 
 # Server VM1
 $server1VMName = "oelvm1"
@@ -217,23 +218,52 @@ New-AzureRmResourceGroupDeployment `
 # Get Storage Account Key and use it to create an Azure File Share
 $storageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName)[0].Value
 $storageContext = New-AzureStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey $storageAccountKey
-$azureFileShare = New-AzureStorageShare $azureFilesShareName -Context $storageContext
-$azureFileShareDir = New-AzureStorageDirectory -Share $azureFileShare -Path $azureFilesShareFolder
-$azureFileUpload = Set-AzureStorageFileContent -Source $shellScriptLocalPath -Directory $azureFileShareDir
+$storageContainer = New-AzureStorageContainer -Context $storageContext -Name $azureStorageContainerName -Permission Off -ConcurrentTaskCount 50 
+$storageBlob = Set-AzureStorageBlobContent  -Context $storageContext -Container $azureStorageContainerName -File $shellScriptToUploadLocalPath -Blob $shellScriptToUploadAzurePath -BlobType Block -Force
 
-# Prepare shell commands to run in Linux VMs immediately following deployment in Azure, to create persistent mount point to Azure Files share
-$postDeployShellCmdSuffix = `
+# Azure Blob Fuse driver install prep
+# References
+# https://github.com/Azure/azure-storage-fuse/wiki/1.-Installation
+# https://github.com/Azure/azure-storage-fuse/wiki/2.-Configuring-and-Running
+$blobFuseTempPath_Ubuntu = "/mnt/blobfusetmp"
+$blobFuseTempPath_OEL = "/mnt/blobfusetmp"
+$blobFuseConfigPath = "/etc/blobfuse_azureblob.cfg"
+$blobFuseConfigContent = "accountName " + $StorageAccountName + "\n" + "accountKey " + $storageAccountKey + "\n" + "containerName " + $azureStorageContainerName
+
+# Ubuntu shell command - AT THIS POINT BLOBFUSE DOES ---NOT--- INSTALL ON UBUNTU SERVER 18.10 DUE TO A libcurl3/4 CONFLICT
+# SEE https://github.com/Azure/azure-storage-fuse/issues/236
+# $postDeployShellCmd_Ubuntu = `
+# 	"sudo wget https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb && " + `
+# 	"sudo dpkg -i packages-microsoft-prod.deb && " + `
+# 	"sudo apt-get update && sudo apt-get upgrade -y -qq && " + `
+# 	"sudo apt-get install blobfuse fuse && " + `
+# 	"sudo mkdir " + $blobFuseTempPath_Ubuntu + " && " + `
+# 	"sudo chown " + $bastionVMAdminUsername + " " + $blobFuseTempPath_Ubuntu + " && " + `
+# 	"sudo bash -c 'echo -e """ + $blobFuseConfigContent + """ >> " + $blobFuseConfigPath + "' && " + `
+# 	"sudo mkdir " + $linuxMountPoint + " && " + `
+# 	"sudo blobfuse " + $linuxMountPoint + " --tmp-path=" + $blobFuseTempPath_Ubuntu + " --config-file=" + $blobFuseConfigPath + "  -o allow_other -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120 --file-cache-timeout-in-seconds=120 --log-level=LOG_DEBUG && " + `
+# 	"sudo bash " + $linuxMountPoint + "/" + $shellScriptToUploadAzurePath + ";"
+
+# Minimal shell script for bastion VM just to update it
+$postDeployShellCmd_Ubuntu = "sudo apt-get update && sudo apt-get upgrade -y -qq;"
+
+# OEL shell command
+$postDeployShellCmd_OEL = `
+	"sudo rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm && " + `
+	"sudo yum clean all && sudo yum update -y --releasever=7.5 && " + `
+	"sudo yum install -y blobfuse fuse && " + `
+	"sudo mkdir " + $blobFuseTempPath_OEL + " && " + `
+	"sudo chown " + $serverVMAdminUsername + " " + $blobFuseTempPath_OEL + " && " + `
+	"sudo bash -c 'echo -e """ + $blobFuseConfigContent + """ >> " + $blobFuseConfigPath + "' && " + `
 	"sudo mkdir " + $linuxMountPoint + " && " + `
-	"if [ ! -d ""/etc/smbcredentials"" ]; then sudo mkdir /etc/smbcredentials; fi && " + `
-	"if [ ! -f ""/etc/smbcredentials/" + $StorageAccountName + ".cred"" ]; then sudo bash -c 'echo -e ""username=" + $StorageAccountName + "\npassword=" + $storageAccountKey + """ >> /etc/smbcredentials/" + $StorageAccountName + ".cred'; fi && " + `
-	"sudo chmod 600 /etc/smbcredentials/" + $StorageAccountName + ".cred && " + `
-	"sudo bash -c 'echo ""//" + $StorageAccountName + ".file.core.windows.net/" + $azureFilesShareName + " " + $linuxMountPoint + " cifs nofail,vers=3.0,credentials=/etc/smbcredentials/" + $StorageAccountName + ".cred,dir_mode=0777,file_mode=0777,serverino"" >> /etc/fstab' && " + `
-	"sudo mount -a && " + `
-	"sudo bash " + $linuxMountPoint + "/" + $azureFilesShareFolder + "/" + $shellScriptFileName + ";"
+	"sudo blobfuse " + $linuxMountPoint + " --tmp-path=" + $blobFuseTempPath_OEL + " --config-file=" + $blobFuseConfigPath + "  -o allow_other -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120 --file-cache-timeout-in-seconds=120 --log-level=LOG_DEBUG && " + `
+	"sudo bash " + $linuxMountPoint + "/" + $shellScriptToUploadAzurePath + ";"
 
-$postDeployShellCmd_OEL = "sudo yum -y install cifs-utils && " + $postDeployShellCmdSuffix
-$postDeployShellCmd_Ubuntu = "sudo apt-get update && sudo apt-get install cifs-utils && " + $postDeployShellCmdSuffix
-# ##########
+# OPTIONAL: Write shell commands to file for inspection	
+# $postDeployShellCmd_Ubuntu | Out-File "server_cmd_ubuntu.txt"
+# $postDeployShellCmd_OEL | Out-File "server_cmd_oel.txt"
+
+ ##########
 
 
 # ##########
@@ -301,6 +331,7 @@ Test-AzureRmResourceGroupDeployment `
 	-resource_group_name_network $ResourceGroupName `
 	-vnet_name $vnetName `
 	-subnet_name $subnetNamePrivate1 `
+	-post_deploy_shell_command $postDeployShellCmd_OEL `
 	-Verbose
 
 Write-Host "Deploying Server VM1 - OEL";
@@ -323,6 +354,7 @@ New-AzureRmResourceGroupDeployment `
 	-resource_group_name_network $ResourceGroupName `
 	-vnet_name $vnetName `
 	-subnet_name $subnetNamePrivate1 `
+	-post_deploy_shell_command $postDeployShellCmd_OEL `
 	-Verbose `
 	-DeploymentDebugLogLevel All
 
@@ -346,16 +378,10 @@ New-AzureRmResourceGroupDeployment `
 	-resource_group_name_network $ResourceGroupName `
 	-vnet_name $vnetName `
 	-subnet_name $subnetNamePrivate2 `
+	-post_deploy_shell_command $postDeployShellCmd_OEL `
 	-Verbose `
 	-DeploymentDebugLogLevel All
 
-Write-Host "Please SSH to the OEL server VMs from the bastion VM to run the post-deploy shell command."
-Write-Host "This needs to be done interactively as OEL 7.5 disables password-less sudo for all users in /etc/sudoers,"
-Write-Host "    which prevents the Azure Custom Script Extension from automatically/silently running the post-deploy shell script."
-Write-Host "This script is writing the shell command to run to local file server_cmd.txt."
-Write-Host "Please SSH to each Oracle VM and paste the command from that file to the command prompt in the Oracle VM and run it there."
-
-$postDeployShellCmd_OEL | Out-File "server_cmd.txt"
 
 # ##########
 # ##################################################

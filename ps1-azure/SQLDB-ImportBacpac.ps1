@@ -53,7 +53,7 @@ Finally
 
 
 # Set default subscription
-Select-AzureSubscription -SubscriptionId $SubscriptionId
+Select-AzureRmSubscription -SubscriptionID $SubscriptionId;
 
 
 # ########################################

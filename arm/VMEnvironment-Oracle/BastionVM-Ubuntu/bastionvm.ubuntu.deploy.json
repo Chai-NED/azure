@@ -158,8 +158,8 @@
 		"post_deploy_shell_command": {
 			"type": "string",
 			"metadata": {
-				"displayName": "Storage shell command",
-				"description": "Storage shell command to mount external storage"
+				"displayName": "Post-deploy shell command",
+				"description": "Post-deploy shell command"
 			}
 		}
 	},
