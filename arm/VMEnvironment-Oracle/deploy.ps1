@@ -16,7 +16,7 @@ param
 	[string]$ResourceGroupName = '',
 	[string]$AzureRegion = 'centralus',
 	[string]$StorageAccountName = '',
-	[string]$DeploymentName = 'OracleEnvironment'
+	[string]$DeploymentName = 'DataEnvironment'
 )
 # ##################################################
 
@@ -26,7 +26,7 @@ param
 # Provide values here
 
 # Provide this in one-line format. Do not append a username here; that is done below for bastion and server VMs respectively using the admin usernames specified there.
-$sshKeyData = "ssh-rsa YOURKEY"
+$sshKeyData = "ssh-rsa [YOUR-KEY]"
 
 $plainTextPassword = ""			# If you do not want to enable password authentication to Linux VMs, you need to disable it in the parameter files. Then you do not need to specify a password.
 $ourExternalIp = ""				# This is so you can access storage and VM resources from your network location. This should be a public IP that you are NATed behind. You can find this using https://bing.com/search?q=what+is+my+ip+address
@@ -73,14 +73,14 @@ $nsgNamePrivate2 = "private2"
 $linuxMountPoint = "/mnt/azure"
 $azureStorageContainerName = "software"
 $azureStorageScriptsFolder = "scripts"
-$shellScriptFileName = "script1.sh"
+$shellScriptFileName = "helloworld.sh"
 $shellScriptToUploadLocalPath = ".\BashScripts\" + $shellScriptFileName
 $shellScriptToUploadAzurePath = $azureStorageScriptsFolder + "/" + $shellScriptFileName
 
 # Bastion VM
 $bastionVMSize = "Standard_DS3_v2"
 $bastionVMAvailabilitySetName = "bastionubuntu_avset"
-$bastionVMName = "bastionubuntu1"
+$bastionVMName = "bastionvm1"
 $bastionVMAdminUsername = "bastionadmin"
 $bastionVMAdminPassword = ConvertTo-SecureString -String $plainTextPassword -AsPlainText -Force
 $bastionVMSSHKeyData = ConvertTo-SecureString -String ($sshKeyData + " " + $bastionVMAdminUsername) -AsPlainText -Force
@@ -95,13 +95,18 @@ $serverVMDataDiskSizeGBGroup1 = 1023
 $serverVMDataDiskCountGroup2 = 4
 $serverVMDataDiskSizeGBGroup2 = 150
 
-# Server VM1
-$server1VMName = "oelvm1"
-$server1AvailabilityZone = 1
+# Availability zones for server VMs
+$serverAZ1 = 1
+$serverAZ2 = 2
 
-# Server VM2
-$server2VMName = "oelvm2"
-$server2AvailabilityZone = 2
+# Server Instance 1 in AZ1
+$serverNameAZ1VM1 = "oraaz1vm1"
+# Server Instance 2 in AZ1
+$serverNameAZ1VM2 = "oraaz1vm2"
+# Server Instance 1 in AZ2
+$serverNameAZ2VM1 = "oraaz2vm1"
+# Server Instance 2 in AZ2
+$serverNameAZ2VM2 = "oraaz2vm2"
 
 # ##################################################
 
@@ -215,11 +220,11 @@ New-AzureRmResourceGroupDeployment `
 	-Verbose `
 	-DeploymentDebugLogLevel All
 
-# Get Storage Account Key and use it to create an Azure File Share
+# Get Storage Account Key and use it to create a storage container
 $storageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName)[0].Value
-$storageContext = New-AzureStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey $storageAccountKey
-$storageContainer = New-AzureStorageContainer -Context $storageContext -Name $azureStorageContainerName -Permission Off -ConcurrentTaskCount 50 
-$storageBlob = Set-AzureStorageBlobContent  -Context $storageContext -Container $azureStorageContainerName -File $shellScriptToUploadLocalPath -Blob $shellScriptToUploadAzurePath -BlobType Block -Force
+$storageContext = New-AzureStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey $storageAccountKey -Verbose
+$storageContainer = New-AzureStorageContainer -Context $storageContext -Name $azureStorageContainerName -Permission Off -Verbose
+$storageBlob = Set-AzureStorageBlobContent -Context $storageContext -Container $azureStorageContainerName -File $shellScriptToUploadLocalPath -Blob $shellScriptToUploadAzurePath -BlobType Block -Force -Verbose
 
 # Azure Blob Fuse driver install prep
 # References
@@ -230,22 +235,21 @@ $blobFuseTempPath_OEL = "/mnt/blobfusetmp"
 $blobFuseConfigPath = "/etc/blobfuse_azureblob.cfg"
 $blobFuseConfigContent = "accountName " + $StorageAccountName + "\n" + "accountKey " + $storageAccountKey + "\n" + "containerName " + $azureStorageContainerName
 
-# Ubuntu shell command - AT THIS POINT BLOBFUSE DOES ---NOT--- INSTALL ON UBUNTU SERVER 18.10 DUE TO A libcurl3/4 CONFLICT
-# SEE https://github.com/Azure/azure-storage-fuse/issues/236
-# $postDeployShellCmd_Ubuntu = `
-# 	"sudo wget https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb && " + `
-# 	"sudo dpkg -i packages-microsoft-prod.deb && " + `
-# 	"sudo apt-get update && sudo apt-get upgrade -y -qq && " + `
-# 	"sudo apt-get install blobfuse fuse && " + `
-# 	"sudo mkdir " + $blobFuseTempPath_Ubuntu + " && " + `
-# 	"sudo chown " + $bastionVMAdminUsername + " " + $blobFuseTempPath_Ubuntu + " && " + `
-# 	"sudo bash -c 'echo -e """ + $blobFuseConfigContent + """ >> " + $blobFuseConfigPath + "' && " + `
-# 	"sudo mkdir " + $linuxMountPoint + " && " + `
-# 	"sudo blobfuse " + $linuxMountPoint + " --tmp-path=" + $blobFuseTempPath_Ubuntu + " --config-file=" + $blobFuseConfigPath + "  -o allow_other -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120 --file-cache-timeout-in-seconds=120 --log-level=LOG_DEBUG && " + `
-# 	"sudo bash " + $linuxMountPoint + "/" + $shellScriptToUploadAzurePath + ";"
+# Ubuntu shell command
+$postDeployShellCmd_Ubuntu = `
+	"sudo wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb && " + `
+	"sudo dpkg -i packages-microsoft-prod.deb && " + `
+	"sudo apt-get update -y && sudo apt-get upgrade -y -qq && " + `
+	"sudo apt-get install -y blobfuse fuse && " + `
+	"sudo mkdir " + $blobFuseTempPath_Ubuntu + " && " + `
+	"sudo chown " + $bastionVMAdminUsername + " " + $blobFuseTempPath_Ubuntu + " && " + `
+	"sudo bash -c 'echo -e """ + $blobFuseConfigContent + """ >> " + $blobFuseConfigPath + "' && " + `
+	"sudo mkdir " + $linuxMountPoint + " && " + `
+	"sudo blobfuse " + $linuxMountPoint + " --tmp-path=" + $blobFuseTempPath_Ubuntu + " --config-file=" + $blobFuseConfigPath + "  -o allow_other -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120 --file-cache-timeout-in-seconds=120 --log-level=LOG_DEBUG && " + `
+	"sudo bash " + $linuxMountPoint + "/" + $shellScriptToUploadAzurePath + ";"
 
 # Minimal shell script for bastion VM just to update it
-$postDeployShellCmd_Ubuntu = "sudo apt-get update && sudo apt-get upgrade -y -qq;"
+# $postDeployShellCmd_Ubuntu = "sudo apt-get update && sudo apt-get upgrade -y -qq;"
 
 # OEL shell command
 $postDeployShellCmd_OEL = `
@@ -312,14 +316,50 @@ New-AzureRmResourceGroupDeployment `
 
 # ##########
 # Deploy Server VMs - OEL 7.5
-Write-Host "Testing deployment - Server VM1 - OEL";
+
+function DeployServer()
+{
+	param
+	(
+        [int]$avlZone,
+		[string]$vmName,
+		[string]$subnetName
+	)
+
+	Write-Host "Deploying - AZ: " + $avlZone + " - VM: " + $vmName + " - Subnet: " + $subnetName;
+
+	New-AzureRmResourceGroupDeployment `
+		-Name ($DeploymentName + "-AZ" + $avlZone + "-" + $vmName) `
+		-ResourceGroupName $ResourceGroupName `
+		-TemplateFile $templateFilePath_ServerVM_OEL `
+		-TemplateParameterFile $parametersFilePath_ServerVM_OEL `
+		-location $AzureRegion `
+		-availability_zones $avlZone `
+		-virtual_machine_name $vmName `
+		-virtual_machine_size $serverVMSize `
+		-admin_username $serverVMAdminUsername `
+		-admin_password $serverVMAdminPassword `
+		-ssh_key_data $serverVMSSHKeyData `
+		-data_disk_count_group1 $serverVMDataDiskCountGroup1 `
+		-data_disk_size_gb_group1 $serverVMDataDiskSizeGBGroup1 `
+		-data_disk_count_group2 $serverVMDataDiskCountGroup2 `
+		-data_disk_size_gb_group2 $serverVMDataDiskSizeGBGroup2 `
+		-resource_group_name_network $ResourceGroupName `
+		-vnet_name $vnetName `
+		-subnet_name $subnetName `
+		-post_deploy_shell_command $postDeployShellCmd_OEL `
+		-Verbose `
+		-DeploymentDebugLogLevel All
+}
+
+Write-Host "Testing deployment - OEL";
 Test-AzureRmResourceGroupDeployment `
 	-ResourceGroupName $ResourceGroupName `
 	-TemplateFile $templateFilePath_ServerVM_OEL `
 	-TemplateParameterFile $parametersFilePath_ServerVM_OEL `
 	-location $AzureRegion `
-	-availability_zones $server1AvailabilityZone `
-	-virtual_machine_name $server1VMName `
+	-availability_zones $serverAZ1 `
+	-virtual_machine_name $serverNameAZ1VM1 `
 	-virtual_machine_size $serverVMSize `
 	-admin_username $serverVMAdminUsername `
 	-admin_password $serverVMAdminPassword `
@@ -334,54 +374,17 @@ Test-AzureRmResourceGroupDeployment `
 	-post_deploy_shell_command $postDeployShellCmd_OEL `
 	-Verbose
 
-Write-Host "Deploying Server VM1 - OEL";
-New-AzureRmResourceGroupDeployment `
-	-Name ($DeploymentName + "-Server1OEL") `
-	-ResourceGroupName $ResourceGroupName `
-	-TemplateFile $templateFilePath_ServerVM_OEL `
-	-TemplateParameterFile $parametersFilePath_ServerVM_OEL `
-	-location $AzureRegion `
-	-availability_zones $server1AvailabilityZone `
-	-virtual_machine_name $server1VMName `
-	-virtual_machine_size $serverVMSize `
-	-admin_username $serverVMAdminUsername `
-	-admin_password $serverVMAdminPassword `
-	-ssh_key_data $serverVMSSHKeyData `
-	-data_disk_count_group1 $serverVMDataDiskCountGroup1 `
-	-data_disk_size_gb_group1 $serverVMDataDiskSizeGBGroup1 `
-	-data_disk_count_group2 $serverVMDataDiskCountGroup2 `
-	-data_disk_size_gb_group2 $serverVMDataDiskSizeGBGroup2 `
-	-resource_group_name_network $ResourceGroupName `
-	-vnet_name $vnetName `
-	-subnet_name $subnetNamePrivate1 `
-	-post_deploy_shell_command $postDeployShellCmd_OEL `
-	-Verbose `
-	-DeploymentDebugLogLevel All
+Write-Host "Deploying Server AZ1 VM1 - OEL";
+DeployServer -avlZone $serverAZ1 -vmName $serverNameAZ1VM1 -subnetName $subnetNamePrivate1;
 
-Write-Host "Deploying Server VM2 - OEL";
-New-AzureRmResourceGroupDeployment `
-	-Name ($DeploymentName + "-Server2OEL") `
-	-ResourceGroupName $ResourceGroupName `
-	-TemplateFile $templateFilePath_ServerVM_OEL `
-	-TemplateParameterFile $parametersFilePath_ServerVM_OEL `
-	-location $AzureRegion `
-	-availability_zones $server2AvailabilityZone `
-	-virtual_machine_name $server2VMName `
-	-virtual_machine_size $serverVMSize `
-	-admin_username $serverVMAdminUsername `
-	-admin_password $serverVMAdminPassword `
-	-ssh_key_data $serverVMSSHKeyData `
-	-data_disk_count_group1 $serverVMDataDiskCountGroup1 `
-	-data_disk_size_gb_group1 $serverVMDataDiskSizeGBGroup1 `
-	-data_disk_count_group2 $serverVMDataDiskCountGroup2 `
-	-data_disk_size_gb_group2 $serverVMDataDiskSizeGBGroup2 `
-	-resource_group_name_network $ResourceGroupName `
-	-vnet_name $vnetName `
-	-subnet_name $subnetNamePrivate2 `
-	-post_deploy_shell_command $postDeployShellCmd_OEL `
-	-Verbose `
-	-DeploymentDebugLogLevel All
+Write-Host "Deploying Server AZ1 VM2 - OEL";
+DeployServer -avlZone $serverAZ1 -vmName $serverNameAZ1VM2 -subnetName $subnetNamePrivate1;
 
+Write-Host "Deploying Server AZ2 VM1 - OEL";
+DeployServer -avlZone $serverAZ2 -vmName $serverNameAZ2VM1 -subnetName $subnetNamePrivate2;
 
+Write-Host "Deploying Server AZ2 VM2 - OEL";
+DeployServer -avlZone $serverAZ2 -vmName $serverNameAZ2VM2 -subnetName $subnetNamePrivate2;
+	
 # ##########
 # ##################################################
