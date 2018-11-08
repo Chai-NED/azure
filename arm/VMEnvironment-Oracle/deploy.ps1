@@ -1,113 +1,86 @@
-### NOTES
+# ##################################################
+# NOTES
 # This PS script uses params for New-AzureRmResourceGroupDeployment: -Verbose -DeploymentDebugLogLevel All
 # These params WILL result in extra logging, including to Azure deployment results.
 # This WILL result in sensitive values (like the ssh key) being potentially available after the fact.
 # For Production deployments, you should remove these params from the New-AzureRmResourceGroupDeployment calls below.
 
-# The Azure region below is set to "centralus". Not all Azure regions explicitly expose, or allow selection of, specific availability zones yet.
+# The Azure region below is set to "centralus". Not all Azure regions yet explicitly expose, or allow selection of, specific availability zones yet.
 # See https://docs.microsoft.com/en-us/azure/virtual-machines/linux/create-cli-availability-zone#check-vm-sku-availability or use Azure CLI command 'az vm list-skus --location (REGION) --output table'
 #	to check availability zone status for a given Azure region before using it here.
-
 # ##################################################
-# Parameters - provide values here or on the command line
+# Parameters - provide default values here or pass on the command line
 param
 (
+	[string]$DeploymentName = "DataEnvironment",
 	[string]$SubscriptionId = '',
 	[string]$ResourceGroupName = '',
 	[string]$AzureRegion = 'centralus',
 	[string]$StorageAccountName = '',
-	[string]$DeploymentName = 'DataEnvironment'
+	# Source IP Address is so you can access storage and VM resources from your network location. This should be a public IP that you are NATed behind. You can find this using https://bing.com/search?q=what+is+my+ip+address
+	[string]$SourceIpAddressToAllow = '',
+	# Provide ONLY the SSH public key value itself, not "ssh-rsa" prefix or a username suffix. The script handles these correctly.
+	[string]$SSHPublicKeyValue = ""
 )
-# ##################################################
-
-
-# ##################################################
-# SENSITIVE - DO NOT CHECK INTO PUBLIC REPOS WITHOUT OBSCURING THESE, OR KNOWING EXACTLY WHAT YOU ARE DOING!!!!!!!!!!!
-# Provide values here
-
-# Provide this in one-line format. Do not append a username here; that is done below for bastion and server VMs respectively using the admin usernames specified there.
-$sshKeyData = "ssh-rsa [YOUR-KEY]"
-
-$plainTextPassword = ""			# If you do not want to enable password authentication to Linux VMs, you need to disable it in the parameter files. Then you do not need to specify a password.
-$ourExternalIp = ""				# This is so you can access storage and VM resources from your network location. This should be a public IP that you are NATed behind. You can find this using https://bing.com/search?q=what+is+my+ip+address
-
-# ##################################################
-
-
 # ##################################################
 # Variables
 
-# Deployment file paths - change these if you change the deployment artifact folder/file names
-$templateFilePath_VNetSubnetsNSGs = '.\VNetSubnetsNsgs\vnetSubnetsNsgs.deploy.json'
-$parametersFilePath_VNetSubnetsNSGs = '.\VNetSubnetsNsgs\vnetSubnetsNsgs.parameters.json'
-
-$templateFilePath_Storage = '.\Storage\storage.deploy.json'
-$parametersFilePath_Storage = '.\Storage\storage.parameters.json'
-
-$templateFilePath_BastionVM_Ubuntu = '.\BastionVM-Ubuntu\bastionvm.ubuntu.deploy.json'
-$parametersFilePath_BastionVM_Ubuntu = '.\BastionVM-Ubuntu\bastionvm.ubuntu.parameters.json'
-
-$templateFilePath_ServerVM_OEL = '.\ServerVM-OEL\servervm.oel.deploy.json'
-$parametersFilePath_ServerVM_OEL = '.\ServerVM-OEL\servervm.oel.parameters.json'
+$SSHPublicKey = "ssh-rsa " + $SSHPublicKeyValue
 
 # The following variables will be passed as dynamic parameters to the various New-AzureRmResourceGroupDeployment calls below so that redundant copy-paste to parameters files is minimized.
 # The parameter files contain additional parameters but those are either only used in one template or are relatively invariant.
 # The variables here represent settings that apply to more than one template and/or that are subject to variability depending on environment and context.
-# These variables will override same-named parameter values specified in the parameter files.
+# These variables will override same-named parameter values specified in the parameter files when passed dynamically.
 # Change as needed, e.g. if you will use existing network or storage resources - remove these dynamic parameters from the calls below and edit parameters files instead.
 
 # VNet/Subnets/NSGs
-$vnetName = "datavnet"
-$vnetAddressSpace = "172.16.0.0/16"
-$subnetNamePublic = "public"
-$subnetAddressSpacePublic = "172.16.1.0/24"
-$subnetNamePrivate1 = "private1"
-$subnetAddressSpacePrivate1 = "172.16.2.0/24"
-$subnetNamePrivate2 = "private2"
-$subnetAddressSpacePrivate2 = "172.16.3.0/24"
-$nsgNamePublic = "public"
-$nsgNamePrivate1 = "private1"
-$nsgNamePrivate2 = "private2"
+$ResourceGroupNameNetwork = $ResourceGroupName	# If you have existing, or want to deploy, network resources in a different resource group than the VMs, specify that network resource group name here
+$VNetName = "datavnet"
+$VNetAddressSpace = "172.16.0.0/16"
+$SubnetNamePublic = "public"
+$SubnetAddressSpacePublic = "172.16.1.0/24"
+$SubnetNamePrivate1 = "private1"
+$SubnetAddressSpacePrivate1 = "172.16.2.0/24"
+$SubnetNamePrivate2 = "private2"
+$SubnetAddressSpacePrivate2 = "172.16.3.0/24"
+$NSGNamePublic = "public"
+$NSGNamePrivate1 = "private1"
+$NSGNamePrivate2 = "private2"
 
 # Storage management for Linux VMs
-$linuxMountPoint = "/mnt/azure"
-$azureStorageContainerName = "software"
-$azureStorageScriptsFolder = "scripts"
-$shellScriptFileName = "helloworld.sh"
-$shellScriptToUploadLocalPath = ".\BashScripts\" + $shellScriptFileName
-$shellScriptToUploadAzurePath = $azureStorageScriptsFolder + "/" + $shellScriptFileName
+$ResourceGroupNameStorage = $ResourceGroupName		# If you have existing, or want to deploy, storage resources in a different resource group than the VMs, specify that storage resource group name here
+$LinuxMountPoint = "/mnt/azure"
+$AzureStorageContainerName = "software"
+$AzureStorageScriptsFolder = "scripts"
+$ShellScriptFileName = "helloworld.sh"
+$ShellScriptToUploadLocalPath = ".\BashScripts\" + $shellScriptFileName
+$ShellScriptToUploadAzurePath = $azureStorageScriptsFolder + "/" + $shellScriptFileName
 
 # Bastion VM
-$bastionVMSize = "Standard_DS3_v2"
-$bastionVMAvailabilitySetName = "bastionubuntu_avset"
-$bastionVMName = "bastionvm1"
-$bastionVMAdminUsername = "bastionadmin"
-$bastionVMAdminPassword = ConvertTo-SecureString -String $plainTextPassword -AsPlainText -Force
-$bastionVMSSHKeyData = ConvertTo-SecureString -String ($sshKeyData + " " + $bastionVMAdminUsername) -AsPlainText -Force
+$BastionVMSize = "Standard_DS3_v2"
+$BastionVMAvailabilitySetName = "bastionubuntu_avset"
+$BastionVMName = ($ResourceGroupName + "-bastionvm1")
+$BastionVMAdminUsername = "bastionadmin"
+$BastionVMSSHKeyData = ConvertTo-SecureString -String ($SSHPublicKey + " " + $bastionVMAdminUsername) -AsPlainText -Force
 
 # OEL VMs
-$serverVMSize = "Standard_E16s_v3"
-$serverVMAdminUsername = "oraadmin"
-$serverVMAdminPassword = ConvertTo-SecureString -String $plainTextPassword -AsPlainText -Force
-$serverVMSSHKeyData = ConvertTo-SecureString -String ($sshKeyData + " " + $serverVMAdminUsername) -AsPlainText -Force
-$serverVMDataDiskCountGroup1 = 16
-$serverVMDataDiskSizeGBGroup1 = 1023
-$serverVMDataDiskCountGroup2 = 4
-$serverVMDataDiskSizeGBGroup2 = 150
+$ServerVMSize = "Standard_E16s_v3"
+$ServerVMAdminUsername = "oraadmin"
+$ServerVMSSHKeyData = ConvertTo-SecureString -String ($SSHPublicKey + " " + $serverVMAdminUsername) -AsPlainText -Force
+$ServerVMDataDiskCountGroup1 = 16
+$ServerVMDataDiskSizeGBGroup1 = 1023
+$ServerVMDataDiskCountGroup2 = 4
+$ServerVMDataDiskSizeGBGroup2 = 150
 
 # Availability zones for server VMs
-$serverAZ1 = 1
-$serverAZ2 = 2
+$ServerAZ1 = 1
+$ServerAZ2 = 2
 
-# Server Instance 1 in AZ1
-$serverNameAZ1VM1 = "oraaz1vm1"
-# Server Instance 2 in AZ1
-$serverNameAZ1VM2 = "oraaz1vm2"
-# Server Instance 1 in AZ2
-$serverNameAZ2VM1 = "oraaz2vm1"
-# Server Instance 2 in AZ2
-$serverNameAZ2VM2 = "oraaz2vm2"
-
+# Server Instance Names
+$ServerNameAZ1VM1 = ($ResourceGroupName + "-oraaz1vm1")
+$ServerNameAZ1VM2 = ($ResourceGroupName + "-oraaz1vm2")
+$ServerNameAZ2VM1 = ($ResourceGroupName + "-oraaz2vm1")
+$ServerNameAZ2VM2 = ($ResourceGroupName + "-oraaz2vm2")
 # ##################################################
 
 
@@ -119,113 +92,74 @@ Select-AzureRmSubscription -SubscriptionID $SubscriptionId;
 # ##################################################
 
 
-
 # ##################################################
-# Create or get existing resource group
-$resourceGroup = Get-AzureRmResourceGroup -Name $ResourceGroupName -ErrorAction SilentlyContinue
+# Ensure VM resource group exists
+$resourceGroup = Get-AzureRmResourceGroup -Name $ResourceGroupName -Location $AzureRegion -ErrorAction SilentlyContinue
 
 if (!$resourceGroup) {
-	Write-Host "Creating resource group '$ResourceGroupName' in location '$AzureRegion'";
 	New-AzureRmResourceGroup -Name $ResourceGroupName -Location $AzureRegion
 }
-else {
-	Write-Host "Found existing resource group '$ResourceGroupName'";
-}
 # ##################################################
 
 
+# ##################################################
+# VNet, Subnets, NSGs
+# Uncomment this if you would like to create these resources as part of this script
+# .\VNetSubnetsNsgs\deploy.ps1 `
+# 	-DeploymentName $DeploymentName `
+# 	-TemplateFilePath ".\VNetSubnetsNsgs\vnetSubnetsNsgs.deploy.json" `
+# 	-ParametersFilePath ".\VNetSubnetsNsgs\vnetSubnetsNsgs.parameters.json" `
+# 	-ResourceGroupName $ResourceGroupNameNetwork `
+# 	-AzureRegion $AzureRegion `
+# 	-VNetName $VNetName `
+# 	-VNetAddressSpace $VNetAddressSpace `
+# 	-SubnetNamePublic $SubnetNamePublic `
+# 	-SubnetAddressSpacePublic $SubnetAddressSpacePublic `
+# 	-SubnetNamePrivate1 $SubnetNamePrivate1 `
+# 	-SubnetAddressSpacePrivate1 $SubnetAddressSpacePrivate1 `
+# 	-SubnetNamePrivate2 $SubnetNamePrivate2 `
+# 	-SubnetAddressSpacePrivate2 $SubnetAddressSpacePrivate2 `
+# 	-NSGNamePublic $NSGNamePublic `
+# 	-NSGNamePrivate1 $NSGNamePrivate1 `
+# 	-NSGNamePrivate2 $NSGNamePrivate2 `
+# 	-ExternalSourceIpAddress $SourceIpAddressToAllow
+# ##################################################
+# Storage Deployment
+# Uncomment this if you would like to create these resources as part of this script
+# .\Storage\deploy.ps1 `
+# 	-DeploymentName $DeploymentName `
+# 	-TemplateFilePath ".\Storage\storage.deploy.json" `
+# 	-ParametersFilePath ".\Storage\storage.parameters.json" `
+# 	-SubscriptionId $SubscriptionId `
+# 	-ResourceGroupNameStorage $ResourceGroupNameStorage `
+# 	-AzureRegion $AzureRegion `
+# 	-StorageAccountName $StorageAccountName `
+# 	-ResourceGroupNameVNet $ResourceGroupNameNetwork `
+# 	-VNetName $VNetName `
+# 	-SubnetNamePublic $SubnetNamePublic `
+# 	-SubnetNamePrivate1 $SubnetNamePrivate1 `
+# 	-SubnetNamePrivate2 $SubnetNamePrivate2 `
+# 	-ExternalSourceIpAddress $SourceIpAddressToAllow
+# ##################################################
+
 
 # ##################################################
-# Resource Deployments
-# You can use a call like the next commented-out line to retrieve details for any deployment
-# Get-AzureRmResourceGroupDeploymentOperation -DeploymentName 'PROVIDE' -ResourceGroupName $ResourceGroupName
-
-# ##########
-# Deploy VNet, Subnets, and NSGs
-
-Write-Host "Testing deployment - VNet/Subnets/NSGs";
-Test-AzureRmResourceGroupDeployment `
-	-ResourceGroupName $ResourceGroupName `
-	-TemplateFile $templateFilePath_VNetSubnetsNSGs `
-	-TemplateParameterFile $parametersFilePath_VNetSubnetsNSGs `
-	-location $AzureRegion `
-	-vnet_name $vnetName `
-	-vnet_address_space $vnetAddressSpace `
-	-subnet_public_name $subnetNamePublic `
-	-subnet_public_address_space $subnetAddressSpacePublic `
-	-subnet_private1_name $subnetNamePrivate1 `
-	-subnet_private1_address_space $subnetAddressSpacePrivate1 `
-	-subnet_private2_name $subnetNamePrivate2 `
-	-subnet_private2_address_space $subnetAddressSpacePrivate2 `
-	-nsg_public_name $nsgNamePublic `
-	-nsg_private1_name $nsgNamePrivate1 `
-	-nsg_private2_name $nsgNamePrivate2 `
-	-external_source_ip $ourExternalIp `
-	-Verbose
-
-Write-Host "Deploying VNet/Subnets/NSGs";
-New-AzureRmResourceGroupDeployment `
-	-Name ($DeploymentName + "-Network") `
-	-ResourceGroupName $ResourceGroupName `
-	-TemplateFile $templateFilePath_VNetSubnetsNSGs `
-	-TemplateParameterFile $parametersFilePath_VNetSubnetsNSGs `
-	-location $AzureRegion `
-	-vnet_name $vnetName `
-	-vnet_address_space $vnetAddressSpace `
-	-subnet_public_name $subnetNamePublic `
-	-subnet_public_address_space $subnetAddressSpacePublic `
-	-subnet_private1_name $subnetNamePrivate1 `
-	-subnet_private1_address_space $subnetAddressSpacePrivate1 `
-	-subnet_private2_name $subnetNamePrivate2 `
-	-subnet_private2_address_space $subnetAddressSpacePrivate2 `
-	-nsg_public_name $nsgNamePublic `
-	-nsg_private1_name $nsgNamePrivate1 `
-	-nsg_private2_name $nsgNamePrivate2 `
-	-external_source_ip $ourExternalIp `
-	-Verbose `
-	-DeploymentDebugLogLevel All
-# ##########
-
-
-# ##########
-# Deploy Storage Account and perform Storage operations
-
-Write-Host "Testing deployment - Storage";
-Test-AzureRmResourceGroupDeployment `
-	-ResourceGroupName $ResourceGroupName `
-	-TemplateFile $templateFilePath_Storage `
-	-TemplateParameterFile $parametersFilePath_Storage `
-	-subscription_id $SubscriptionId `
-	-location $AzureRegion `
-	-storage_account_name $StorageAccountName `
-	-resource_group_name_vnet $ResourceGroupName `
-	-vnet_name $vnetName `
-	-subnet_names $subnetNamePublic, $subnetNamePrivate1, $subnetNamePrivate2 `
-	-external_source_ip $ourExternalIp `
-	-Verbose
-
-Write-Host "Deploying Storage";
-New-AzureRmResourceGroupDeployment `
-	-Name ($DeploymentName + "-Storage") `
-	-ResourceGroupName $ResourceGroupName `
-	-TemplateFile $templateFilePath_Storage `
-	-TemplateParameterFile $parametersFilePath_Storage `
-	-subscription_id $SubscriptionId `
-	-location $AzureRegion `
-	-storage_account_name $StorageAccountName `
-	-resource_group_name_vnet $ResourceGroupName `
-	-vnet_name $vnetName `
-	-subnet_names $subnetNamePublic, $subnetNamePrivate1, $subnetNamePrivate2 `
-	-external_source_ip $ourExternalIp `
-	-Verbose `
-	-DeploymentDebugLogLevel All
-
-# Get Storage Account Key and use it to create a storage container
+# Storage Operations to prepare for Linux mounts to Azure storage
+# Need storage account key for other operations
 $storageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName)[0].Value
+# Need storage context for other operations
 $storageContext = New-AzureStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey $storageAccountKey -Verbose
-$storageContainer = New-AzureStorageContainer -Context $storageContext -Name $azureStorageContainerName -Permission Off -Verbose
-$storageBlob = Set-AzureStorageBlobContent -Context $storageContext -Container $azureStorageContainerName -File $shellScriptToUploadLocalPath -Blob $shellScriptToUploadAzurePath -BlobType Block -Force -Verbose
 
+# Ensure the container for Linux VM storage mounts exists
+$storageContainer = Get-AzureStorageContainer -Context $storageContext -Name $AzureStorageContainerName -Verbose -ErrorAction SilentlyContinue
+
+if ($null -eq $storageContainer) {
+	$storageContainer = New-AzureStorageContainer -Context $storageContext -Name $azureStorageContainerName -Permission Off -Verbose
+}
+
+# Upload the bash script with overwrite if exists
+$storageBlob = Set-AzureStorageBlobContent -Context $storageContext -Container $azureStorageContainerName -File $shellScriptToUploadLocalPath -Blob $shellScriptToUploadAzurePath -BlobType Block -Force -Verbose
+# ##################################################
 # Azure Blob Fuse driver install prep
 # References
 # https://github.com/Azure/azure-storage-fuse/wiki/1.-Installation
@@ -234,8 +168,8 @@ $blobFuseTempPath_Ubuntu = "/mnt/blobfusetmp"
 $blobFuseTempPath_OEL = "/mnt/blobfusetmp"
 $blobFuseConfigPath = "/etc/blobfuse_azureblob.cfg"
 $blobFuseConfigContent = "accountName " + $StorageAccountName + "\n" + "accountKey " + $storageAccountKey + "\n" + "containerName " + $azureStorageContainerName
-
-# Ubuntu shell command
+# ##################################################
+# Ubuntu shell command to run at the end of VM deploy
 $postDeployShellCmd_Ubuntu = `
 	"sudo wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb && " + `
 	"sudo dpkg -i packages-microsoft-prod.deb && " + `
@@ -248,10 +182,7 @@ $postDeployShellCmd_Ubuntu = `
 	"sudo blobfuse " + $linuxMountPoint + " --tmp-path=" + $blobFuseTempPath_Ubuntu + " --config-file=" + $blobFuseConfigPath + "  -o allow_other -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120 --file-cache-timeout-in-seconds=120 --log-level=LOG_DEBUG && " + `
 	"sudo bash " + $linuxMountPoint + "/" + $shellScriptToUploadAzurePath + ";"
 
-# Minimal shell script for bastion VM just to update it
-# $postDeployShellCmd_Ubuntu = "sudo apt-get update && sudo apt-get upgrade -y -qq;"
-
-# OEL shell command
+# OEL shell command to run at the end of VM deploy
 $postDeployShellCmd_OEL = `
 	"sudo rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm && " + `
 	"sudo yum clean all && sudo yum update -y --releasever=7.5 && " + `
@@ -264,60 +195,31 @@ $postDeployShellCmd_OEL = `
 	"sudo bash " + $linuxMountPoint + "/" + $shellScriptToUploadAzurePath + ";"
 
 # OPTIONAL: Write shell commands to file for inspection	
-# $postDeployShellCmd_Ubuntu | Out-File "server_cmd_ubuntu.txt"
-# $postDeployShellCmd_OEL | Out-File "server_cmd_oel.txt"
+# $postDeployShellCmd_Ubuntu | Out-File "post_deploy_cmd_ubuntu.txt"
+# $postDeployShellCmd_OEL | Out-File "post_deploy_cmd_oel.txt"
+# ##################################################
 
- ##########
 
-
-# ##########
+# ##################################################
 # Deploy Bastion Host - Ubuntu
-Write-Host "Testing deployment - Bastion VM - Ubuntu Server 18.10";
-Test-AzureRmResourceGroupDeployment `
-	-ResourceGroupName $ResourceGroupName `
-	-TemplateFile $templateFilePath_BastionVM_Ubuntu `
-	-TemplateParameterFile $parametersFilePath_BastionVM_Ubuntu `
-	-location $AzureRegion `
-	-availability_set_name $bastionVMAvailabilitySetName `
-	-resource_group_name_vm $ResourceGroupName `
-	-virtual_machine_name $bastionVMName `
-	-virtual_machine_size $bastionVMSize `
-	-admin_username $bastionVMAdminUsername `
-	-admin_password $bastionVMAdminPassword `
-	-ssh_key_data $bastionVMSSHKeyData `
-	-resource_group_name_network $ResourceGroupName `
-	-vnet_name $vnetName `
-	-subnet_name $subnetNamePublic `
-	-post_deploy_shell_command $postDeployShellCmd_Ubuntu `
-	-Verbose
-
-Write-Host "Deploying Bastion VM - Ubuntu Server";
-New-AzureRmResourceGroupDeployment `
-	-Name ($DeploymentName + "-BastionUbuntu") `
-	-ResourceGroupName $ResourceGroupName `
-	-TemplateFile $templateFilePath_BastionVM_Ubuntu `
-	-TemplateParameterFile $parametersFilePath_BastionVM_Ubuntu `
-	-location $AzureRegion `
-	-availability_set_name $bastionVMAvailabilitySetName `
-	-resource_group_name_vm $ResourceGroupName `
-	-virtual_machine_name $bastionVMName `
-	-virtual_machine_size $bastionVMSize `
-	-admin_username $bastionVMAdminUsername `
-	-admin_password $bastionVMAdminPassword `
-	-ssh_key_data $bastionVMSSHKeyData `
-	-resource_group_name_network $ResourceGroupName `
-	-vnet_name $vnetName `
-	-subnet_name $subnetNamePublic `
-	-post_deploy_shell_command $postDeployShellCmd_Ubuntu `
-	-Verbose `
-	-DeploymentDebugLogLevel All
-# ##########
-
-
-# ##########
+.\BastionVM-Ubuntu\deploy.ps1 `
+	-DeploymentName $DeploymentName `
+	-TemplateFilePath '.\BastionVM-Ubuntu\bastionvm.ubuntu.deploy.json' `
+	-ParametersFilePath '.\BastionVM-Ubuntu\bastionvm.ubuntu.parameters.json' `
+	-ResourceGroupNameVM $ResourceGroupName `
+	-AzureRegion $AzureRegion `
+	-VMAvailabilitySetName $BastionVMAvailabilitySetName `
+	-VMName $BastionVMName `
+	-VMSize $BastionVMSize `
+	-VMAdminUsername $BastionVMAdminUsername `
+	-SSHPublicKeyData $BastionVMSSHKeyData `
+	-ResourceGroupNameVNet $ResourceGroupNameNetwork `
+	-VNetName $VNetName `
+	-SubnetName $SubnetNamePublic `
+	-PostDeployShellCmd $postDeployShellCmd_Ubuntu
+# ##################################################
 # Deploy Server VMs - OEL 7.5
-
-function DeployServer()
+function DeployServerVM()
 {
 	param
 	(
@@ -326,65 +228,29 @@ function DeployServer()
 		[string]$subnetName
 	)
 
-	Write-Host "Deploying - AZ: " + $avlZone + " - VM: " + $vmName + " - Subnet: " + $subnetName;
-
-	New-AzureRmResourceGroupDeployment `
-		-Name ($DeploymentName + "-AZ" + $avlZone + "-" + $vmName) `
-		-ResourceGroupName $ResourceGroupName `
-		-TemplateFile $templateFilePath_ServerVM_OEL `
-		-TemplateParameterFile $parametersFilePath_ServerVM_OEL `
-		-location $AzureRegion `
-		-availability_zones $avlZone `
-		-virtual_machine_name $vmName `
-		-virtual_machine_size $serverVMSize `
-		-admin_username $serverVMAdminUsername `
-		-admin_password $serverVMAdminPassword `
-		-ssh_key_data $serverVMSSHKeyData `
-		-data_disk_count_group1 $serverVMDataDiskCountGroup1 `
-		-data_disk_size_gb_group1 $serverVMDataDiskSizeGBGroup1 `
-		-data_disk_count_group2 $serverVMDataDiskCountGroup2 `
-		-data_disk_size_gb_group2 $serverVMDataDiskSizeGBGroup2 `
-		-resource_group_name_network $ResourceGroupName `
-		-vnet_name $vnetName `
-		-subnet_name $subnetName `
-		-post_deploy_shell_command $postDeployShellCmd_OEL `
-		-Verbose `
-		-DeploymentDebugLogLevel All
+	.\ServerVM-OEL\deploy.ps1 `
+		-DeploymentName $DeploymentName `
+		-TemplateFilePath '.\ServerVM-OEL\servervm.oel.deploy.json' `
+		-ParametersFilePath '.\ServerVM-OEL\servervm.oel.parameters.json' `
+		-ResourceGroupNameVM $ResourceGroupName `
+		-AzureRegion $AzureRegion `
+		-AvailabilityZone $avlZone `
+		-VMName $vmName `
+		-VMSize $ServerVMSize `
+		-VMAdminUsername $ServerVMAdminUsername `
+		-SSHPublicKeyData $ServerVMSSHKeyData `
+		-DataDiskCountGroup1 $ServerVMDataDiskCountGroup1 `
+		-DataDiskSizeGBGroup1 $ServerVMDataDiskSizeGBGroup1 `
+		-DataDiskCountGroup2 $ServerVMDataDiskCountGroup2 `
+		-DataDiskSizeGBGroup2 $ServerVMDataDiskSizeGBGroup2 `
+		-ResourceGroupNameVNet $ResourceGroupNameNetwork `
+		-VNetName $VNetName `
+		-SubnetName $subnetName `
+		-PostDeployShellCmd $postDeployShellCmd_OEL
 }
 
-Write-Host "Testing deployment - OEL";
-Test-AzureRmResourceGroupDeployment `
-	-ResourceGroupName $ResourceGroupName `
-	-TemplateFile $templateFilePath_ServerVM_OEL `
-	-TemplateParameterFile $parametersFilePath_ServerVM_OEL `
-	-location $AzureRegion `
-	-availability_zones $serverAZ1 `
-	-virtual_machine_name $serverNameAZ1VM1 `
-	-virtual_machine_size $serverVMSize `
-	-admin_username $serverVMAdminUsername `
-	-admin_password $serverVMAdminPassword `
-	-ssh_key_data $serverVMSSHKeyData `
-	-data_disk_count_group1 $serverVMDataDiskCountGroup1 `
-	-data_disk_size_gb_group1 $serverVMDataDiskSizeGBGroup1 `
-	-data_disk_count_group2 $serverVMDataDiskCountGroup2 `
-	-data_disk_size_gb_group2 $serverVMDataDiskSizeGBGroup2 `
-	-resource_group_name_network $ResourceGroupName `
-	-vnet_name $vnetName `
-	-subnet_name $subnetNamePrivate1 `
-	-post_deploy_shell_command $postDeployShellCmd_OEL `
-	-Verbose
-
-Write-Host "Deploying Server AZ1 VM1 - OEL";
-DeployServer -avlZone $serverAZ1 -vmName $serverNameAZ1VM1 -subnetName $subnetNamePrivate1;
-
-Write-Host "Deploying Server AZ1 VM2 - OEL";
-DeployServer -avlZone $serverAZ1 -vmName $serverNameAZ1VM2 -subnetName $subnetNamePrivate1;
-
-Write-Host "Deploying Server AZ2 VM1 - OEL";
-DeployServer -avlZone $serverAZ2 -vmName $serverNameAZ2VM1 -subnetName $subnetNamePrivate2;
-
-Write-Host "Deploying Server AZ2 VM2 - OEL";
-DeployServer -avlZone $serverAZ2 -vmName $serverNameAZ2VM2 -subnetName $subnetNamePrivate2;
-	
-# ##########
+DeployServerVM -avlZone $serverAZ1 -vmName $serverNameAZ1VM1 -subnetName $subnetNamePrivate1;
+DeployServerVM -avlZone $serverAZ1 -vmName $serverNameAZ1VM2 -subnetName $subnetNamePrivate1;
+DeployServerVM -avlZone $serverAZ2 -vmName $serverNameAZ2VM1 -subnetName $subnetNamePrivate2;
+DeployServerVM -avlZone $serverAZ2 -vmName $serverNameAZ2VM2 -subnetName $subnetNamePrivate2;
 # ##################################################

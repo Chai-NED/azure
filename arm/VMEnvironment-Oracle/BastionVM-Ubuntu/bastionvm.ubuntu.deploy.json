@@ -74,13 +74,6 @@
 				"description": "VM administrator username"
 			}
 		},
-		"admin_password": {
-			"type": "securestring",
-			"metadata": {
-				"displayName": "VM administrator password",
-				"description": "VM administrator password"
-			}
-		},
 		"ssh_key_data": {
 			"type": "securestring",
 			"metadata": {
@@ -204,10 +197,9 @@
 				"osProfile": {
 					"computerName": "[parameters('virtual_machine_name')]",
 					"adminUsername": "[parameters('admin_username')]",
-					"adminPassword": "[parameters('admin_password')]",
 					"linuxConfiguration": {
 						"provisionVMAgent": "true",
-						"disablePasswordAuthentication": false,
+						"disablePasswordAuthentication": true,
 						"ssh": {
 							"publicKeys": [
 								{

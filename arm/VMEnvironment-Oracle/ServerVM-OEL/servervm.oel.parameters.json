@@ -29,9 +29,6 @@
         "admin_username": {
             "value": ""
         },
-        "admin_password": {
-            "value": ""
-        },
         "ssh_key_data": {
             "value": ""
         },
