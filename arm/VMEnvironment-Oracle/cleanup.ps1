@@ -1,13 +1,10 @@
-param
-(
-    [string]$SubscriptionId = '',
-    [string]$ResourceGroupName = '',
-    [string]$NamePrefixToDelete = ''
-)
+.\globals.ps1
+
+$NamePrefixToDelete = ($ResourceGroupNameVMs + '-')
 
 function GetResources()
 {
-	$resourceId = ("/subscriptions/" + $SubscriptionId + "/resourceGroups/" + $ResourceGroupName + "/resources")
+	$resourceId = ("/subscriptions/" + $SubscriptionId + "/resourceGroups/" + $ResourceGroupNameVMs + "/resources")
 
 	$result = Get-AzureRmResource -ResourceId $resourceId
 

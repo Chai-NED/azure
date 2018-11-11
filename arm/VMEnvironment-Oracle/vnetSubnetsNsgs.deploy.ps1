@@ -1,27 +1,11 @@
-param
-(
-	[string]$DeploymentName,
-	[string]$TemplateFilePath,
-	[string]$ParametersFilePath,
-    [string]$ResourceGroupName,
-    [string]$AzureRegion,
-    [string]$VNetName,
-    [string]$VNetAddressSpace,
-    [string]$SubnetNamePublic,
-    [string]$SubnetAddressSpacePublic,
-    [string]$SubnetNamePrivate1,
-    [string]$SubnetAddressSpacePrivate1,
-    [string]$SubnetNamePrivate2,
-    [string]$SubnetAddressSpacePrivate2,
-    [string]$NSGNamePublic,
-    [string]$NSGNamePrivate1,
-	[string]$NSGNamePrivate2,
-	[string]$ExternalSourceIpAddress
-)
+.\globals.ps1
+
+$TemplateFilePath = ".\vnetSubnetsNsgs.template.json"
+$ParametersFilePath = ".\vnetSubnetsNsgs.parameters.json"
 
 New-AzureRmResourceGroupDeployment `
 	-Name $DeploymentName `
-	-ResourceGroupName $ResourceGroupName `
+	-ResourceGroupName $ResourceGroupNameNetwork `
 	-TemplateFile $TemplateFilePath `
 	-TemplateParameterFile $ParametersFilePath `
 	-location $AzureRegion `
@@ -36,6 +20,6 @@ New-AzureRmResourceGroupDeployment `
 	-nsg_public_name $NSGNamePublic `
 	-nsg_private1_name $NSGNamePrivate1 `
 	-nsg_private2_name $NSGNamePrivate2 `
-	-external_source_ip $ExternalSourceIpAddress `
+	-external_source_ip $SourceIpAddressToAllow `
 	-Verbose `
 	-DeploymentDebugLogLevel All
