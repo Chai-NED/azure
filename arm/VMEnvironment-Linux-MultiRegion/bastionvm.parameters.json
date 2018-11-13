@@ -5,8 +5,11 @@
         "location": {
             "value": ""
         },
-        "availability_zones": {
-            "value": null
+        "availability_set_name": {
+            "value": ""
+        },
+        "resource_group_name_vm": {
+            "value": ""
         },
         "virtual_machine_name": {
             "value": ""
@@ -29,9 +32,6 @@
         "admin_username": {
             "value": ""
         },
-        "admin_password": {
-            "value": ""
-        },
         "ssh_key_data": {
             "value": ""
         },
@@ -41,23 +41,11 @@
         "os_disk_size_gb": {
             "value": 129
         },
-        "data_disk_storage_type_group1": {
-            "value": "Premium_LRS"
+        "public_ip_address_type": {
+            "value": "Dynamic"
         },
-        "data_disk_count_group1": {
-            "value": 0
-        },
-        "data_disk_size_gb_group1": {
-            "value": 0
-        },
-        "data_disk_storage_type_group2": {
-            "value": "Premium_LRS"
-        },
-        "data_disk_count_group2": {
-            "value": 0
-        },
-        "data_disk_size_gb_group2": {
-            "value": 0
+        "public_ip_address_sku": {
+            "value": "Basic"
         },
         "resource_group_name_network": {
             "value": ""
@@ -66,12 +54,6 @@
             "value": ""
         },
         "subnet_name": {
-            "value": ""
-        },
-        "resource_group_name_diagnostics": {
-            "value": ""
-        },
-        "storage_account_name_diagnostics": {
             "value": ""
         },
         "post_deploy_shell_command": {

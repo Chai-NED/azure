@@ -68,7 +68,6 @@
             "apiVersion": "[variables('storageApiVersion')]",
             "location": "[parameters('location')]",
             "tags": {},
-            "scale": null,
             "properties": {
                 "accessTier": "Hot",
                 "supportsHttpsTrafficOnly": true,

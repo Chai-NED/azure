@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": ""
+        },
+        "vnet_name": {
+            "value": ""
+        },
+        "vnet_address_space": {
+            "value": ""
+        },
+        "subnet_name": {
+            "value": ""
+        },
+        "subnet_address_space": {
+            "value": ""
+        },
+        "nsg_name": {
+            "value": ""
+        },
+        "external_source_ip": {
+            "value": ""
+        }
+    }
+}

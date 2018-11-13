@@ -1,0 +1,66 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subscription_id": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Azure subscription ID",
+                "description": "Azure subscription ID"
+            }
+        },
+        "resource_group_name_remote": {
+            "type": "string",
+            "metadata": {
+                "displayName": "",
+                "description": ""
+            }
+        },
+        "vnet_name_local": {
+            "type": "string",
+            "metadata": {
+                "displayName": "",
+                "description": ""
+            }
+        },
+        "vnet_name_remote": {
+            "type": "string",
+            "metadata": {
+                "displayName": "",
+                "description": ""
+            }
+        },
+        "vnet_address_space_remote": {
+            "type": "string",
+            "metadata": {
+                "displayName": "",
+                "description": ""
+            }
+        }
+    },
+    "variables": {
+        "networkApiVersion": "2018-08-01",
+        "vnet_id_remote": "[concat('/subscriptions/', parameters('subscription_id'), '/resourceGroups/', parameters('resource_group_name_remote'), '/providers/Microsoft.Network/virtualNetworks/', parameters('vnet_name_remote'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+            "name": "[concat(parameters('vnet_name_local'), '/', parameters('vnet_name_remote'))]",
+            "apiVersion": "[variables('networkApiVersion')]",
+            "properties": {
+                "remoteVirtualNetwork": {
+                    "id": "[variables('vnet_id_remote')]"
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": false,
+                "allowGatewayTransit": false,
+                "useRemoteGateways": false,
+                "remoteAddressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('vnet_address_space_remote')]"
+                    ]
+                }
+            }
+        }
+    ]
+}

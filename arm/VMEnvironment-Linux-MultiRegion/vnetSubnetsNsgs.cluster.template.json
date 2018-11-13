@@ -1,0 +1,103 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Azure region",
+                "description": "The Azure region within which to deploy. Examples: '[parameters('location')]', 'westus', and so on. See https://azure.microsoft.com/regions/."
+            }
+        },
+        "vnet_name": {
+            "type": "string",
+            "metadata": {
+                "displayName": "VNet Name",
+                "description": "Name for the Virtual Network"
+            }
+        },
+        "vnet_address_space": {
+            "type": "string",
+            "metadata": {
+                "displayName": "VNet Address Space",
+                "description": "Overall address space for the entire Virtual Network"
+            }
+        },
+        "subnet_name": {
+            "type": "string",
+            "metadata": {
+                "displayName": "",
+                "description": ""
+            }
+        },
+        "subnet_address_space": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "displayName": "",
+                "description": ""
+            }
+        },
+        "nsg_name": {
+            "type": "string",
+            "metadata": {
+                "displayName": "",
+                "description": ""
+            }
+        }
+    },
+    "variables": {
+        "networkApiVersion": "2018-08-01"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[parameters('vnet_name')]",
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('vnet_address_space')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('subnet_name')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnet_address_space')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
+                            },
+                            "serviceEndpoints": [
+                                {
+                                    "service": "Microsoft.Storage",
+                                    "locations": [
+                                        "[parameters('location')]"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false,
+                "enableVmProtection": false
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[parameters('nsg_name')]",
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": [
+                ]
+            },
+            "dependsOn": []
+        }
+    ]
+}

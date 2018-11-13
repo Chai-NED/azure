@@ -8,9 +8,6 @@
         "availability_set_name": {
             "value": ""
         },
-        "resource_group_name_vm": {
-            "value": ""
-        },
         "virtual_machine_name": {
             "value": ""
         },
@@ -32,9 +29,6 @@
         "admin_username": {
             "value": ""
         },
-        "admin_password": {
-            "value": ""
-        },
         "ssh_key_data": {
             "value": ""
         },
@@ -44,11 +38,14 @@
         "os_disk_size_gb": {
             "value": 129
         },
-        "public_ip_address_type": {
-            "value": "Dynamic"
+        "data_disk_storage_type": {
+            "value": "Premium_LRS"
         },
-        "public_ip_address_sku": {
-            "value": "Basic"
+        "data_disk_count": {
+            "value": 0
+        },
+        "data_disk_size_gb": {
+            "value": 0
         },
         "resource_group_name_network": {
             "value": ""

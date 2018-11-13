@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"subscription_id": {
+			"value": ""
+        },
+        "resource_group_name_remote": {
+			"value": ""
+        },
+        "vnet_name_local": {
+			"value": ""
+        },
+        "vnet_name_remote": {
+			"value": ""
+        },
+        "vnet_address_space_remote": {
+			"value": ""
+		}
+	}
+}

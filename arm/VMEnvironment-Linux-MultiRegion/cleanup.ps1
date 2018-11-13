@@ -1,13 +1,13 @@
-param
-(
-    [string]$SubscriptionId = '',
-    [string]$ResourceGroupName = '',
-    [string]$NamePrefixToDelete = ''
-)
+.\globals.ps1
+
+# Set a name prefix to delete or everything in the specified resource group will be deleted. You have been warned!
+
+$ResourceGroupNameToClean = ""
+$NamePrefixToDelete = ""
 
 function GetResources()
 {
-	$resourceId = ("/subscriptions/" + $SubscriptionId + "/resourceGroups/" + $ResourceGroupName + "/resources")
+	$resourceId = ("/subscriptions/" + $SubscriptionId + "/resourceGroups/" + $ResourceGroupNameToClean + "/resources")
 
 	$result = Get-AzureRmResource -ResourceId $resourceId
 
