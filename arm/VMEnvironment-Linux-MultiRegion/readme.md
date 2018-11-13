@@ -31,8 +31,8 @@ The deployment is split into distinct templates for more flexibility, e.g. to us
 - Azure Linux VM premium storage: https://docs.microsoft.com/azure/virtual-machines/linux/premium-storage
 
 - Azure Blob Fuse Driver
-  - https://github.com/Azure/azure-storage-fuse/wiki/1.-Installation
-  - https://github.com/Azure/azure-storage-fuse/wiki/2.-Configuring-and-Running
+    - https://github.com/Azure/azure-storage-fuse/wiki/1.-Installation
+    - https://github.com/Azure/azure-storage-fuse/wiki/2.-Configuring-and-Running
 
 ## Pre-Requisites
 
@@ -45,7 +45,7 @@ The deployment is split into distinct templates for more flexibility, e.g. to us
 1. Clone this repo. (Or fork it, if you'd consider improving this artifact and contributing back with Pull Requests!)
 2. Open the root folder of this repo in Visual Studio Code (VS Code) or another Powershell IDE with debug/step-through capability
 3. Open globals.ps1. Fill in appropriate values for all variables. This is the only file in this deployment where you need to provide values; everything else is driven off what is provided there.
-  - Note that I use global Powershell variables so that the various .ps1 files can see the values. Due to this, you should not mingle other Powershell work into your Powershell session while working on this deployment. I have not been able to get a lesser variable scope (e.g. Script or Local) to correctly share variables among multiple .ps1 scripts. The trade-off is that this deployment is highly modular, for easier mixing/matching/customization.
+    - Note that I use global Powershell variables so that the various .ps1 files can see the values. Due to this, you should not mingle other Powershell work into your Powershell session while working on this deployment. I have not been able to get a lesser variable scope (e.g. Script or Local) to correctly share variables among multiple .ps1 scripts. The trade-off is that this deployment is highly modular, for easier mixing/matching/customization.
 4. Open main.deploy.ps1. Set whether you want VNet/Subnets/NSGs and Storage deploys to happen (set these to $false to use existing network and storage resources).
 5. Note the following points for globals.ps1:
   - Use short Azure region names where location is needed. Example: centralus, eastus, westus, etc. (see https://azure.microsoft.com/regions/ or use CLI command:\
