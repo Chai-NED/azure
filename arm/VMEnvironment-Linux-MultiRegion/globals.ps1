@@ -2,6 +2,13 @@ $global:DeploymentName = "LinuxEnvironment-MultiRegion"
 
 $global:SubscriptionId = ""
 
+$global:DeployVNetSubnetsNSGs = $true
+$global:DeployStorage = $true
+$global:DeployBastion = $true
+$global:DeployCluster1 = $true
+$global:DeployCluster2 = $true
+$global:DeployCluster3 = $true
+
 $global:AzureRegionBastion = "centralus"
 $global:AzureRegionCluster1 = "eastus"
 $global:AzureRegionCluster2 = "centralus"
@@ -17,7 +24,7 @@ $global:SourceIpAddressToAllow = ""		# External IP address of your location - th
 
 # SSH Public Key
 # Provide only the public key value - no "ssh-rsa" prefix or username suffix. The deployment script handles those pieces.
-$global:SSHPublicKeyValue = ""
+$global:SSHPublicKeyValue = "###YOUR_PUBLIC_KEY_IN_ONE_LINE_FORM###=="
 # Do not alter the next line
 $global:SSHPublicKey = "ssh-rsa " + $SSHPublicKeyValue
 
